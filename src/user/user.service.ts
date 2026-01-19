@@ -1,8 +1,8 @@
+import { Injectable } from '@nestjs/common';
 import {
-  Injectable,
   NotFoundException,
   ConflictException,
-} from '@nestjs/common';
+} from '../common/exceptions/custom-exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -75,5 +75,33 @@ export class UserService {
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
+  }
+
+  async findOrCreateGoogleUser(googleProfile: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    picture?: string;
+  }): Promise<User> {
+    let user = await this.findByEmail(googleProfile.email);
+
+    if (!user) {
+      // Tạo password ngẫu nhiên cho user Google (sẽ không bao giờ được dùng)
+      const randomPassword = await bcrypt.hash(
+        Math.random().toString(36).slice(-8),
+        10,
+      );
+
+      user = this.userRepository.create({
+        email: googleProfile.email,
+        password: randomPassword,
+        firstName: googleProfile.firstName,
+        lastName: googleProfile.lastName,
+      });
+
+      user = await this.userRepository.save(user);
+    }
+
+    return user;
   }
 }

@@ -6,27 +6,41 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-export interface Response<T> {
-  data: T;
-  statusCode: number;
-  message?: string;
-}
+import { ApiResponseDto } from '../dto/api-response.dto';
 
 @Injectable()
 export class TransformInterceptor<T>
-  implements NestInterceptor<T, Response<T>>
+  implements NestInterceptor<T, ApiResponseDto<T>>
 {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Observable<Response<T>> {
+  ): Observable<ApiResponseDto<T>> {
+    const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
+    const statusCode = response.statusCode;
+
     return next.handle().pipe(
-      map((data) => ({
-        data,
-        statusCode: context.switchToHttp().getResponse().statusCode,
-        message: 'Success',
-      })),
+      map((data) => {
+        // Nếu data đã là ApiResponseDto, return nguyên vẹn
+        if (data instanceof ApiResponseDto) {
+          return data;
+        }
+
+        // Nếu data có message, sử dụng message đó
+        const message = data?.message || 'Success';
+
+        // Nếu data có message, loại bỏ nó khỏi data
+        const cleanData = data?.message ? { ...data, message: undefined } : data;
+
+        return new ApiResponseDto<T>(
+          true,
+          statusCode,
+          message,
+          cleanData,
+          request.url,
+        );
+      }),
     );
   }
 }

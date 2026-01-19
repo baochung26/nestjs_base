@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -6,6 +6,7 @@ import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../user/entities/user.entity';
+import { UnauthorizedException } from '../common/exceptions/custom-exceptions';
 
 @Injectable()
 export class AuthService {
@@ -41,6 +42,21 @@ export class AuthService {
 
     return {
       ...user,
+      access_token: this.generateToken(user),
+    };
+  }
+
+  async googleLogin(googleUser: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    picture?: string;
+  }) {
+    const user = await this.userService.findOrCreateGoogleUser(googleUser);
+    const { password, ...result } = user;
+
+    return {
+      ...result,
       access_token: this.generateToken(user),
     };
   }

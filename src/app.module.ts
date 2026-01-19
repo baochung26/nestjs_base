@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
 import { QueueModule } from './queue/queue.module';
+import { SeederModule } from './database/seeder/seeder.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { QueueModule } from './queue/queue.module';
     UserModule,
     AdminModule,
     QueueModule,
+    SeederModule,
   ],
 })
 export class AppModule {}

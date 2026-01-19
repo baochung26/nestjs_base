@@ -100,6 +100,12 @@ REDIS_DB=0
 JWT_SECRET=your-secret-key-change-in-production-please-use-strong-secret
 JWT_EXPIRES_IN=7d
 
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+FRONTEND_URL=http://localhost:3001
+
 # Application Configuration
 APP_PORT=3000
 NODE_ENV=development
@@ -196,7 +202,23 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 Response sẽ chứa `access_token` mà bạn cần sử dụng cho các request tiếp theo.
 
-### 3. Sử dụng Token
+### 3. Seed dữ liệu mẫu (Khuyến nghị)
+
+Chạy seeder để tạo users mẫu:
+
+```bash
+npm run seed
+```
+
+Seeder sẽ tạo các users mẫu:
+- **admin@example.com** / **admin123** (Admin role)
+- **user@example.com** / **user123** (User role)
+- **jane@example.com** / **user123** (User role)
+- **inactive@example.com** / **user123** (Inactive user)
+
+Xem chi tiết tại [docs/SEEDER_GUIDE.md](docs/SEEDER_GUIDE.md)
+
+### 4. Sử dụng Token
 
 Thêm token vào header của các request:
 
@@ -334,13 +356,49 @@ POST /api/auth/register
 }
 ```
 
-#### Đăng nhập
+#### Đăng nhập (Email/Password)
 
 ```typescript
 POST /api/auth/login
 {
   "email": "user@example.com",
   "password": "password123"
+}
+```
+
+#### Đăng nhập với Google OAuth
+
+**Bước 1:** User truy cập endpoint để bắt đầu OAuth flow:
+
+```typescript
+GET /api/auth/google
+```
+
+User sẽ được redirect đến Google để đăng nhập. Sau khi đăng nhập thành công, Google sẽ redirect về callback URL và backend sẽ tự động tạo/find user, sau đó redirect về frontend với JWT token.
+
+**Setup Google OAuth:**
+1. Tạo OAuth credentials tại [Google Cloud Console](https://console.cloud.google.com/)
+2. Cập nhật `.env` với:
+   ```env
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+   GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+   FRONTEND_URL=http://localhost:3001
+   ```
+3. Xem chi tiết tại [docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md)
+
+**Frontend Integration:**
+
+```typescript
+// Redirect user to Google OAuth
+window.location.href = 'http://localhost:3000/api/auth/google';
+
+// Handle callback (trong callback page)
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('token');
+if (token) {
+  localStorage.setItem('access_token', token);
+  // Redirect to dashboard
 }
 ```
 
@@ -454,7 +512,9 @@ PUT /api/admin/settings
 | Method | Endpoint | Auth Required | Description |
 |--------|----------|---------------|-------------|
 | POST | `/api/auth/register` | No | Đăng ký user mới |
-| POST | `/api/auth/login` | No | Đăng nhập |
+| POST | `/api/auth/login` | No | Đăng nhập (Email/Password) |
+| GET | `/api/auth/google` | No | Bắt đầu Google OAuth flow |
+| GET | `/api/auth/google/callback` | No | Callback từ Google OAuth |
 | GET | `/api/auth/profile` | Yes | Lấy profile |
 
 ### Users
@@ -536,6 +596,11 @@ npm run start:dev          # Chạy với watch mode
 # Production
 npm run build              # Build project
 npm run start:prod         # Chạy production
+
+# Database Seeding
+npm run seed               # Seed dữ liệu mẫu
+npm run seed:clear         # Xóa dữ liệu đã seed
+npm run seed:refresh       # Clear và seed lại
 
 # Code quality
 npm run lint               # Lint code
