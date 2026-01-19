@@ -109,9 +109,14 @@ FRONTEND_URL=http://localhost:3001
 # Application Configuration
 APP_PORT=3000
 NODE_ENV=development
+
+# pgAdmin Configuration
+PGADMIN_EMAIL=admin@admin.com
+PGADMIN_PASSWORD=admin
+PGADMIN_PORT=5050
 ```
 
-**⚠️ Lưu ý:** Trước khi deploy production, hãy thay đổi `JWT_SECRET` và `DB_PASSWORD` thành các giá trị mạnh và bảo mật.
+**⚠️ Lưu ý:** Trước khi deploy production, hãy thay đổi `JWT_SECRET`, `DB_PASSWORD` và `PGADMIN_PASSWORD` thành các giá trị mạnh và bảo mật.
 
 #### Bước 3: Build và chạy containers
 
@@ -129,6 +134,39 @@ docker-compose logs -f
 #### Bước 4: Kiểm tra ứng dụng
 
 Ứng dụng sẽ chạy tại: `http://localhost:3000/api`
+
+#### Bước 5: Truy cập pgAdmin (Quản lý Database)
+
+pgAdmin đã được tích hợp để quản lý PostgreSQL database:
+
+1. **Truy cập pgAdmin:** Mở trình duyệt và vào `http://localhost:5050` (hoặc port bạn đã cấu hình)
+
+2. **Đăng nhập:**
+   - Email: `admin@admin.com` (hoặc giá trị trong `PGADMIN_EMAIL`)
+   - Password: `admin` (hoặc giá trị trong `PGADMIN_PASSWORD`)
+
+3. **Kết nối với PostgreSQL Server:**
+   - Click chuột phải vào **Servers** → **Register** → **Server**
+   - Tab **General:**
+     - Name: `NestJS PostgreSQL` (tên tùy chọn)
+   - Tab **Connection:**
+     - Host name/address: `postgres` (tên service trong docker-compose)
+     - Port: `5432`
+     - Maintenance database: `nestjs_db` (hoặc giá trị trong `DB_NAME`)
+     - Username: `postgres` (hoặc giá trị trong `DB_USER`)
+     - Password: `postgres` (hoặc giá trị trong `DB_PASSWORD`)
+     - ✅ Check **Save password** để lưu mật khẩu
+   - Click **Save**
+
+4. **Sử dụng pgAdmin:**
+   - Xem và quản lý databases, tables, data
+   - Chạy SQL queries
+   - Xem và chỉnh sửa schema
+   - Export/Import data
+
+**Lưu ý:** Trong môi trường Docker, hostname của PostgreSQL là `postgres` (tên service), không phải `localhost`.
+
+Xem hướng dẫn chi tiết tại [docs/PGADMIN_GUIDE.md](docs/PGADMIN_GUIDE.md)
 
 ### Phương pháp 2: Chạy Local (không dùng Docker)
 
@@ -563,6 +601,7 @@ docker-compose up -d
 docker-compose logs -f app
 docker-compose logs -f postgres
 docker-compose logs -f redis
+docker-compose logs -f pgadmin
 
 # Dừng containers
 docker-compose down
@@ -583,6 +622,11 @@ docker-compose ps
 docker-compose exec app sh
 docker-compose exec postgres psql -U postgres -d nestjs_db
 docker-compose exec redis redis-cli
+
+# Truy cập pgAdmin
+# Mở trình duyệt: http://localhost:5050
+# Email: admin@admin.com (hoặc giá trị trong PGADMIN_EMAIL)
+# Password: admin (hoặc giá trị trong PGADMIN_PASSWORD)
 ```
 
 ## 💻 Development

@@ -1,68 +1,80 @@
 # Hướng dẫn Seeder Dữ liệu Mẫu
 
-## Tổng quan
+## 📋 Mục lục
+
+- [Tổng quan](#tổng-quan)
+- [Quick Start](#quick-start)
+- [Dữ liệu Mẫu](#dữ-liệu-mẫu)
+- [Sử dụng với Docker](#sử-dụng-với-docker)
+- [Sử dụng Local (không Docker)](#sử-dụng-local-không-docker)
+- [Các Lệnh Seeder](#các-lệnh-seeder)
+- [Tùy chỉnh Seeder](#tùy-chỉnh-seeder)
+- [Troubleshooting](#troubleshooting)
+
+## 🎯 Tổng quan
 
 Seeder system cho phép bạn tạo dữ liệu mẫu vào database một cách dễ dàng. Hệ thống seeder được thiết kế để:
-- Tạo dữ liệu mẫu cho development và testing
-- Tránh duplicate data (kiểm tra trước khi tạo)
-- Dễ dàng clear và refresh data
-- Hỗ trợ seeding từng loại data riêng biệt
 
-## Cấu trúc
+- ✅ Tạo dữ liệu mẫu cho development và testing
+- ✅ Tránh duplicate data (kiểm tra trước khi tạo)
+- ✅ Dễ dàng clear và refresh data
+- ✅ Hỗ trợ seeding từng loại data riêng biệt
 
+## 🚀 Quick Start
+
+### Với Docker (Khuyến nghị)
+
+```bash
+# 1. Đảm bảo containers đang chạy
+docker compose ps
+
+# 2. Chạy seed
+docker compose exec app npm run seed
 ```
-src/database/seeder/
-├── seeder.module.ts      # Seeder module
-├── seeder.service.ts      # Seeder service với logic seeding
-└── seeder.command.ts      # CLI command để chạy seeder
+
+### Không dùng Docker
+
+```bash
+# 1. Đảm bảo database đang chạy
+# 2. Chạy seed
+npm run seed
 ```
 
-## Dữ liệu Mẫu
-
-### Users
+## 📊 Dữ liệu Mẫu
 
 Seeder sẽ tạo các users mẫu sau:
 
 | Email | Password | Role | Status | Mô tả |
 |-------|----------|------|--------|-------|
-| admin@example.com | admin123 | admin | Active | Admin user để test admin features |
-| user@example.com | user123 | user | Active | Regular user mẫu |
-| jane@example.com | user123 | user | Active | Regular user mẫu thứ 2 |
-| inactive@example.com | user123 | user | Inactive | User không active để test |
+| `admin@example.com` | `admin123` | admin | Active | Admin user để test admin features |
+| `user@example.com` | `user123` | user | Active | Regular user mẫu |
+| `jane@example.com` | `user123` | user | Active | Regular user mẫu thứ 2 |
+| `inactive@example.com` | `user123` | user | Inactive | User không active để test inactive features |
 
-## Cài đặt
+**Lưu ý:** Seeder sẽ **không tạo duplicate** - nếu user đã tồn tại, nó sẽ bỏ qua.
 
-### 1. Cài đặt Dependencies
+## 🐳 Sử dụng với Docker
 
-Dependencies đã được thêm vào `package.json`:
-- `commander` - CLI command framework
-- `ts-node` - Chạy TypeScript trực tiếp (đã có sẵn)
-
-### 2. Đảm bảo Database đã sẵn sàng
+### Bước 1: Kiểm tra containers đang chạy
 
 ```bash
-# Nếu dùng Docker
-docker-compose up -d postgres
-
-# Hoặc đảm bảo PostgreSQL đang chạy và database đã được tạo
+docker compose ps
 ```
 
-## Sử dụng
+Bạn sẽ thấy các containers:
+- `nestjs_app` - Container ứng dụng
+- `nestjs_postgres` - Container database
+- `nestjs_redis` - Container Redis
+- `nestjs_pgadmin` - Container pgAdmin
 
-### Chạy Seeder
-
-#### 1. Seed dữ liệu mẫu
+### Bước 2: Chạy seed
 
 ```bash
-npm run seed
+# Chạy seed dữ liệu mẫu
+docker compose exec app npm run seed
 ```
 
-Lệnh này sẽ:
-- Kiểm tra xem user đã tồn tại chưa
-- Chỉ tạo user mới nếu chưa tồn tại
-- Log quá trình seeding
-
-**Output:**
+**Output mẫu:**
 ```
 [Nest] Starting database seeding...
 [Nest] Seeding users...
@@ -74,75 +86,121 @@ Lệnh này sẽ:
 [Nest] Database seeding completed successfully!
 ```
 
-#### 2. Clear dữ liệu đã seed
+### Bước 3: Xác nhận dữ liệu đã được tạo
+
+Bạn có thể kiểm tra qua:
+- **pgAdmin:** Truy cập `http://localhost:5050` và xem table `users`
+- **API:** Đăng nhập với các tài khoản trên
+
+### Các lệnh khác
 
 ```bash
-npm run seed:clear
+# Xóa tất cả users (⚠️ Cảnh báo: Xóa TẤT CẢ users)
+docker compose exec app npm run seed:clear
+
+# Xóa và seed lại
+docker compose exec app npm run seed:refresh
+
+# Vào container để chạy lệnh khác
+docker compose exec app sh
 ```
 
-Lệnh này sẽ xóa tất cả users trong database.
+## 💻 Sử dụng Local (không Docker)
 
-**⚠️ Cảnh báo:** Lệnh này sẽ xóa TẤT CẢ users, không chỉ dữ liệu mẫu!
+### Yêu cầu
 
-#### 3. Refresh (Clear + Seed)
+- PostgreSQL đang chạy
+- Database đã được tạo
+- File `.env` đã được cấu hình đúng
+
+### Chạy seed
 
 ```bash
+# 1. Cài đặt dependencies (nếu chưa có)
+npm install
+
+# 2. Chạy seed
+npm run seed
+```
+
+### Các lệnh khác
+
+```bash
+# Xóa dữ liệu
+npm run seed:clear
+
+# Refresh (xóa + seed lại)
 npm run seed:refresh
 ```
 
-Lệnh này sẽ:
-1. Xóa tất cả users
-2. Seed lại dữ liệu mẫu
+## 📝 Các Lệnh Seeder
 
-**Output:**
-```
-[Nest] Refreshing database (clear + seed)...
-[Nest] Clearing database...
-[Nest] Database cleared successfully!
-[Nest] Starting database seeding...
-[Nest] Seeding users...
-[Nest] Created user: admin@example.com
-...
-[Nest] Database seeding completed successfully!
-```
+### 1. `npm run seed` - Seed dữ liệu mẫu
 
-## Sử dụng trong Code
+**Mô tả:** Tạo dữ liệu mẫu vào database. Nếu dữ liệu đã tồn tại, sẽ bỏ qua.
 
-### Import SeederService
+**Sử dụng:**
+```bash
+# Docker
+docker compose exec app npm run seed
 
-```typescript
-import { SeederService } from './database/seeder/seeder.service';
-import { SeederModule } from './database/seeder/seeder.module';
-
-// Trong module
-@Module({
-  imports: [SeederModule],
-  // ...
-})
+# Local
+npm run seed
 ```
 
-### Chạy Seeder Programmatically
+**Khi nào sử dụng:**
+- Lần đầu setup project
+- Cần thêm dữ liệu mẫu mới
+- Sau khi clear database
 
-```typescript
-import { SeederService } from './database/seeder/seeder.service';
+### 2. `npm run seed:clear` - Xóa dữ liệu
 
-// Trong service hoặc controller
-constructor(private seederService: SeederService) {}
+**Mô tả:** Xóa TẤT CẢ users trong database.
 
-async seedData() {
-  await this.seederService.seed();
-}
+**⚠️ Cảnh báo:** Lệnh này sẽ xóa TẤT CẢ users, không chỉ dữ liệu mẫu!
 
-async clearData() {
-  await this.seederService.clear();
-}
+**Sử dụng:**
+```bash
+# Docker
+docker compose exec app npm run seed:clear
 
-async refreshData() {
-  await this.seederService.refresh();
-}
+# Local
+npm run seed:clear
 ```
 
-## Tùy chỉnh Seeder
+**Khi nào sử dụng:**
+- Cần xóa toàn bộ dữ liệu
+- Reset database về trạng thái ban đầu
+- Trước khi seed lại
+
+### 3. `npm run seed:refresh` - Refresh dữ liệu
+
+**Mô tả:** Xóa tất cả users và seed lại dữ liệu mẫu.
+
+**Sử dụng:**
+```bash
+# Docker
+docker compose exec app npm run seed:refresh
+
+# Local
+npm run seed:refresh
+```
+
+**Khi nào sử dụng:**
+- Cần reset database về trạng thái mẫu
+- Sau khi test và muốn quay về dữ liệu ban đầu
+- Khi có thay đổi trong seeder
+
+## 🔧 Tùy chỉnh Seeder
+
+### Cấu trúc Seeder
+
+```
+src/database/seeder/
+├── seeder.module.ts      # Seeder module
+├── seeder.service.ts      # Seeder service với logic seeding
+└── seeder.command.ts      # CLI command để chạy seeder
+```
 
 ### Thêm User Mới
 
@@ -150,6 +208,8 @@ Chỉnh sửa file `src/database/seeder/seeder.service.ts`:
 
 ```typescript
 async seedUsers() {
+  this.logger.log('Seeding users...');
+  
   const users = [
     // ... existing users
     {
@@ -166,13 +226,26 @@ async seedUsers() {
 }
 ```
 
-### Thêm Seeder Mới (ví dụ: Products, Orders, etc.)
+### Thêm Seeder Mới (ví dụ: Products, Orders)
 
-1. Tạo entity mới (nếu chưa có)
-2. Thêm repository vào SeederModule
-3. Thêm method seeding mới vào SeederService:
+**Bước 1:** Tạo entity mới (nếu chưa có)
+
+**Bước 2:** Thêm repository vào SeederModule
 
 ```typescript
+// seeder.module.ts
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([User, Product]), // Thêm Product
+  ],
+  // ...
+})
+```
+
+**Bước 3:** Thêm method seeding mới vào SeederService
+
+```typescript
+// seeder.service.ts
 async seedProducts() {
   this.logger.log('Seeding products...');
   
@@ -218,13 +291,125 @@ async seed() {
 }
 ```
 
-## Best Practices
+### Sử dụng Faker để tạo dữ liệu ngẫu nhiên
+
+**Cài đặt:**
+```bash
+npm install @faker-js/faker
+```
+
+**Sử dụng:**
+```typescript
+import { faker } from '@faker-js/faker';
+
+async seedUsers(count: number = 10) {
+  for (let i = 0; i < count; i++) {
+    const user = {
+      email: faker.internet.email(),
+      password: 'password123',
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      role: UserRole.USER,
+      isActive: true,
+    };
+    // ... create user
+  }
+}
+```
+
+## 🐛 Troubleshooting
+
+### Lỗi: "Cannot find module 'commander'"
+
+**Nguyên nhân:** Dependencies chưa được cài đặt.
+
+**Giải pháp:**
+```bash
+# Docker
+docker compose exec app npm install
+
+# Local
+npm install
+```
+
+### Lỗi: "Database connection failed"
+
+**Nguyên nhân:** Database không kết nối được.
+
+**Giải pháp:**
+
+1. **Kiểm tra database đang chạy:**
+   ```bash
+   # Docker
+   docker compose ps postgres
+   
+   # Local
+   # Kiểm tra PostgreSQL service đang chạy
+   ```
+
+2. **Kiểm tra file `.env`:**
+   ```env
+   DB_HOST=postgres  # hoặc localhost nếu không dùng Docker
+   DB_PORT=5432
+   DB_USER=postgres
+   DB_PASSWORD=postgres
+   DB_NAME=nestjs_db
+   ```
+
+3. **Kiểm tra network (Docker):**
+   ```bash
+   docker compose exec app ping postgres
+   ```
+
+### Lỗi: "Table 'users' doesn't exist"
+
+**Nguyên nhân:** Database chưa có tables.
+
+**Giải pháp:**
+
+1. **Chạy ứng dụng lần đầu** để tạo tables tự động (với `synchronize: true` trong development)
+2. **Hoặc chạy migrations** nếu có
+
+### Seeder chạy nhưng không tạo data
+
+**Nguyên nhân có thể:**
+
+1. **Data đã tồn tại:** Seeder sẽ skip nếu user đã tồn tại
+2. **Lỗi trong quá trình seeding:** Kiểm tra logs
+
+**Giải pháp:**
+
+```bash
+# Xem logs chi tiết
+docker compose logs app | grep -i seed
+
+# Clear và seed lại
+docker compose exec app npm run seed:refresh
+```
+
+### Lỗi: "Container not found" hoặc "Cannot connect to container"
+
+**Giải pháp:**
+
+```bash
+# Kiểm tra containers đang chạy
+docker compose ps
+
+# Nếu container không chạy, khởi động lại
+docker compose up -d
+
+# Sau đó chạy seed
+docker compose exec app npm run seed
+```
+
+## 💡 Best Practices
 
 ### 1. Idempotent Seeding
 
 Seeder được thiết kế để có thể chạy nhiều lần mà không tạo duplicate:
-- Luôn kiểm tra data đã tồn tại trước khi tạo
-- Skip nếu đã tồn tại
+- ✅ Luôn kiểm tra data đã tồn tại trước khi tạo
+- ✅ Skip nếu đã tồn tại
+- ✅ Log rõ ràng quá trình seeding
 
 ### 2. Environment-specific Data
 
@@ -250,9 +435,9 @@ async seedUsers() {
 
 ### 3. Password Security
 
-- Passwords được hash bằng bcrypt
-- Sử dụng passwords mạnh trong production
-- Không commit passwords thật vào code
+- ✅ Passwords được hash bằng bcrypt
+- ✅ Sử dụng passwords mạnh trong production
+- ❌ Không commit passwords thật vào code
 
 ### 4. Seeding trong Tests
 
@@ -273,131 +458,54 @@ describe('UserService', () => {
 });
 ```
 
-## Troubleshooting
+## 🔒 Security Notes
 
-### Lỗi: "Cannot find module 'commander'"
+1. **❌ Không seed trong Production** - Chỉ sử dụng seeder trong development và testing
+2. **⚠️ Passwords mẫu** - Đảm bảo đổi passwords sau khi seed trong production
+3. **❌ Sensitive Data** - Không seed sensitive data thật (credit cards, SSN, etc.)
+4. **✅ Environment Variables** - Sử dụng environment variables cho data có thể thay đổi
 
-```bash
-npm install
-```
-
-### Lỗi: "Database connection failed"
-
-- Kiểm tra database đang chạy
-- Kiểm tra `.env` file với đúng thông tin database
-- Đảm bảo database đã được tạo
-
-### Lỗi: "Table 'users' doesn't exist"
-
-- Chạy migration hoặc đảm bảo `synchronize: true` trong development
-- Database sẽ tự động tạo tables khi chạy app lần đầu
-
-### Seeder chạy nhưng không tạo data
-
-- Kiểm tra logs để xem có lỗi gì không
-- Kiểm tra xem data đã tồn tại chưa (seeder sẽ skip nếu đã tồn tại)
-- Chạy `seed:refresh` để clear và seed lại
-
-## Scripts có sẵn
-
-| Script | Mô tả |
-|--------|-------|
-| `npm run seed` | Seed dữ liệu mẫu |
-| `npm run seed:clear` | Xóa tất cả dữ liệu đã seed |
-| `npm run seed:refresh` | Clear và seed lại |
-
-## Ví dụ Workflow
+## 📚 Ví dụ Workflow
 
 ### Development Setup
 
 ```bash
-# 1. Start database
-docker-compose up -d postgres
+# 1. Start containers
+docker compose up -d
 
-# 2. Seed initial data
-npm run seed
+# 2. Đợi database sẵn sàng (vài giây)
+sleep 5
 
-# 3. Start application
-npm run start:dev
+# 3. Seed initial data
+docker compose exec app npm run seed
+
+# 4. Kiểm tra ứng dụng
+curl http://localhost:3000/api
 ```
 
 ### Reset Database
 
 ```bash
 # Clear và seed lại
-npm run seed:refresh
+docker compose exec app npm run seed:refresh
 ```
 
-### Testing
+### Testing Workflow
 
 ```bash
 # Trước khi chạy tests
-npm run seed
+docker compose exec app npm run seed
 
 # Chạy tests
-npm run test
+docker compose exec app npm run test
 
 # Sau khi tests (optional)
-npm run seed:clear
+docker compose exec app npm run seed:clear
 ```
 
-## Security Notes
-
-1. **Không seed trong Production** - Chỉ sử dụng seeder trong development và testing
-2. **Passwords mẫu** - Đảm bảo đổi passwords sau khi seed trong production
-3. **Sensitive Data** - Không seed sensitive data thật (credit cards, SSN, etc.)
-4. **Environment Variables** - Sử dụng environment variables cho data có thể thay đổi
-
-## Mở rộng
-
-### Thêm CLI Options
-
-Có thể mở rộng seeder command với các options:
-
-```typescript
-program
-  .command('seed')
-  .option('-u, --users', 'Seed only users')
-  .option('-p, --products', 'Seed only products')
-  .action(async (options) => {
-    if (options.users) {
-      await seederService.seedUsers();
-    } else if (options.products) {
-      await seederService.seedProducts();
-    } else {
-      await seederService.seed();
-    }
-  });
-```
-
-### Thêm Faker Data
-
-Có thể sử dụng thư viện như `@faker-js/faker` để tạo data ngẫu nhiên:
-
-```bash
-npm install @faker-js/faker
-```
-
-```typescript
-import { faker } from '@faker-js/faker';
-
-async seedUsers(count: number = 10) {
-  for (let i = 0; i < count; i++) {
-    const user = {
-      email: faker.internet.email(),
-      password: 'password123',
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
-      role: UserRole.USER,
-      isActive: true,
-    };
-    // ... create user
-  }
-}
-```
-
-## Tài liệu liên quan
+## 📖 Tài liệu liên quan
 
 - [TypeORM Documentation](https://typeorm.io/)
 - [NestJS CLI](https://docs.nestjs.com/cli/overview)
-- [Database Module](./README.md#database)
+- [pgAdmin Guide](./PGADMIN_GUIDE.md) - Xem dữ liệu qua pgAdmin
+- [README.md](../README.md) - Tài liệu chính của project
