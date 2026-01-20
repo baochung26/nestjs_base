@@ -8,9 +8,12 @@ import appConfig, {
   mailConfig,
   storageConfig,
 } from './config/configuration';
+import { validationSchema, validationOptions } from './config/validation.schema';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { LoggerModule } from './infrastructure/logger/logger.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
+import { MailModule } from './infrastructure/mail/mail.module';
+import { StorageModule } from './infrastructure/storage/storage.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -27,6 +30,8 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
       isGlobal: true,
       envFilePath: '.env',
       load: [appConfig, databaseConfig, redisConfig, jwtConfig, googleOAuthConfig, mailConfig, storageConfig],
+      validationSchema,
+      validationOptions,
     }),
     LoggerModule,
     DatabaseModule,

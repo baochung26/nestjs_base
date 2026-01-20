@@ -7,6 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponseDto } from '../../shared/response/api-response.dto';
+import { SUCCESS_MESSAGES, HTTP_STATUS } from '../constants';
 
 @Injectable()
 export class TransformInterceptor<T>
@@ -28,7 +29,7 @@ export class TransformInterceptor<T>
         }
 
         // Nếu data có message, sử dụng message đó
-        const message = data?.message || 'Success';
+        const message = data?.message || SUCCESS_MESSAGES.SUCCESS;
 
         // Nếu data có message, loại bỏ nó khỏi data
         const cleanData = data?.message ? { ...data, message: undefined } : data;

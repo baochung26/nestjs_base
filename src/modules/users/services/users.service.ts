@@ -1,110 +1,90 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Logger } from 'nestjs-pino';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
-import {
-  NotFoundException,
-  ConflictException,
-} from '../../../shared/errors/custom-exceptions';
+import { UserDto } from '../dtos/user.dto';
+import { UsersRepository } from '../repositories/users.repository';
+import { UserMapper } from '../mappers/user.mapper';
+import { ConflictException } from '../../../shared/errors/custom-exceptions';
 import { ERROR_MESSAGES } from '../../../common/constants';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
+  private readonly userMapper = new UserMapper();
 
-  constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<UserDto> {
     this.logger.debug({ email: createUserDto.email }, 'Creating new user');
 
-    const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
-    });
+    const emailExists = await this.usersRepository.emailExists(createUserDto.email);
 
-    if (existingUser) {
+    if (emailExists) {
       this.logger.warn({ email: createUserDto.email }, 'User creation failed: email already exists');
       throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    const user = this.userRepository.create({
-      ...createUserDto,
+    // Use mapper to convert DTO to entity
+    const userData = this.userMapper.toEntity(createUserDto);
+    const user = this.usersRepository.create({
+      ...userData,
       password: hashedPassword,
     });
 
-    const savedUser = await this.userRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
     this.logger.info({ userId: savedUser.id, email: savedUser.email }, 'User created successfully');
-    return savedUser;
+    
+    // Convert entity to DTO for response
+    return this.userMapper.toDto(savedUser);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find({
-      select: [
-        'id',
-        'email',
-        'firstName',
-        'lastName',
-        'role',
-        'isActive',
-        'createdAt',
-        'updatedAt',
-      ],
-    });
+  async findAll(): Promise<UserDto[]> {
+    const users = await this.usersRepository.findActiveUsers();
+    return this.userMapper.toDtoArray(users);
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOne(id: string): Promise<UserDto> {
     this.logger.debug({ userId: id }, 'Finding user by ID');
-
-    const user = await this.userRepository.findOne({
-      where: { id },
-      select: [
-        'id',
-        'email',
-        'firstName',
-        'lastName',
-        'role',
-        'isActive',
-        'createdAt',
-        'updatedAt',
-      ],
-    });
-
-    if (!user) {
-      this.logger.warn({ userId: id }, 'User not found');
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    return user;
+    const user = await this.usersRepository.findByIdWithoutPassword(id);
+    return this.userMapper.toDto(user);
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({
-      where: { email },
-    });
+    return this.usersRepository.findByEmail(email);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepository.findByEmailWithPassword(email);
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
+    const user = await this.usersRepository.findByIdWithoutPassword(id);
 
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    Object.assign(user, updateUserDto);
-    return this.userRepository.save(user);
+    // Use mapper to convert DTO to entity
+    const userData = this.userMapper.toEntityFromUpdate(updateUserDto);
+    if (updateUserDto.password) {
+      (userData as any).password = updateUserDto.password;
+    }
+
+    Object.assign(user, userData);
+    const updatedUser = await this.usersRepository.save(user);
+    
+    // Convert entity to DTO for response
+    return this.userMapper.toDto(updatedUser);
   }
 
   async remove(id: string): Promise<void> {
-    const user = await this.findOne(id);
-    await this.userRepository.remove(user);
+    const user = await this.usersRepository.findByIdWithoutPassword(id);
+    await this.usersRepository.remove(user);
   }
 
   async findOrCreateGoogleUser(googleProfile: {
@@ -113,7 +93,8 @@ export class UsersService {
     lastName: string;
     picture?: string;
   }): Promise<User> {
-    let user = await this.findByEmail(googleProfile.email);
+    // Return User entity (not DTO) for internal use (auth service needs full entity)
+    let user = await this.usersRepository.findByEmail(googleProfile.email);
 
     if (!user) {
       // Tạo password ngẫu nhiên cho user Google (sẽ không bao giờ được dùng)
@@ -122,14 +103,14 @@ export class UsersService {
         10,
       );
 
-      user = this.userRepository.create({
+      user = this.usersRepository.create({
         email: googleProfile.email,
         password: randomPassword,
         firstName: googleProfile.firstName,
         lastName: googleProfile.lastName,
       });
 
-      user = await this.userRepository.save(user);
+      user = await this.usersRepository.save(user);
     }
 
     return user;

@@ -1,0 +1,123 @@
+import * as Joi from 'joi';
+
+/**
+ * Validation schema cho environment variables
+ * Sử dụng Joi để validate và đảm bảo tất cả required variables đều có giá trị
+ */
+export const validationSchema = Joi.object({
+  // App Configuration
+  NODE_ENV: Joi.string()
+    .valid('development', 'production', 'test')
+    .default('development')
+    .description('Node environment'),
+
+  APP_PORT: Joi.number().port().default(3000).description('Application port'),
+
+  // Database Configuration
+  DB_HOST: Joi.string().required().description('Database host'),
+  DB_PORT: Joi.number().port().default(5432).description('Database port'),
+  DB_USER: Joi.string().required().description('Database username'),
+  DB_PASSWORD: Joi.string().required().description('Database password'),
+  DB_NAME: Joi.string().required().description('Database name'),
+  DB_SSL: Joi.string()
+    .valid('true', 'false')
+    .default('false')
+    .description('Enable SSL for database connection'),
+
+  // Redis Configuration
+  REDIS_HOST: Joi.string().default('localhost').description('Redis host'),
+  REDIS_PORT: Joi.number().port().default(6379).description('Redis port'),
+  REDIS_PASSWORD: Joi.string().allow('').default('').description('Redis password'),
+  REDIS_DB: Joi.number().integer().min(0).max(15).default(0).description('Redis database number'),
+
+  // JWT Configuration
+  JWT_SECRET: Joi.string()
+    .min(32)
+    .required()
+    .description('JWT secret key (minimum 32 characters)'),
+  JWT_EXPIRES_IN: Joi.string()
+    .default('7d')
+    .description('JWT expiration time (e.g., 7d, 24h, 60m)'),
+
+  // Google OAuth Configuration
+  GOOGLE_CLIENT_ID: Joi.string()
+    .allow('')
+    .default('')
+    .description('Google OAuth Client ID'),
+  GOOGLE_CLIENT_SECRET: Joi.string()
+    .allow('')
+    .default('')
+    .description('Google OAuth Client Secret'),
+  GOOGLE_CALLBACK_URL: Joi.string()
+    .uri()
+    .allow('')
+    .default('')
+    .description('Google OAuth Callback URL'),
+  FRONTEND_URL: Joi.string()
+    .uri()
+    .default('http://localhost:3001')
+    .description('Frontend URL for OAuth redirects'),
+
+  // Mail Configuration
+  MAIL_HOST: Joi.string().default('smtp.gmail.com').description('SMTP host'),
+  MAIL_PORT: Joi.number().port().default(587).description('SMTP port'),
+  MAIL_SECURE: Joi.string()
+    .valid('true', 'false')
+    .default('false')
+    .description('Enable secure SMTP (true for 465, false for other ports)'),
+  MAIL_USER: Joi.string().email().allow('').default('').description('SMTP username/email'),
+  MAIL_PASSWORD: Joi.string().allow('').default('').description('SMTP password'),
+  MAIL_FROM: Joi.string().email().allow('').default('').description('Default from email address'),
+  MAIL_FROM_NAME: Joi.string().default('NestJS App').description('Default from name'),
+
+  // Storage Configuration
+  STORAGE_TYPE: Joi.string()
+    .valid('local', 's3', 'azure', 'gcp')
+    .default('local')
+    .description('Storage type'),
+  STORAGE_LOCAL_DESTINATION: Joi.string()
+    .default('./uploads')
+    .description('Local storage destination path'),
+  STORAGE_MAX_FILE_SIZE: Joi.number()
+    .integer()
+    .min(1024)
+    .default(10485760)
+    .description('Maximum file size in bytes (default: 10MB)'),
+  STORAGE_ALLOWED_MIME_TYPES: Joi.string()
+    .allow('')
+    .default('image/jpeg,image/png,image/gif,application/pdf,text/plain')
+    .description('Comma-separated list of allowed MIME types'),
+
+  // CORS Configuration
+  CORS_ORIGINS: Joi.string()
+    .allow('')
+    .default('http://localhost:3000,http://localhost:3001')
+    .description('Comma-separated list of allowed CORS origins'),
+
+  // pgAdmin Configuration (optional)
+  PGADMIN_EMAIL: Joi.string().email().allow('').default('').description('pgAdmin email'),
+  PGADMIN_PASSWORD: Joi.string().allow('').default('').description('pgAdmin password'),
+  PGADMIN_PORT: Joi.number().port().default(5050).description('pgAdmin port'),
+});
+
+/**
+ * Validation options
+ */
+export const validationOptions = {
+  /**
+   * Cho phép unknown keys (không throw error nếu có env vars không được định nghĩa)
+   * Hữu ích khi có các env vars từ third-party services
+   */
+  allowUnknown: true,
+
+  /**
+   * Bỏ qua các giá trị null/undefined
+   */
+  stripUnknown: true,
+
+  /**
+   * Abort early: dừng validation ngay khi gặp lỗi đầu tiên
+   * Set false để xem tất cả lỗi cùng lúc
+   */
+  abortEarly: false,
+};

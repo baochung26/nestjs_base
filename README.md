@@ -736,6 +736,11 @@ getProfile(@CurrentUser() user: User) {
 - [Storage Guide](./docs/STORAGE_GUIDE.md) - Hướng dẫn sử dụng Storage Module với Local Storage
 - [Health Guide](./docs/HEALTH_GUIDE.md) - Hướng dẫn sử dụng Health Module với Terminus
 - [Security Guide](./docs/SECURITY_GUIDE.md) - Hướng dẫn sử dụng Security Module (CORS, Helmet, Rate Limiting)
+- [Constants Guide](./docs/CONSTANTS_GUIDE.md) - Hướng dẫn sử dụng Constants
+- [Environment Validation Guide](./docs/ENV_VALIDATION_GUIDE.md) - Hướng dẫn Environment Variables Validation
+- [Repository Pattern Guide](./docs/REPOSITORY_PATTERN_GUIDE.md) - Hướng dẫn Repository Pattern
+- [Mapper Pattern Guide](./docs/MAPPER_PATTERN_GUIDE.md) - Hướng dẫn Mapper Pattern
+- [Architecture Improvements](./docs/ARCHITECTURE_IMPROVEMENTS.md) - Đề xuất cải thiện cấu trúc dự án
 - [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
 
 ## 🤝 Contributing

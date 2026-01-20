@@ -21,9 +21,9 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmailWithPassword(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
+      const { password: _, ...result } = user;
       return result;
     }
     return null;
@@ -32,12 +32,17 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     this.logger.debug({ email: registerDto.email }, 'Registering new user');
 
-    const user = await this.usersService.create(registerDto);
-    const { password, ...result } = user;
+    const userDto = await this.usersService.create(registerDto);
+    
+    // Get full user entity for token generation
+    const user = await this.usersService.findByEmail(userDto.email);
+    if (!user) {
+      throw new Error('User not found after creation');
+    }
 
-    this.logger.info({ userId: user.id, email: user.email }, 'User registered successfully');
+    this.logger.info({ userId: userDto.id, email: userDto.email }, 'User registered successfully');
     return {
-      ...result,
+      ...userDto,
       access_token: this.generateToken(user),
     };
   }
