@@ -740,6 +740,7 @@ getProfile(@CurrentUser() user: User) {
 - [Environment Validation Guide](./docs/ENV_VALIDATION_GUIDE.md) - Hướng dẫn Environment Variables Validation
 - [Repository Pattern Guide](./docs/REPOSITORY_PATTERN_GUIDE.md) - Hướng dẫn Repository Pattern
 - [Mapper Pattern Guide](./docs/MAPPER_PATTERN_GUIDE.md) - Hướng dẫn Mapper Pattern
+- [Base Entity Guide](./docs/BASE_ENTITY_GUIDE.md) - Hướng dẫn Base Entity
 - [Architecture Improvements](./docs/ARCHITECTURE_IMPROVEMENTS.md) - Đề xuất cải thiện cấu trúc dự án
 - [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
 

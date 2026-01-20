@@ -145,14 +145,21 @@ export class UserMapper extends BaseMapper<User, UserDto> {
 
 **Documentation:** Xem [MAPPER_PATTERN_GUIDE.md](./MAPPER_PATTERN_GUIDE.md)
 
-### 4. 🏗️ **Base Entity**
+### 4. ✅ **COMPLETED: Base Entity**
 
 **Vấn đề:** Mỗi entity phải tự định nghĩa common fields (id, createdAt, updatedAt).
 
-**Giải pháp:** Tạo base entity với common fields.
+**Giải pháp:** ✅ Đã tạo base entity với common fields.
 
 **Priority:** 🟢 LOW
 
+**Status:** ✅ **COMPLETED**
+
+**Files Created:**
+- `src/shared/entities/base.entity.ts` - Base entity với common fields
+- `docs/BASE_ENTITY_GUIDE.md` - Documentation
+
+**Implementation:**
 ```typescript
 // src/shared/entities/base.entity.ts
 export abstract class BaseEntity {
@@ -165,7 +172,23 @@ export abstract class BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
+
+// src/modules/users/entities/user.entity.ts
+@Entity('users')
+export class User extends BaseEntity {
+  @Column()
+  email: string;
+  // id, createdAt, updatedAt inherited
+}
 ```
+
+**Benefits:**
+- ✅ DRY Principle - Không lặp lại common fields
+- ✅ Consistency - Tất cả entities có cùng structure
+- ✅ Maintainability - Dễ thay đổi common fields
+- ✅ Less Code - Giảm boilerplate code
+
+**Documentation:** Xem [BASE_ENTITY_GUIDE.md](./BASE_ENTITY_GUIDE.md)
 
 ### 5. 🔧 **Custom Pipes**
 
