@@ -24,32 +24,76 @@ export class QueueService {
   /**
    * Add email job
    */
-  async addEmailJob(data: {
-    to: string;
-    subject: string;
-    template?: string;
-    data?: any;
-  }) {
-    return this.emailQueue.add('send-email', data, {
+  async addEmailJob(
+    data: {
+      to: string;
+      subject: string;
+      template?: string;
+      data?: any;
+    },
+    options?: {
+      attempts?: number;
+      delay?: number;
+      priority?: number;
+      backoff?: {
+        type: 'fixed' | 'exponential';
+        delay: number;
+      };
+      removeOnComplete?: boolean | number;
+      removeOnFail?: boolean | number;
+    },
+  ) {
+    const defaultOptions = {
       attempts: 3,
       backoff: {
-        type: 'exponential',
+        type: 'exponential' as const,
         delay: 2000,
       },
+      removeOnComplete: true,
+      removeOnFail: false,
+    };
+
+    return this.emailQueue.add('send-email', data, {
+      ...defaultOptions,
+      ...options,
     });
   }
 
   /**
    * Add notification job
    */
-  async addNotificationJob(data: {
-    userId: string;
-    type: string;
-    message: string;
-    data?: any;
-  }) {
-    return this.notificationQueue.add('send-notification', data, {
+  async addNotificationJob(
+    data: {
+      userId: string;
+      type: string;
+      message: string;
+      data?: any;
+    },
+    options?: {
+      attempts?: number;
+      delay?: number;
+      priority?: number;
+      backoff?: {
+        type: 'fixed' | 'exponential';
+        delay: number;
+      };
+      removeOnComplete?: boolean | number;
+      removeOnFail?: boolean | number;
+    },
+  ) {
+    const defaultOptions = {
       attempts: 3,
+      backoff: {
+        type: 'exponential' as const,
+        delay: 2000,
+      },
+      removeOnComplete: true,
+      removeOnFail: false,
+    };
+
+    return this.notificationQueue.add('send-notification', data, {
+      ...defaultOptions,
+      ...options,
     });
   }
 

@@ -21,10 +21,15 @@ Dự án NestJS đầy đủ với Docker, bao gồm các module: Auth, User, Ad
 - ✅ **Admin Panel** - Dashboard, User management, Settings
 - ✅ **Queue System** - Background job processing với Bull và Redis
 - ✅ **Database** - PostgreSQL với TypeORM
+- ✅ **Cache System** - Redis-based caching với decorators và interceptors
+- ✅ **Scheduler System** - Cron jobs cho cleanup, retries, sync tasks
+- ✅ **Mail System** - Email sending với Nodemailer và templates
+- ✅ **Storage System** - Local file storage với upload/download/delete
 - ✅ **Docker Support** - Full Docker setup với docker-compose
 - ✅ **Validation** - Request validation với class-validator
 - ✅ **Error Handling** - Global exception filters
 - ✅ **Response Transformation** - Global interceptors
+- ✅ **Logging** - Structured logging với Pino và correlation ID tracing
 
 ## 📁 Cấu trúc dự án
 
@@ -34,28 +39,37 @@ src/
 │   ├── decorators/            # Custom decorators (@CurrentUser, @Roles)
 │   ├── filters/               # Exception filters
 │   ├── guards/                # Auth guards (JWT, Roles)
-│   └── interceptors/          # Response interceptors
+│   ├── interceptors/         # Response interceptors & logging
+│   ├── middleware/           # Middleware (correlation ID)
+│   └── utils/                # Utility functions
 ├── config/                    # Configuration files
-├── database/                   # Database configuration (TypeORM)
-├── auth/                       # Authentication module
-│   ├── dto/                   # Data Transfer Objects
-│   ├── guards/                # Auth guards
-│   └── strategies/            # Passport strategies (JWT, Local)
-├── user/                       # User module
-│   ├── dto/                   # User DTOs
-│   ├── entities/              # User entity
-│   ├── user.controller.ts     # User endpoints
-│   ├── user.service.ts        # User business logic
-│   └── user.module.ts         # User module
-├── admin/                      # Admin module
-│   ├── users/                 # Admin user management
-│   ├── settings/              # Admin settings
-│   └── dashboard/             # Admin dashboard
-├── queue/                      # Queue module
-│   ├── queue.module.ts        # Queue configuration
-│   ├── queue.service.ts       # Queue service
-│   ├── queue.processor.ts     # Job processors
-│   └── queue.controller.ts    # Queue API endpoints
+│   ├── configuration.ts      # Config loader
+│   └── validation.ts         # Environment validation
+├── infrastructure/            # Infrastructure modules
+│   ├── database/              # Database configuration
+│   │   ├── database.module.ts
+│   │   └── seed/             # Data seeder
+│   ├── queue/                 # Queue module (Bull + Redis)
+│   └── logger/                # Logger module (Pino)
+├── modules/                    # Business modules
+│   ├── auth/                  # Authentication module
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── strategies/        # Passport strategies
+│   │   └── guards/
+│   ├── users/                 # User module
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── entities/
+│   │   └── dtos/
+│   └── admin/                 # Admin module
+│       ├── users/             # Admin user management
+│       ├── settings/          # Admin settings
+│       └── dashboard/         # Admin dashboard
+├── shared/                     # Shared utilities
+│   ├── response/              # API response DTOs
+│   ├── pagination/            # Pagination DTOs
+│   └── errors/                # Custom exceptions
 ├── app.module.ts              # Root module
 └── main.ts                    # Application entry point
 ```
@@ -703,6 +717,22 @@ getProfile(@CurrentUser() user: User) {
 - Redis được sử dụng cho queue system và có thể dùng cho caching
 - Tất cả passwords được hash bằng bcrypt
 - JWT tokens có thời hạn mặc định là 7 ngày
+- Logger sử dụng Pino với correlation ID để trace requests
+- Tất cả requests được log tự động với correlation ID trong header `x-correlation-id`
+
+## 📚 Documentation
+
+- [API Response Format](./docs/API_RESPONSE_FORMAT.md) - Chuẩn hóa API response và error
+- [Google OAuth Setup](./docs/GOOGLE_OAUTH_SETUP.md) - Hướng dẫn setup Google OAuth
+- [Queue Guide](./docs/QUEUE_GUIDE.md) - Hướng dẫn sử dụng Queue System
+- [Seeder Guide](./docs/SEEDER_GUIDE.md) - Hướng dẫn sử dụng Data Seeder
+- [Logger Guide](./docs/LOGGER_GUIDE.md) - Hướng dẫn sử dụng Logger với Pino
+- [TypeORM Guide](./docs/TYPEORM_GUIDE.md) - Hướng dẫn sử dụng TypeORM và Migrations
+- [Cache Guide](./docs/CACHE_GUIDE.md) - Hướng dẫn sử dụng Cache Module với Redis
+- [Scheduler Guide](./docs/SCHEDULER_GUIDE.md) - Hướng dẫn sử dụng Scheduler Module với Cron Jobs
+- [Mail Guide](./docs/MAIL_GUIDE.md) - Hướng dẫn sử dụng Mail Module với Nodemailer
+- [Storage Guide](./docs/STORAGE_GUIDE.md) - Hướng dẫn sử dụng Storage Module với Local Storage
+- [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
 
 ## 🤝 Contributing
 

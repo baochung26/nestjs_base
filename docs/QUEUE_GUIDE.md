@@ -165,6 +165,11 @@ await this.queueService.addEmailJob(
   },
   {
     delay: 3600000, // 1 giờ = 3600000ms
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 2000,
+    },
   },
 );
 ```
@@ -209,7 +214,7 @@ Tạo file mới hoặc thêm vào `queue.processor.ts`:
 
 ```typescript
 import { Processor, Process } from '@nestjs/bull';
-import { Logger } from '@nestjs/common';
+import { Logger } from 'nestjs-pino';
 import { Job } from 'bull';
 
 @Processor('your-queue-name')
@@ -301,20 +306,23 @@ export class PdfQueueProcessor {
   async handleGeneratePdf(
     job: Job<{ userId: string; documentId: string }>,
   ) {
-    this.logger.log(`Generating PDF for job ${job.id}`);
+    this.logger.info({ jobId: job.id, userId: job.data.userId }, 'Generating PDF');
     
     try {
       // Generate PDF logic
       const pdfPath = await this.generatePdf(job.data);
       
-      this.logger.log(`PDF generated successfully: ${pdfPath}`);
+      this.logger.info({ jobId: job.id, pdfPath }, 'PDF generated successfully');
       return {
         success: true,
         jobId: job.id,
         pdfPath: pdfPath,
       };
     } catch (error: any) {
-      this.logger.error(`PDF generation failed: ${error.message}`);
+      this.logger.error(
+        { jobId: job.id, error: error.message },
+        'PDF generation failed',
+      );
       throw error;
     }
   }
@@ -547,8 +555,11 @@ Luôn handle errors trong processors:
 async handleSendEmail(job: Job<EmailJobData>) {
   try {
     // Process job
-  } catch (error) {
-    this.logger.error(`Job ${job.id} failed:`, error);
+  } catch (error: any) {
+    this.logger.error(
+      { jobId: job.id, error: error.message },
+      'Job failed',
+    );
     // Throw để Bull retry
     throw error;
   }
@@ -565,7 +576,7 @@ async handleSendEmail(job: Job<EmailJobData>) {
   // Kiểm tra xem email đã được gửi chưa
   const sent = await this.checkEmailSent(job.data.to, job.data.subject);
   if (sent) {
-    this.logger.log('Email already sent, skipping');
+    this.logger.info({ jobId: job.id }, 'Email already sent, skipping');
     return { skipped: true };
   }
   

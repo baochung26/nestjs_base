@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Logger } from 'nestjs-pino';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dtos/create-user.dto';
@@ -12,17 +13,22 @@ import {
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    this.logger.debug({ email: createUserDto.email }, 'Creating new user');
+
     const existingUser = await this.userRepository.findOne({
       where: { email: createUserDto.email },
     });
 
     if (existingUser) {
+      this.logger.warn({ email: createUserDto.email }, 'User creation failed: email already exists');
       throw new ConflictException('Email already exists');
     }
 
@@ -33,7 +39,9 @@ export class UsersService {
       password: hashedPassword,
     });
 
-    return this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+    this.logger.info({ userId: savedUser.id, email: savedUser.email }, 'User created successfully');
+    return savedUser;
   }
 
   async findAll(): Promise<User[]> {
@@ -52,6 +60,8 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
+    this.logger.debug({ userId: id }, 'Finding user by ID');
+
     const user = await this.userRepository.findOne({
       where: { id },
       select: [
@@ -67,6 +77,7 @@ export class UsersService {
     });
 
     if (!user) {
+      this.logger.warn({ userId: id }, 'User not found');
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 

@@ -1,6 +1,7 @@
-import { Processor, Process } from '@nestjs/bull';
-import { Logger } from '@nestjs/common';
+import { Processor, Process, Inject } from '@nestjs/bull';
+import { Logger } from 'nestjs-pino';
 import { Job } from 'bull';
+import { MailService } from '../mail/mail.service';
 
 @Processor('default')
 export class DefaultQueueProcessor {
@@ -8,13 +9,12 @@ export class DefaultQueueProcessor {
 
   @Process()
   async handleDefaultJob(job: Job) {
-    this.logger.log(`Processing default job ${job.id}`);
-    this.logger.debug(`Job data: ${JSON.stringify(job.data)}`);
+    this.logger.debug({ jobId: job.id, data: job.data }, 'Processing default job');
 
     // Simulate processing
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    this.logger.log(`Default job ${job.id} completed`);
+    this.logger.info({ jobId: job.id }, 'Default job completed');
     return { success: true, jobId: job.id };
   }
 }
@@ -23,17 +23,35 @@ export class DefaultQueueProcessor {
 export class EmailQueueProcessor {
   private readonly logger = new Logger(EmailQueueProcessor.name);
 
+  constructor(
+    private readonly mailService?: MailService,
+  ) {}
+
   @Process('send-email')
   async handleSendEmail(
-    job: Job<{ to: string; subject: string; template?: string; data?: any }>,
+    job: Job<{ to: string; subject: string; text?: string; html?: string; template?: string; data?: any }>,
   ) {
-    this.logger.log(`Processing email job ${job.id} to ${job.data.to}`);
+    this.logger.info(
+      { jobId: job.id, to: job.data.to, subject: job.data.subject },
+      'Processing email job',
+    );
 
     try {
-      // Simulate email sending
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (this.mailService) {
+        // Use real mail service if available
+        await this.mailService.sendMail({
+          to: job.data.to,
+          subject: job.data.subject,
+          text: job.data.text,
+          html: job.data.html,
+        });
+      } else {
+        // Simulate email sending if mail service not available
+        this.logger.warn('MailService not injected, simulating email send');
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
 
-      this.logger.log(`Email sent successfully to ${job.data.to}`);
+      this.logger.info({ jobId: job.id, to: job.data.to }, 'Email sent successfully');
       return {
         success: true,
         jobId: job.id,
@@ -41,7 +59,10 @@ export class EmailQueueProcessor {
         subject: job.data.subject,
       };
     } catch (error: any) {
-      this.logger.error(`Failed to send email: ${error.message}`);
+      this.logger.error(
+        { jobId: job.id, to: job.data.to, error: error.message },
+        'Failed to send email',
+      );
       throw error;
     }
   }
@@ -55,13 +76,19 @@ export class NotificationQueueProcessor {
   async handleSendNotification(
     job: Job<{ userId: string; type: string; message: string; data?: any }>,
   ) {
-    this.logger.log(`Processing notification job ${job.id} for user ${job.data.userId}`);
+    this.logger.info(
+      { jobId: job.id, userId: job.data.userId, type: job.data.type },
+      'Processing notification job',
+    );
 
     try {
       // Simulate notification sending
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      this.logger.log(`Notification sent successfully to user ${job.data.userId}`);
+      this.logger.info(
+        { jobId: job.id, userId: job.data.userId },
+        'Notification sent successfully',
+      );
       return {
         success: true,
         jobId: job.id,
@@ -69,7 +96,10 @@ export class NotificationQueueProcessor {
         type: job.data.type,
       };
     } catch (error: any) {
-      this.logger.error(`Failed to send notification: ${error.message}`);
+      this.logger.error(
+        { jobId: job.id, userId: job.data.userId, error: error.message },
+        'Failed to send notification',
+      );
       throw error;
     }
   }

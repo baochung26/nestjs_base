@@ -13,6 +13,7 @@ import { QueueController } from './queue.controller';
 @Module({
   imports: [
     ConfigModule.forFeature(redisConfig),
+    MailModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {

@@ -3,12 +3,19 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { createValidationExceptionFactory } from './config/validation';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  // Use Pino logger
+  app.useLogger(app.get(Logger));
 
   // Enable CORS
   app.enableCors();
@@ -23,7 +30,8 @@ async function bootstrap() {
     }),
   );
 
-  // Global interceptors - Transform response to standard format
+  // Global interceptors
+  app.useGlobalInterceptors(new LoggingInterceptor(app.get(Logger)));
   app.useGlobalInterceptors(new TransformInterceptor());
 
   // Global exception filters - Handle all exceptions
@@ -38,6 +46,7 @@ async function bootstrap() {
   const port = appConfig?.port || parseInt(process.env.APP_PORT || '3000', 10);
   await app.listen(port);
 
-  console.log(`Application is running on: http://localhost:${port}/${appConfig?.prefix || 'api'}`);
+  const logger = app.get(Logger);
+  logger.log(`Application is running on: http://localhost:${port}/${appConfig?.prefix || 'api'}`);
 }
 bootstrap();
