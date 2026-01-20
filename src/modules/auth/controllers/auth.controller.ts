@@ -7,6 +7,7 @@ import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { SkipThrottle, ThrottlePreset } from '../../../common/decorators/skip-throttle.decorator';
 import { User } from '../../users/entities/user.entity';
 import { Request, Response } from 'express';
 import { googleOAuthConfig } from '../../../config/configuration';
@@ -19,12 +20,14 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @ThrottlePreset('short') // 10 requests per 10 seconds for registration
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
+  @ThrottlePreset('short') // 10 requests per 10 seconds for login
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }

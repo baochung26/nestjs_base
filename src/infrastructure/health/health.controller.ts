@@ -8,9 +8,11 @@ import {
 } from '@nestjs/terminus';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
+import { SkipThrottle } from '../../common/decorators/skip-throttle.decorator';
 import { RedisHealthIndicator } from './indicators/redis.health-indicator';
 
 @Controller('health')
+@SkipThrottle() // Skip rate limiting for health checks
 export class HealthController {
   constructor(
     private health: HealthCheckService,

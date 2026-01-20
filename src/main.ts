@@ -8,6 +8,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { createValidationExceptionFactory } from './config/validation';
 import { Logger } from 'nestjs-pino';
+import { getHelmetConfig, getCorsConfig } from './infrastructure/security/security.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -17,8 +18,14 @@ async function bootstrap() {
   // Use Pino logger
   app.useLogger(app.get(Logger));
 
-  // Enable CORS
-  app.enableCors();
+  // Get ConfigService
+  const configService = app.get(ConfigService);
+
+  // Security: Helmet
+  app.use(getHelmetConfig(configService));
+
+  // Security: CORS
+  app.enableCors(getCorsConfig(configService));
 
   // Global validation pipe with custom exception
   app.useGlobalPipes(

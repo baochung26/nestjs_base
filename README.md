@@ -26,6 +26,7 @@ Dự án NestJS đầy đủ với Docker, bao gồm các module: Auth, User, Ad
 - ✅ **Mail System** - Email sending với Nodemailer và templates
 - ✅ **Storage System** - Local file storage với upload/download/delete
 - ✅ **Health Checks** - Health monitoring với @nestjs/terminus (database, Redis, memory, disk)
+- ✅ **Security** - CORS, Helmet security headers, Rate limiting với @nestjs/throttler
 - ✅ **Docker Support** - Full Docker setup với docker-compose
 - ✅ **Validation** - Request validation với class-validator
 - ✅ **Error Handling** - Global exception filters
@@ -734,6 +735,7 @@ getProfile(@CurrentUser() user: User) {
 - [Mail Guide](./docs/MAIL_GUIDE.md) - Hướng dẫn sử dụng Mail Module với Nodemailer
 - [Storage Guide](./docs/STORAGE_GUIDE.md) - Hướng dẫn sử dụng Storage Module với Local Storage
 - [Health Guide](./docs/HEALTH_GUIDE.md) - Hướng dẫn sử dụng Health Module với Terminus
+- [Security Guide](./docs/SECURITY_GUIDE.md) - Hướng dẫn sử dụng Security Module (CORS, Helmet, Rate Limiting)
 - [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
 
 ## 🤝 Contributing
