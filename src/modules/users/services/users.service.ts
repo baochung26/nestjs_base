@@ -10,6 +10,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '../../../shared/errors/custom-exceptions';
+import { ERROR_MESSAGES } from '../../../common/constants';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +30,7 @@ export class UsersService {
 
     if (existingUser) {
       this.logger.warn({ email: createUserDto.email }, 'User creation failed: email already exists');
-      throw new ConflictException('Email already exists');
+      throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);

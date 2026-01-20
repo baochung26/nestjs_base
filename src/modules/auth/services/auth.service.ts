@@ -8,6 +8,7 @@ import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
 import { User } from '../../users/entities/user.entity';
 import { UnauthorizedException } from '../../../shared/errors/custom-exceptions';
+import { ERROR_MESSAGES } from '../../../common/constants';
 
 @Injectable()
 export class AuthService {
@@ -47,7 +48,7 @@ export class AuthService {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       this.logger.warn({ email: loginDto.email }, 'Login failed: invalid credentials');
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
     this.logger.info({ userId: user.id, email: user.email }, 'User logged in successfully');

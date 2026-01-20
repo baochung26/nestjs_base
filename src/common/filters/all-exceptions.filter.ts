@@ -3,10 +3,10 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ApiErrorResponseDto } from '../../shared/response/api-response.dto';
+import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -15,8 +15,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    let status = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    let message = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
     let error: string | string[] | object | undefined;
 
     if (exception instanceof HttpException) {
@@ -31,7 +31,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         error = responseObj.error || responseObj.errors || undefined;
       }
     } else if (exception instanceof Error) {
-      message = exception.message || 'Internal server error';
+      message = exception.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
     }
 
     // Log error for debugging (in production, use proper logging service)

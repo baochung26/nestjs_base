@@ -1,5 +1,6 @@
 import { ApiResponseDto } from './api-response.dto';
 import { PaginatedResponseDto } from '../pagination/pagination.dto';
+import { SUCCESS_MESSAGES, HTTP_STATUS } from '../../common/constants';
 
 /**
  * Helper functions để tạo response chuẩn
@@ -10,8 +11,8 @@ export class ResponseHelper {
    */
   static success<T>(
     data: T,
-    message: string = 'Success',
-    statusCode: number = 200,
+    message: string = SUCCESS_MESSAGES.SUCCESS,
+    statusCode: number = HTTP_STATUS.OK,
     path?: string,
   ): ApiResponseDto<T> {
     return new ApiResponseDto(true, statusCode, message, data, path);
@@ -25,7 +26,7 @@ export class ResponseHelper {
     page: number,
     limit: number,
     total: number,
-    message: string = 'Success',
+    message: string = SUCCESS_MESSAGES.SUCCESS,
   ): PaginatedResponseDto<T> {
     return new PaginatedResponseDto(data, page, limit, total, message);
   }
@@ -35,10 +36,10 @@ export class ResponseHelper {
    */
   static created<T>(
     data: T,
-    message: string = 'Created successfully',
+    message: string = SUCCESS_MESSAGES.CREATED,
     path?: string,
   ): ApiResponseDto<T> {
-    return new ApiResponseDto(true, 201, message, data, path);
+    return new ApiResponseDto(true, HTTP_STATUS.CREATED, message, data, path);
   }
 
   /**
@@ -46,19 +47,19 @@ export class ResponseHelper {
    */
   static updated<T>(
     data: T,
-    message: string = 'Updated successfully',
+    message: string = SUCCESS_MESSAGES.UPDATED,
     path?: string,
   ): ApiResponseDto<T> {
-    return new ApiResponseDto(true, 200, message, data, path);
+    return new ApiResponseDto(true, HTTP_STATUS.OK, message, data, path);
   }
 
   /**
    * Tạo response cho delete
    */
   static deleted(
-    message: string = 'Deleted successfully',
+    message: string = SUCCESS_MESSAGES.DELETED,
     path?: string,
   ): ApiResponseDto<null> {
-    return new ApiResponseDto(true, 200, message, null, path);
+    return new ApiResponseDto(true, HTTP_STATUS.OK, message, null, path);
   }
 }

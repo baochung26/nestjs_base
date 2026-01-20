@@ -1,4 +1,7 @@
+import { IsOptional, IsInt, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiResponseDto } from '../response/api-response.dto';
+import { PAGINATION, HTTP_STATUS, SUCCESS_MESSAGES } from '../../common/constants';
 
 /**
  * Pagination Metadata
@@ -28,9 +31,9 @@ export class PaginatedResponseDto<T = any> extends ApiResponseDto<T[]> {
     page: number,
     limit: number,
     total: number,
-    message: string = 'Success',
+    message: string = SUCCESS_MESSAGES.SUCCESS,
   ) {
-    super(true, 200, message, data);
+    super(true, HTTP_STATUS.OK, message, data);
     this.meta = new PaginationMetaDto(page, limit, total);
   }
 }
@@ -39,14 +42,24 @@ export class PaginatedResponseDto<T = any> extends ApiResponseDto<T[]> {
  * Pagination Query DTO
  */
 export class PaginationQueryDto {
-  page?: number = 1;
-  limit?: number = 10;
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(PAGINATION.MIN_PAGE)
+  page?: number = PAGINATION.DEFAULT_PAGE;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(PAGINATION.MIN_LIMIT)
+  @Max(PAGINATION.MAX_LIMIT)
+  limit?: number = PAGINATION.DEFAULT_LIMIT;
 
   get skip(): number {
-    return (this.page - 1) * this.limit;
+    return ((this.page || PAGINATION.DEFAULT_PAGE) - 1) * (this.limit || PAGINATION.DEFAULT_LIMIT);
   }
 
   get take(): number {
-    return this.limit;
+    return this.limit || PAGINATION.DEFAULT_LIMIT;
   }
 }
