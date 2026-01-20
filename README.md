@@ -274,6 +274,8 @@ Queue module sử dụng Bull và Redis để xử lý background jobs. Có 3 qu
 - `email` - Queue cho email jobs
 - `notification` - Queue cho notification jobs
 
+**📖 Xem hướng dẫn chi tiết tại:** [docs/QUEUE_GUIDE.md](docs/QUEUE_GUIDE.md)
+
 #### Sử dụng QueueService trong code
 
 ```typescript
