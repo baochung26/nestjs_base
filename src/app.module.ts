@@ -16,6 +16,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
 import { SchedulerModule } from './infrastructure/scheduler/scheduler.module';
+import { HealthModule } from './infrastructure/health/health.module';
 import { SeederModule } from './infrastructure/database/seed/seeder.module';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
@@ -36,6 +37,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     AdminModule,
     QueueModule,
     SchedulerModule,
+    HealthModule,
     SeederModule,
   ],
 })

@@ -25,6 +25,7 @@ Dự án NestJS đầy đủ với Docker, bao gồm các module: Auth, User, Ad
 - ✅ **Scheduler System** - Cron jobs cho cleanup, retries, sync tasks
 - ✅ **Mail System** - Email sending với Nodemailer và templates
 - ✅ **Storage System** - Local file storage với upload/download/delete
+- ✅ **Health Checks** - Health monitoring với @nestjs/terminus (database, Redis, memory, disk)
 - ✅ **Docker Support** - Full Docker setup với docker-compose
 - ✅ **Validation** - Request validation với class-validator
 - ✅ **Error Handling** - Global exception filters
@@ -732,6 +733,7 @@ getProfile(@CurrentUser() user: User) {
 - [Scheduler Guide](./docs/SCHEDULER_GUIDE.md) - Hướng dẫn sử dụng Scheduler Module với Cron Jobs
 - [Mail Guide](./docs/MAIL_GUIDE.md) - Hướng dẫn sử dụng Mail Module với Nodemailer
 - [Storage Guide](./docs/STORAGE_GUIDE.md) - Hướng dẫn sử dụng Storage Module với Local Storage
+- [Health Guide](./docs/HEALTH_GUIDE.md) - Hướng dẫn sử dụng Health Module với Terminus
 - [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
 
 ## 🤝 Contributing
