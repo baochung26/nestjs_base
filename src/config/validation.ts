@@ -1,16 +1,14 @@
 import { plainToInstance } from 'class-transformer';
-import {
-  ClassConstructor,
-  validate,
-  ValidationError,
-} from 'class-validator';
+import { validate, ValidationError } from 'class-validator';
 import { ValidationException } from '../shared/errors/custom-exceptions';
+
+type ClassConstructor<T> = new (...args: any[]) => T;
 
 export async function validateDto<T extends object>(
   dto: ClassConstructor<T>,
   plain: any,
 ): Promise<T> {
-  const instance = plainToInstance(dto, plain);
+  const instance = plainToInstance(dto, plain) as T;
   const errors = await validate(instance);
 
   if (errors.length > 0) {

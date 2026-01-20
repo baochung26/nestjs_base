@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Logger } from 'nestjs-pino';
 import { QueueService } from '../../queue/queue.service';
 import { CacheService } from '../../cache/cache.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,7 +22,7 @@ export class CleanupScheduler {
    */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanupCompletedJobs() {
-    this.logger.info('Starting cleanup of completed queue jobs');
+    this.logger.log('Starting cleanup of completed queue jobs');
 
     try {
       const queues = ['default', 'email', 'notification'];
@@ -34,8 +33,7 @@ export class CleanupScheduler {
           queueName,
           grace,
         );
-        this.logger.info(
-          { queueName, cleaned: cleaned.length },
+        this.logger.log(
           `Cleaned ${cleaned.length} completed jobs from ${queueName} queue`,
         );
       }
@@ -52,7 +50,7 @@ export class CleanupScheduler {
    */
   @Cron('0 2 * * *')
   async cleanupFailedJobs() {
-    this.logger.info('Starting cleanup of failed queue jobs');
+    this.logger.log('Starting cleanup of failed queue jobs');
 
     try {
       const queues = ['default', 'email', 'notification'];
@@ -63,8 +61,7 @@ export class CleanupScheduler {
           queueName,
           grace,
         );
-        this.logger.info(
-          { queueName, cleaned: cleaned.length },
+        this.logger.log(
           `Cleaned ${cleaned.length} failed jobs from ${queueName} queue`,
         );
       }
@@ -81,12 +78,12 @@ export class CleanupScheduler {
    */
   @Cron('0 3 * * *')
   async cleanupCache() {
-    this.logger.info('Starting cache cleanup');
+    this.logger.log('Starting cache cleanup');
 
     try {
       // This is a placeholder - actual cache cleanup depends on TTL
       // Redis will automatically expire keys based on TTL
-      this.logger.info('Cache cleanup completed (TTL-based expiration)');
+      this.logger.log('Cache cleanup completed (TTL-based expiration)');
     } catch (error: any) {
       this.logger.error({ error: error.message }, 'Error cleaning up cache');
     }
@@ -97,7 +94,7 @@ export class CleanupScheduler {
    */
   @Cron('0 4 1 * *')
   async cleanupInactiveUsers() {
-    this.logger.info('Starting cleanup of inactive users');
+    this.logger.log('Starting cleanup of inactive users');
 
     try {
       const sixMonthsAgo = new Date();
@@ -111,8 +108,7 @@ export class CleanupScheduler {
         .andWhere('updatedAt < :date', { date: sixMonthsAgo })
         .execute();
 
-      this.logger.info(
-        { deleted: result.affected },
+      this.logger.log(
         `Cleaned up ${result.affected || 0} inactive users`,
       );
     } catch (error: any) {
@@ -128,12 +124,12 @@ export class CleanupScheduler {
    */
   @Cron('0 5 * * 0')
   async cleanupOldFiles() {
-    this.logger.info('Starting cleanup of old files');
+    this.logger.log('Starting cleanup of old files');
 
     try {
       // Placeholder for file cleanup logic
       // This would typically clean up old uploaded files, logs, etc.
-      this.logger.info('Old files cleanup completed');
+      this.logger.log('Old files cleanup completed');
     } catch (error: any) {
       this.logger.error({ error: error.message }, 'Error cleaning up old files');
     }

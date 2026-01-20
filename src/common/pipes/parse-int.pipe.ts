@@ -20,7 +20,7 @@ export class ParseIntPipe implements PipeTransform<string, number> {
   transform(value: string, metadata: ArgumentMetadata): number {
     if (value === undefined || value === null || value === '') {
       throw new BadRequestException(
-        ERROR_MESSAGES.VALIDATION_FAILED || 'Validation failed',
+        ERROR_MESSAGES.VALIDATION_ERROR || 'Validation failed',
       );
     }
 

@@ -69,10 +69,10 @@ export class CacheInterceptor implements NestInterceptor {
   }
 
   private generateCacheKey(request: Request): string {
-    const { method, url, query, params, user } = request;
+    const { method, url, query, params, user } = request as any;
     const queryString = JSON.stringify(query);
     const paramsString = JSON.stringify(params);
-    const userId = user?.id || 'anonymous';
+    const userId = (user as any)?.id || 'anonymous';
 
     return `cache:${method}:${url}:${queryString}:${paramsString}:${userId}`;
   }

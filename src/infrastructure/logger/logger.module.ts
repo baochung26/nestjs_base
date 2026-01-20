@@ -53,8 +53,10 @@ import { v4 as uuidv4 } from 'uuid';
               // Use existing correlation ID if present, otherwise generate new one
               const existingId = req.headers['x-correlation-id'] || req.id || uuidv4();
               req.id = existingId;
-              res.setHeader('x-correlation-id', existingId);
-              return existingId;
+              const headerId =
+                typeof existingId === 'string' ? existingId : String(existingId);
+              res.setHeader('x-correlation-id', headerId);
+              return headerId;
             },
             customLogLevel: (req, res, err) => {
               if (res.statusCode >= 400 && res.statusCode < 500) {

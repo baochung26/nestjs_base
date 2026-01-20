@@ -12,7 +12,11 @@ export const SkipThrottle = (skipAll = true) => SetMetadata('skipThrottle', skip
  * @param limit - Số lượng requests cho phép
  * @param ttl - Time to live (milliseconds)
  */
-export const ThrottleCustom = (limit: number, ttl: number) => Throttle({ limit, ttl });
+export const ThrottleCustom = (limit: number, ttl: number) =>
+  // Với @nestjs/throttler v5, Throttle nhận vào Record<string, ThrottlerMethodOrControllerOptions>
+  Throttle({
+    default: { limit, ttl },
+  });
 
 /**
  * Decorator để sử dụng rate limit preset
@@ -25,5 +29,7 @@ export const ThrottlePreset = (preset: 'short' | 'long' | 'default' = 'default')
     default: { limit: 100, ttl: 60000 }, // 100 requests per minute
   };
 
-  return Throttle(presets[preset]);
+  return Throttle({
+    [preset]: presets[preset],
+  });
 };

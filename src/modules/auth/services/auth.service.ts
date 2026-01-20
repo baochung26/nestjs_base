@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from 'nestjs-pino';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../../users/services/users.service';
 import { RegisterDto } from '../dtos/register.dto';
@@ -30,7 +29,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    this.logger.debug({ email: registerDto.email }, 'Registering new user');
+    this.logger.debug(`Registering new user: ${registerDto.email}`);
 
     const userDto = await this.usersService.create(registerDto);
     
@@ -40,7 +39,7 @@ export class AuthService {
       throw new Error('User not found after creation');
     }
 
-    this.logger.info({ userId: userDto.id, email: userDto.email }, 'User registered successfully');
+    this.logger.log(`User registered successfully: ${userDto.email} (ID: ${userDto.id})`);
     return {
       ...userDto,
       access_token: this.generateToken(user),
@@ -48,15 +47,15 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    this.logger.debug({ email: loginDto.email }, 'Attempting user login');
+    this.logger.debug(`Attempting user login: ${loginDto.email}`);
 
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
-      this.logger.warn({ email: loginDto.email }, 'Login failed: invalid credentials');
+      this.logger.warn(`Login failed: invalid credentials for ${loginDto.email}`);
       throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
-    this.logger.info({ userId: user.id, email: user.email }, 'User logged in successfully');
+    this.logger.log(`User logged in successfully: ${user.email} (ID: ${user.id})`);
     return {
       ...user,
       access_token: this.generateToken(user),

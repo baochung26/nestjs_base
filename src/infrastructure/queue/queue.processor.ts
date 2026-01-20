@@ -1,5 +1,5 @@
-import { Processor, Process, Inject } from '@nestjs/bull';
-import { Logger } from 'nestjs-pino';
+import { Processor, Process } from '@nestjs/bull';
+import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { MailService } from '../mail/mail.service';
 
@@ -9,12 +9,14 @@ export class DefaultQueueProcessor {
 
   @Process()
   async handleDefaultJob(job: Job) {
-    this.logger.debug({ jobId: job.id, data: job.data }, 'Processing default job');
+    this.logger.debug(
+      `Processing default job: id=${job.id}, data=${JSON.stringify(job.data)}`,
+    );
 
     // Simulate processing
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    this.logger.info({ jobId: job.id }, 'Default job completed');
+    this.logger.log(`Default job completed: id=${job.id}`);
     return { success: true, jobId: job.id };
   }
 }
@@ -31,9 +33,8 @@ export class EmailQueueProcessor {
   async handleSendEmail(
     job: Job<{ to: string; subject: string; text?: string; html?: string; template?: string; data?: any }>,
   ) {
-    this.logger.info(
-      { jobId: job.id, to: job.data.to, subject: job.data.subject },
-      'Processing email job',
+    this.logger.log(
+      `Processing email job: id=${job.id}, to=${job.data.to}, subject=${job.data.subject}`,
     );
 
     try {
@@ -51,7 +52,9 @@ export class EmailQueueProcessor {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      this.logger.info({ jobId: job.id, to: job.data.to }, 'Email sent successfully');
+      this.logger.log(
+        `Email sent successfully: id=${job.id}, to=${job.data.to}`,
+      );
       return {
         success: true,
         jobId: job.id,
@@ -76,18 +79,16 @@ export class NotificationQueueProcessor {
   async handleSendNotification(
     job: Job<{ userId: string; type: string; message: string; data?: any }>,
   ) {
-    this.logger.info(
-      { jobId: job.id, userId: job.data.userId, type: job.data.type },
-      'Processing notification job',
+    this.logger.log(
+      `Processing notification job: id=${job.id}, userId=${job.data.userId}, type=${job.data.type}`,
     );
 
     try {
       // Simulate notification sending
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      this.logger.info(
-        { jobId: job.id, userId: job.data.userId },
-        'Notification sent successfully',
+      this.logger.log(
+        `Notification sent successfully: id=${job.id}, userId=${job.data.userId}`,
       );
       return {
         success: true,

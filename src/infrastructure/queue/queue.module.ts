@@ -9,6 +9,7 @@ import {
   NotificationQueueProcessor,
 } from './queue.processor';
 import { QueueController } from './queue.controller';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [

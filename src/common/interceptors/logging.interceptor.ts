@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Logger } from 'nestjs-pino';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -19,16 +19,10 @@ export class LoggingInterceptor implements NestInterceptor {
 
     const startTime = Date.now();
 
-    this.logger.info(
-      {
-        correlationId,
-        method,
-        url,
-        body: this.sanitizeBody(body),
-        query,
-        params,
-      },
-      `Incoming ${method} ${url}`,
+    this.logger.log(
+      `Incoming ${method} ${url} - correlationId=${correlationId} - body=${JSON.stringify(
+        this.sanitizeBody(body),
+      )} - query=${JSON.stringify(query)} - params=${JSON.stringify(params)}`,
     );
 
     return next.handle().pipe(
@@ -37,15 +31,8 @@ export class LoggingInterceptor implements NestInterceptor {
           const response = context.switchToHttp().getResponse();
           const duration = Date.now() - startTime;
 
-          this.logger.info(
-            {
-              correlationId,
-              method,
-              url,
-              statusCode: response.statusCode,
-              duration: `${duration}ms`,
-            },
-            `Outgoing ${method} ${url} ${response.statusCode}`,
+          this.logger.log(
+            `Outgoing ${method} ${url} ${response.statusCode} - correlationId=${correlationId} - duration=${duration}ms`,
           );
         },
         error: (error) => {

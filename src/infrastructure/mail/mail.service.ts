@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { Logger } from 'nestjs-pino';
 import { Transporter, SendMailOptions } from 'nodemailer';
 
 export interface MailOptions {
@@ -47,7 +46,7 @@ export class MailService {
   private async verifyConnection() {
     try {
       await this.transporter.verify();
-      this.logger.info('SMTP connection verified successfully');
+      this.logger.log('SMTP connection verified successfully');
     } catch (error: any) {
       this.logger.error(
         { error: error.message },
@@ -77,13 +76,10 @@ export class MailService {
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      this.logger.info(
-        {
-          messageId: info.messageId,
-          to: options.to,
-          subject: options.subject,
-        },
-        'Email sent successfully',
+      this.logger.log(
+        `Email sent successfully: messageId=${info.messageId}, to=${Array.isArray(
+          options.to,
+        ) ? options.to.join(',') : options.to}, subject=${options.subject}`,
       );
     } catch (error: any) {
       this.logger.error(
@@ -116,7 +112,7 @@ export class MailService {
    * Send bulk emails
    */
   async sendBulkEmails(options: MailOptions[]): Promise<void> {
-    this.logger.info({ count: options.length }, 'Sending bulk emails');
+    this.logger.log(`Sending bulk emails: ${options.length} emails`);
 
     const results = await Promise.allSettled(
       options.map((option) => this.sendMail(option)),
@@ -125,9 +121,8 @@ export class MailService {
     const succeeded = results.filter((r) => r.status === 'fulfilled').length;
     const failed = results.filter((r) => r.status === 'rejected').length;
 
-    this.logger.info(
-      { total: options.length, succeeded, failed },
-      'Bulk emails sent',
+    this.logger.log(
+      `Bulk emails sent: total=${options.length}, succeeded=${succeeded}, failed=${failed}`,
     );
 
     if (failed > 0) {

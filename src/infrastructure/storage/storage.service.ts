@@ -1,6 +1,5 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from 'nestjs-pino';
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
@@ -59,7 +58,7 @@ export class StorageService {
       await access(this.storagePath);
     } catch {
       await mkdir(this.storagePath, { recursive: true });
-      this.logger.info({ path: this.storagePath }, 'Storage directory created');
+      this.logger.log(`Storage directory created at ${this.storagePath}`);
     }
   }
 
@@ -146,9 +145,8 @@ export class StorageService {
       uploadedAt: new Date(),
     };
 
-    this.logger.info(
-      { filename, size: file.size, mimetype: file.mimetype },
-      'File uploaded successfully',
+    this.logger.log(
+      `File uploaded successfully: ${filename} (${file.size} bytes, ${file.mimetype})`,
     );
 
     return fileInfo;
@@ -165,7 +163,7 @@ export class StorageService {
       files.map((file) => this.uploadFile(file, options)),
     );
 
-    this.logger.info({ count: results.length }, 'Multiple files uploaded');
+    this.logger.log(`Multiple files uploaded: ${results.length} files`);
     return results;
   }
 
@@ -219,7 +217,7 @@ export class StorageService {
 
     try {
       await unlink(filePath);
-      this.logger.info({ filename }, 'File deleted successfully');
+      this.logger.log(`File deleted successfully: ${filename}`);
     } catch (error: any) {
       if (error.code === 'ENOENT') {
         throw new NotFoundException(`File ${filename} not found`);
@@ -233,7 +231,7 @@ export class StorageService {
    */
   async deleteFiles(filenames: string[], subfolder?: string): Promise<void> {
     await Promise.all(filenames.map((filename) => this.deleteFile(filename, subfolder)));
-    this.logger.info({ count: filenames.length }, 'Multiple files deleted');
+    this.logger.log(`Multiple files deleted: ${filenames.length} files`);
   }
 
   /**

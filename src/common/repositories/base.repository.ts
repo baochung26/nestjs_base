@@ -1,4 +1,9 @@
-import { Repository, FindOptionsWhere, FindManyOptions, EntityTarget } from 'typeorm';
+import {
+  Repository,
+  FindOptionsWhere,
+  FindManyOptions,
+  DeepPartial,
+} from 'typeorm';
 import { NotFoundException } from '../../shared/errors/custom-exceptions';
 
 /**
@@ -13,7 +18,7 @@ export abstract class BaseRepository<T> {
    */
   async findById(id: string, options?: FindManyOptions<T>): Promise<T> {
     const entity = await this.repository.findOne({
-      where: { id } as FindOptionsWhere<T>,
+      where: { id } as any,
       ...options,
     });
 
@@ -29,7 +34,7 @@ export abstract class BaseRepository<T> {
    */
   async findByIdOrNull(id: string, options?: FindManyOptions<T>): Promise<T | null> {
     return this.repository.findOne({
-      where: { id } as FindOptionsWhere<T>,
+      where: { id } as any,
       ...options,
     });
   }
@@ -39,7 +44,7 @@ export abstract class BaseRepository<T> {
    */
   async exists(id: string): Promise<boolean> {
     const count = await this.repository.count({
-      where: { id } as FindOptionsWhere<T>,
+      where: { id } as any,
     });
     return count > 0;
   }
@@ -49,7 +54,7 @@ export abstract class BaseRepository<T> {
    */
   async findActive(options?: FindManyOptions<T>): Promise<T[]> {
     return this.repository.find({
-      where: { isActive: true } as FindOptionsWhere<T>,
+      where: { isActive: true } as any,
       ...options,
     });
   }
@@ -59,7 +64,7 @@ export abstract class BaseRepository<T> {
    */
   async findInactive(options?: FindManyOptions<T>): Promise<T[]> {
     return this.repository.find({
-      where: { isActive: false } as FindOptionsWhere<T>,
+      where: { isActive: false } as any,
       ...options,
     });
   }
@@ -67,7 +72,7 @@ export abstract class BaseRepository<T> {
   /**
    * Create entity
    */
-  create(entityLike: Partial<T>): T {
+  create(entityLike: DeepPartial<T>): T {
     return this.repository.create(entityLike);
   }
 

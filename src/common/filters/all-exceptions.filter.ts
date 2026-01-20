@@ -15,8 +15,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = HTTP_STATUS.INTERNAL_SERVER_ERROR;
-    let message = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
+    // Dùng kiểu number/string để linh hoạt với mọi HttpStatus và message
+    let status: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    let message: string = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
     let error: string | string[] | object | undefined;
 
     if (exception instanceof HttpException) {

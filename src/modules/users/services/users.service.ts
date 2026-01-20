@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { Logger } from 'nestjs-pino';
+import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dtos/create-user.dto';
@@ -37,7 +36,7 @@ export class UsersService {
     });
 
     const savedUser = await this.usersRepository.save(user);
-    this.logger.info({ userId: savedUser.id, email: savedUser.email }, 'User created successfully');
+    this.logger.log(`User created successfully: ${savedUser.email} (ID: ${savedUser.id})`);
     
     // Convert entity to DTO for response
     return this.userMapper.toDto(savedUser);

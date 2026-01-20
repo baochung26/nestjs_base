@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { Logger } from 'nestjs-pino';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,7 +20,7 @@ export class SyncScheduler {
    */
   @Cron('*/5 * * * *')
   async syncUserStatistics() {
-    this.logger.info('Starting user statistics sync');
+    this.logger.log('Starting user statistics sync');
 
     try {
       const [totalUsers, activeUsers, inactiveUsers] = await Promise.all([
@@ -40,10 +39,7 @@ export class SyncScheduler {
       // Cache statistics
       await this.cacheService.set('stats:users', stats, 300); // 5 minutes
 
-      this.logger.info(
-        { stats },
-        'User statistics synced successfully',
-      );
+      this.logger.log('User statistics synced successfully');
     } catch (error: any) {
       this.logger.error(
         { error: error.message },
@@ -57,7 +53,7 @@ export class SyncScheduler {
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async syncCacheWithDatabase() {
-    this.logger.info('Starting cache sync with database');
+    this.logger.log('Starting cache sync with database');
 
     try {
       // Example: Warm up cache with frequently accessed data
@@ -73,10 +69,7 @@ export class SyncScheduler {
         await this.cacheService.set(cacheKey, user, 3600); // 1 hour
       }
 
-      this.logger.info(
-        { count: activeUsers.length },
-        'Cache synced with database',
-      );
+      this.logger.log(`Cache synced with database, ${activeUsers.length} users cached`);
     } catch (error: any) {
       this.logger.error(
         { error: error.message },
@@ -90,7 +83,7 @@ export class SyncScheduler {
    */
   @Cron(CronExpression.EVERY_HOUR)
   async syncExternalServices() {
-    this.logger.info('Starting external services sync');
+    this.logger.log('Starting external services sync');
 
     try {
       // Placeholder for external service sync
@@ -100,7 +93,7 @@ export class SyncScheduler {
       // - External databases
       // - Cloud storage services
 
-      this.logger.info('External services sync completed');
+      this.logger.log('External services sync completed');
     } catch (error: any) {
       this.logger.error(
         { error: error.message },
@@ -159,7 +152,7 @@ export class SyncScheduler {
    */
   @Cron('0 1 * * *')
   async dataBackupSync() {
-    this.logger.info('Starting data backup sync');
+    this.logger.log('Starting data backup sync');
 
     try {
       // Placeholder for backup logic
@@ -169,7 +162,7 @@ export class SyncScheduler {
       // - Create snapshots
       // - Archive old data
 
-      this.logger.info('Data backup sync completed');
+      this.logger.log('Data backup sync completed');
     } catch (error: any) {
       this.logger.error(
         { error: error.message },

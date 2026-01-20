@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { Logger } from 'nestjs-pino';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { QueueService } from '../../queue/queue.service';
 import { InjectQueue } from '@nestjs/bull';
@@ -21,7 +20,7 @@ export class RetryScheduler {
    */
   @Cron('*/30 * * * *')
   async retryFailedEmailJobs() {
-    this.logger.info('Starting retry of failed email jobs');
+    this.logger.log('Starting retry of failed email jobs');
 
     try {
       const failedJobs = await this.emailQueue.getFailed();
@@ -51,10 +50,7 @@ export class RetryScheduler {
       }
 
       if (retried > 0) {
-        this.logger.info(
-          { retried },
-          `Retried ${retried} failed email jobs`,
-        );
+        this.logger.log(`Retried ${retried} failed email jobs`);
       }
     } catch (error: any) {
       this.logger.error(
@@ -69,7 +65,7 @@ export class RetryScheduler {
    */
   @Cron('*/15 * * * *')
   async retryFailedNotificationJobs() {
-    this.logger.info('Starting retry of failed notification jobs');
+    this.logger.log('Starting retry of failed notification jobs');
 
     try {
       const failedJobs = await this.notificationQueue.getFailed();
@@ -99,10 +95,7 @@ export class RetryScheduler {
       }
 
       if (retried > 0) {
-        this.logger.info(
-          { retried },
-          `Retried ${retried} failed notification jobs`,
-        );
+        this.logger.log(`Retried ${retried} failed notification jobs`);
       }
     } catch (error: any) {
       this.logger.error(
@@ -117,7 +110,7 @@ export class RetryScheduler {
    */
   @Cron(CronExpression.EVERY_HOUR)
   async retryFailedDefaultJobs() {
-    this.logger.info('Starting retry of failed default queue jobs');
+    this.logger.log('Starting retry of failed default queue jobs');
 
     try {
       const failedJobs = await this.defaultQueue.getFailed();
@@ -147,10 +140,7 @@ export class RetryScheduler {
       }
 
       if (retried > 0) {
-        this.logger.info(
-          { retried },
-          `Retried ${retried} failed default queue jobs`,
-        );
+        this.logger.log(`Retried ${retried} failed default queue jobs`);
       }
     } catch (error: any) {
       this.logger.error(
