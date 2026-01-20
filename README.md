@@ -741,6 +741,8 @@ getProfile(@CurrentUser() user: User) {
 - [Repository Pattern Guide](./docs/REPOSITORY_PATTERN_GUIDE.md) - Hướng dẫn Repository Pattern
 - [Mapper Pattern Guide](./docs/MAPPER_PATTERN_GUIDE.md) - Hướng dẫn Mapper Pattern
 - [Base Entity Guide](./docs/BASE_ENTITY_GUIDE.md) - Hướng dẫn Base Entity
+- [Custom Pipes Guide](./docs/CUSTOM_PIPES_GUIDE.md) - Hướng dẫn Custom Pipes
+- [Testing Guide](./docs/TESTING_GUIDE.md) - Hướng dẫn Testing với Jest
 - [Architecture Improvements](./docs/ARCHITECTURE_IMPROVEMENTS.md) - Đề xuất cải thiện cấu trúc dự án
 - [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
 

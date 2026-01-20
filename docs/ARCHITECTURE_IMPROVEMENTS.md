@@ -190,13 +190,55 @@ export class User extends BaseEntity {
 
 **Documentation:** Xem [BASE_ENTITY_GUIDE.md](./BASE_ENTITY_GUIDE.md)
 
-### 5. 🔧 **Custom Pipes**
+### 5. ✅ **COMPLETED: Custom Pipes**
 
 **Vấn đề:** Thư mục `pipes/` trống, chưa có custom pipes.
 
-**Giải pháp:** Tạo custom pipes cho validation và transformation.
+**Giải pháp:** ✅ Đã tạo custom pipes cho validation và transformation.
 
 **Priority:** 🟢 LOW
+
+**Status:** ✅ **COMPLETED**
+
+**Files Created:**
+- `src/common/pipes/parse-int.pipe.ts` - Parse string to integer với min/max validation
+- `src/common/pipes/parse-uuid.pipe.ts` - Validate UUID format
+- `src/common/pipes/parse-enum.pipe.ts` - Validate enum values
+- `src/common/pipes/trim.pipe.ts` - Trim whitespace từ strings
+- `src/common/pipes/pagination.pipe.ts` - Parse và validate pagination params
+- `src/common/pipes/index.ts` - Export all pipes
+- `docs/CUSTOM_PIPES_GUIDE.md` - Documentation
+
+**Implementation:**
+```typescript
+// ParseIntPipe với min/max
+@Get(':id')
+findOne(@Param('id', new ParseIntPipe(1, 100)) id: number) { }
+
+// ParseUUIDPipe
+@Get(':id')
+findOne(@Param('id', ParseUUIDPipe) id: string) { }
+
+// ParseEnumPipe
+@Get('by-role/:role')
+findByRole(@Param('role', new ParseEnumPipe(UserRole)) role: UserRole) { }
+
+// TrimPipe
+@Post()
+create(@Body(new TrimPipe(['email'])) createDto: CreateUserDto) { }
+
+// PaginationPipe
+@Get()
+findAll(@Query(new PaginationPipe()) pagination: any) { }
+```
+
+**Benefits:**
+- ✅ Validation - Validate và transform input data
+- ✅ Type Safety - Đảm bảo type correctness
+- ✅ Error Handling - Custom error messages
+- ✅ Reusability - Tái sử dụng validation logic
+
+**Documentation:** Xem [CUSTOM_PIPES_GUIDE.md](./CUSTOM_PIPES_GUIDE.md)
 
 ```typescript
 // src/common/pipes/parse-int.pipe.ts
@@ -232,44 +274,69 @@ export interface PaginatedResult<T> {
 }
 ```
 
-### 7. 🧪 **Testing Setup**
+### 7. ✅ **COMPLETED: Testing Setup**
 
 **Vấn đề:** Chưa có test files và testing configuration.
 
-**Giải pháp:** Setup testing với Jest và tạo test examples.
+**Giải pháp:** ✅ Đã setup Jest và tạo unit test mẫu cho `UsersService`.
 
 **Priority:** 🟡 MEDIUM
 
+**Status:** ✅ **COMPLETED**
+
+**Files Created:**
+- `test/modules/users/users.service.spec.ts` - Unit test mẫu cho `UsersService`
+- `docs/TESTING_GUIDE.md` - Hướng dẫn Testing với Jest
+
+**Implementation (Example):**
 ```typescript
-// src/modules/users/services/users.service.spec.ts
+// test/modules/users/users.service.spec.ts
 describe('UsersService', () => {
   let service: UsersService;
-  
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [UsersService, /* mocks */],
     }).compile();
-    
+
     service = module.get<UsersService>(UsersService);
   });
-  
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 });
 ```
 
-### 8. 📚 **API Versioning**
+### 8. ✅ **COMPLETED: API Versioning**
 
 **Vấn đề:** Chưa có API versioning strategy.
 
-**Giải pháp:** Implement API versioning với `@nestjs/common`.
+**Giải pháp:** ✅ Đã implement API versioning với `VersioningType.URI` (NestJS).
 
 **Priority:** 🟢 LOW
 
+**Status:** ✅ **COMPLETED**
+
+**Implementation:**
 ```typescript
 // main.ts
-app.setGlobalPrefix('api/v1');
+import { VersioningType } from '@nestjs/common';
+
+// Global prefix + API versioning
+const appConfig = configService.get('app');
+const prefix = appConfig?.prefix || 'api';
+
+app.setGlobalPrefix(prefix);
+
+app.enableVersioning({
+  type: VersioningType.URI,
+  defaultVersion: '1',
+});
+
+// Resulting URLs:
+// GET /api/v1/users
+// GET /api/v1/auth/login
 ```
 
 ### 9. 🔐 **Base Service với Common CRUD**
@@ -300,26 +367,38 @@ export abstract class BaseService<T> {
 }
 ```
 
-### 10. 📊 **Base Repository**
+### 10. ✅ **COMPLETED: Base Repository**
 
 **Vấn đề:** Repositories có thể có common methods.
 
-**Giải pháp:** Tạo base repository với common query methods.
+**Giải pháp:** ✅ Đã tạo base repository với common query methods và áp dụng cho `UsersRepository`.
 
 **Priority:** 🟢 LOW
 
+**Status:** ✅ **COMPLETED**
+
+**Files Used:**
+- `src/common/repositories/base.repository.ts` - Base repository với common methods
+- `src/modules/users/repositories/users.repository.ts` - Extends `BaseRepository<User>`
+
+**Implementation (Summary):**
 ```typescript
 // src/common/repositories/base.repository.ts
-export abstract class BaseRepository<T extends BaseEntity> extends Repository<T> {
-  async findById(id: string): Promise<T | null> {
-    return this.findOne({ where: { id } });
-  }
-  
-  async softDelete(id: string): Promise<void> {
-    await this.update(id, { deletedAt: new Date() });
-  }
+export abstract class BaseRepository<T> {
+  protected abstract repository: Repository<T>;
+
+  async findById(id: string, options?: FindManyOptions<T>): Promise<T> { /* ... */ }
+  async findByIdOrNull(id: string, options?: FindManyOptions<T>): Promise<T | null> { /* ... */ }
+  async exists(id: string): Promise<boolean> { /* ... */ }
+  async findActive(options?: FindManyOptions<T>): Promise<T[]> { /* ... */ }
+  async findInactive(options?: FindManyOptions<T>): Promise<T[]> { /* ... */ }
 }
 ```
+
+**Benefits:**
+- ✅ Giảm lặp code cho các truy vấn common
+- ✅ Dễ mở rộng cho các repositories khác
+- ✅ Kết hợp tốt với Repository Pattern đã triển khai ở mục 2
 
 ### 11. 🎯 **DTO Validation với Custom Decorators**
 

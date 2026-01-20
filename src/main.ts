@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -45,15 +45,24 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global prefix
-  const configService = app.get(ConfigService);
-  const appConfig = configService.get('app');
-  app.setGlobalPrefix(appConfig?.prefix || 'api');
+  // Global prefix + API Versioning (URI-based: /api/v1)
+  const configServiceAgain = app.get(ConfigService);
+  const appConfig = configServiceAgain.get('app');
+  const prefix = appConfig?.prefix || 'api';
+
+  app.setGlobalPrefix(prefix);
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
 
   const port = appConfig?.port || parseInt(process.env.APP_PORT || '3000', 10);
   await app.listen(port);
 
   const logger = app.get(Logger);
-  logger.log(`Application is running on: http://localhost:${port}/${appConfig?.prefix || 'api'}`);
+  logger.log(
+    `Application is running on: http://localhost:${port}/${prefix}/v1`,
+  );
 }
 bootstrap();
