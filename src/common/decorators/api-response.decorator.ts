@@ -1,6 +1,7 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import { ApiResponse, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
-import { ApiResponseDto, PaginatedResponseDto } from '../dto/api-response.dto';
+import { ApiResponseDto } from '../../shared/response/api-response.dto';
+import { PaginatedResponseDto } from '../../shared/pagination/pagination.dto';
 
 /**
  * Decorator để document API response trong Swagger

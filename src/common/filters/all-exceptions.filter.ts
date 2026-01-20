@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ApiErrorResponseDto } from '../dto/api-response.dto';
+import { ApiErrorResponseDto } from '../../shared/response/api-response.dto';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
