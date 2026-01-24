@@ -730,6 +730,7 @@ getProfile(@CurrentUser() user: User) {
 
 ## 📚 Documentation
 
+- [API Documentation](./docs/API_DOCUMENTATION.md) - **Tài liệu đầy đủ về tất cả API endpoints**
 - [API Response Format](./docs/API_RESPONSE_FORMAT.md) - Chuẩn hóa API response và error
 - [Google OAuth Setup](./docs/GOOGLE_OAUTH_SETUP.md) - Hướng dẫn setup Google OAuth
 - [Queue Guide](./docs/QUEUE_GUIDE.md) - Hướng dẫn sử dụng Queue System
