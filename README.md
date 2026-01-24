@@ -126,6 +126,10 @@ FRONTEND_URL=http://localhost:3001
 APP_PORT=3000
 NODE_ENV=development
 
+# CORS Configuration
+# Comma-separated list of allowed origins
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
+
 # pgAdmin Configuration
 PGADMIN_EMAIL=admin@admin.com
 PGADMIN_PASSWORD=admin
@@ -133,6 +137,8 @@ PGADMIN_PORT=5050
 ```
 
 **⚠️ Lưu ý:** Trước khi deploy production, hãy thay đổi `JWT_SECRET`, `DB_PASSWORD` và `PGADMIN_PASSWORD` thành các giá trị mạnh và bảo mật.
+
+**📝 CORS Configuration:** Thêm các frontend URLs vào `CORS_ORIGINS` để cho phép cross-origin requests. Format: `http://localhost:3000,http://localhost:3001,http://localhost:3002`
 
 #### Bước 3: Build và chạy containers
 

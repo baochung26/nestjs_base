@@ -38,3 +38,5 @@ lerna-debug.log*
 .env
 .env.local
 .env.*.local
+# Allow .env.example to be committed
+!.env.example

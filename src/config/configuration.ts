@@ -58,3 +58,30 @@ export const storageConfig = registerAs('storage', () => ({
       : ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain'],
   },
 }));
+
+/**
+ * CORS Configuration
+ * Load từ environment variable CORS_ORIGINS
+ * Format: comma-separated list of origins
+ * Example: "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+ */
+export const corsConfig = registerAs('cors', () => {
+  const defaultOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+  ];
+
+  const origins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim()).filter(Boolean)
+    : defaultOrigins;
+
+  return {
+    origins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-ID'],
+    exposedHeaders: ['X-Correlation-ID'],
+    maxAge: 86400, // 24 hours
+  };
+});

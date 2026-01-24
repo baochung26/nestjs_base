@@ -38,12 +38,11 @@ export const getHelmetConfig = (configService: ConfigService) => {
 
 /**
  * Cấu hình CORS
+ * Load từ corsConfig trong ConfigModule
  */
 export const getCorsConfig = (configService: ConfigService) => {
-  const appConfig = configService.get('app');
-  const allowedOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',')
-    : ['http://localhost:3000', 'http://localhost:3001'];
+  const corsConfig = configService.get('cors');
+  const allowedOrigins = corsConfig?.origins || [];
 
   return {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -55,13 +54,13 @@ export const getCorsConfig = (configService: ConfigService) => {
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error(`Not allowed by CORS. Origin: ${origin} is not in allowed list: ${allowedOrigins.join(', ')}`));
       }
     },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-ID'],
-    exposedHeaders: ['X-Correlation-ID'],
-    maxAge: 86400, // 24 hours
+    credentials: corsConfig?.credentials ?? true,
+    methods: corsConfig?.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: corsConfig?.allowedHeaders || ['Content-Type', 'Authorization', 'X-Correlation-ID'],
+    exposedHeaders: corsConfig?.exposedHeaders || ['X-Correlation-ID'],
+    maxAge: corsConfig?.maxAge || 86400, // 24 hours
   };
 };

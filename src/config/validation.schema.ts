@@ -91,7 +91,7 @@ export const validationSchema = Joi.object({
   // CORS Configuration
   CORS_ORIGINS: Joi.string()
     .allow('')
-    .default('http://localhost:3000,http://localhost:3001')
+    .default('http://localhost:3000,http://localhost:3001,http://localhost:3002')
     .description('Comma-separated list of allowed CORS origins'),
 
   // pgAdmin Configuration (optional)
