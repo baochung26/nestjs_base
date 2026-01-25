@@ -182,6 +182,8 @@ Lấy thông tin chi tiết về các endpoints có sẵn.
     },
     "users": {
       "list": "GET /api/v1/users",
+      "profile": "GET /api/v1/users/profile",
+      "updateProfile": "PATCH /api/v1/users/profile",
       "get": "GET /api/v1/users/:id",
       "create": "POST /api/v1/users",
       "update": "PATCH /api/v1/users/:id",
@@ -528,7 +530,7 @@ Lấy danh sách tất cả users.
 
 **GET** `/api/v1/users/profile`
 
-Lấy thông tin profile của user hiện tại (từ JWT token).
+Xem thông tin profile của chính mình (user hiện tại từ JWT). Response không chứa mật khẩu.
 
 **Authentication:** Required (JWT)
 
@@ -551,6 +553,58 @@ Lấy thông tin profile của user hiện tại (từ JWT token).
   }
 }
 ```
+
+**Error Responses:**
+- `401`: Unauthorized
+
+---
+
+### Update User Profile (tự sửa thông tin bản thân)
+
+**PATCH** `/api/v1/users/profile`
+
+User tự cập nhật thông tin của chính mình. Chỉ cho phép sửa: `firstName`, `lastName`, `password`. **Không** cho phép sửa: `email`, `role`, `isActive` (chỉ admin qua `PATCH /api/v1/users/:id` hoặc admin endpoints).
+
+**Authentication:** Required (JWT) — luôn dùng `user.id` từ token, không truyền `id` qua params/body.
+
+**Request Body:** (tất cả fields đều optional)
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "password": "newpassword123"
+}
+```
+
+**Validation:**
+- `firstName`: Optional, string
+- `lastName`: Optional, string
+- `password`: Optional, tối thiểu 6 ký tự
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "User updated successfully",
+  "data": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "role": "user",
+    "isActive": true,
+    "createdAt": "2024-01-24T12:00:00.000Z",
+    "updatedAt": "2024-01-24T12:00:00.000Z"
+  }
+}
+```
+
+**Error Responses:**
+- `400`: Validation failed (ví dụ: password quá ngắn)
+- `401`: Unauthorized
 
 ---
 

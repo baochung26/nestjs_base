@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
+import { UpdateProfileDto } from '../dtos/update-profile.dto';
 import { UserDto } from '../dtos/user.dto';
 import { UsersRepository } from '../repositories/users.repository';
 import { UserMapper } from '../mappers/user.mapper';
@@ -59,6 +60,30 @@ export class UsersService {
 
   async findByEmailWithPassword(email: string): Promise<User | null> {
     return this.usersRepository.findByEmailWithPassword(email);
+  }
+
+  /**
+   * User tự cập nhật profile: chỉ firstName, lastName, password.
+   * Không cho phép sửa email, role, isActive.
+   */
+  async updateProfile(id: string, updateProfileDto: UpdateProfileDto): Promise<UserDto> {
+    const user = await this.usersRepository.findByIdWithoutPassword(id);
+
+    const updates: Partial<User> = {};
+    if (updateProfileDto.firstName !== undefined) updates.firstName = updateProfileDto.firstName;
+    if (updateProfileDto.lastName !== undefined) updates.lastName = updateProfileDto.lastName;
+    if (updateProfileDto.password) {
+      updates.password = await bcrypt.hash(updateProfileDto.password, 10);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return this.userMapper.toDto(user);
+    }
+
+    Object.assign(user, updates);
+    const updatedUser = await this.usersRepository.save(user);
+    this.logger.debug({ userId: id }, 'Profile updated');
+    return this.userMapper.toDto(updatedUser);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {

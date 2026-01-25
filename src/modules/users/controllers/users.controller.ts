@@ -11,6 +11,7 @@ import {
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
+import { UpdateProfileDto } from '../dtos/update-profile.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { User } from '../entities/user.entity';
@@ -33,6 +34,11 @@ export class UsersController {
   @Get('profile')
   getProfile(@CurrentUser() user: User) {
     return this.usersService.findOne(user.id);
+  }
+
+  @Patch('profile')
+  updateProfile(@CurrentUser() user: User, @Body() updateProfileDto: UpdateProfileDto) {
+    return this.usersService.updateProfile(user.id, updateProfileDto);
   }
 
   @Get(':id')
