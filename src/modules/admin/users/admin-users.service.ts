@@ -1,14 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../../users/services/users.service';
+import { UsersRepository } from '../../users/repositories/users.repository';
+import { UserMapper } from '../../users/mappers/user.mapper';
 import { UpdateUserDto } from '../../users/dtos/update-user.dto';
 import { CreateUserDto } from '../../users/dtos/create-user.dto';
+import { PaginatedResponseDto } from '../../../shared/pagination/pagination.dto';
+import { UserDto } from '../../users/dtos/user.dto';
+import { PAGINATION } from '../../../common/constants';
 
 @Injectable()
 export class AdminUsersService {
-  constructor(private usersService: UsersService) {}
+  private readonly userMapper = new UserMapper();
 
-  async getAllUsers() {
-    return this.usersService.findAll();
+  constructor(
+    private usersService: UsersService,
+    private usersRepository: UsersRepository,
+  ) {}
+
+  async getAllUsers(
+    page?: number,
+    limit?: number,
+    sortBy?: string,
+    sortOrder?: 'ASC' | 'DESC',
+  ): Promise<PaginatedResponseDto<UserDto>> {
+    const currentPage = page || PAGINATION.DEFAULT_PAGE;
+    const currentLimit = limit || PAGINATION.DEFAULT_LIMIT;
+    const currentSortBy = sortBy || 'createdAt';
+    const currentSortOrder = sortOrder || 'DESC';
+
+    const { users, total } = await this.usersRepository.findAllUsersPaginated(
+      currentPage,
+      currentLimit,
+      currentSortBy,
+      currentSortOrder,
+    );
+
+    const userDtos = this.userMapper.toDtoArray(users);
+
+    return new PaginatedResponseDto(
+      userDtos,
+      currentPage,
+      currentLimit,
+      total,
+      'Users retrieved successfully',
+    );
   }
 
   async getUserById(id: string) {
@@ -33,5 +68,40 @@ export class AdminUsersService {
 
   async deactivateUser(id: string) {
     return this.usersService.update(id, { isActive: false });
+  }
+
+  async searchUsers(
+    searchTerm?: string,
+    role?: string,
+    isActive?: boolean,
+    page?: number,
+    limit?: number,
+    sortBy?: string,
+    sortOrder?: 'ASC' | 'DESC',
+  ): Promise<PaginatedResponseDto<UserDto>> {
+    const currentPage = page || PAGINATION.DEFAULT_PAGE;
+    const currentLimit = limit || PAGINATION.DEFAULT_LIMIT;
+    const currentSortBy = sortBy || 'createdAt';
+    const currentSortOrder = sortOrder || 'DESC';
+
+    const { users, total } = await this.usersRepository.searchUsers(
+      searchTerm,
+      role,
+      isActive,
+      currentPage,
+      currentLimit,
+      currentSortBy,
+      currentSortOrder,
+    );
+
+    const userDtos = this.userMapper.toDtoArray(users);
+
+    return new PaginatedResponseDto(
+      userDtos,
+      currentPage,
+      currentLimit,
+      total,
+      'Users found successfully',
+    );
   }
 }

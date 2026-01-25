@@ -63,3 +63,22 @@ export class PaginationQueryDto {
     return this.limit || PAGINATION.DEFAULT_LIMIT;
   }
 }
+
+/**
+ * Sort Order Enum
+ */
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+/**
+ * Pagination with Sorting Query DTO
+ */
+export class PaginationSortQueryDto extends PaginationQueryDto {
+  @IsOptional()
+  sortBy?: string;
+
+  @IsOptional()
+  sortOrder?: SortOrder = SortOrder.DESC;
+}

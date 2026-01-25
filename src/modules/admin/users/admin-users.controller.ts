@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { AdminUsersService } from './admin-users.service';
 import { CreateUserDto } from '../../users/dtos/create-user.dto';
@@ -15,6 +16,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
+import { PaginationQueryDto, SortOrder } from '../../../shared/pagination/pagination.dto';
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -23,8 +25,43 @@ export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
   @Get()
-  getAllUsers() {
-    return this.adminUsersService.getAllUsers();
+  getAllUsers(
+    @Query() query: PaginationQueryDto & { sortBy?: string; sortOrder?: SortOrder },
+  ) {
+    return this.adminUsersService.getAllUsers(
+      query.page,
+      query.limit,
+      query.sortBy,
+      query.sortOrder,
+    );
+  }
+
+  @Get('search')
+  searchUsers(
+    @Query()
+    query: PaginationQueryDto & {
+      sortBy?: string;
+      sortOrder?: SortOrder;
+      search?: string;
+      role?: string;
+      isActive?: string;
+    },
+  ) {
+    // Parse isActive from string to boolean
+    const isActive =
+      query.isActive !== undefined
+        ? query.isActive === 'true' || query.isActive === '1'
+        : undefined;
+
+    return this.adminUsersService.searchUsers(
+      query.search,
+      query.role,
+      isActive,
+      query.page,
+      query.limit,
+      query.sortBy,
+      query.sortOrder,
+    );
   }
 
   @Get(':id')

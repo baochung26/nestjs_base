@@ -773,9 +773,28 @@ Lấy thống kê tổng quan cho admin dashboard.
 
 **GET** `/api/v1/admin/users`
 
-Lấy danh sách tất cả users (admin view).
+Lấy danh sách tất cả users (admin view) với pagination. **Hiển thị cả users có `isActive = false`**.
 
 **Authentication:** Required (JWT + Admin Role)
+
+**Query Parameters:**
+- `page` (number, optional): Số trang (default: `1`, min: `1`)
+- `limit` (number, optional): Số lượng users mỗi trang (default: `10`, min: `1`, max: `100`)
+- `sortBy` (string, optional): Field để sort (default: `createdAt`)
+  - Allowed values: `createdAt`, `updatedAt`, `email`, `firstName`, `lastName`, `role`, `isActive`
+- `sortOrder` (string, optional): Thứ tự sort (default: `DESC`)
+  - Allowed values: `ASC`, `DESC`
+
+**Examples:**
+```
+GET /api/v1/admin/users                              # Page 1, 10 users, sorted by createdAt DESC (default)
+GET /api/v1/admin/users?page=2                        # Page 2, 10 users per page
+GET /api/v1/admin/users?limit=20                     # Page 1, 20 users per page
+GET /api/v1/admin/users?page=2&limit=25              # Page 2, 25 users per page
+GET /api/v1/admin/users?sortBy=email&sortOrder=ASC   # Sort by email ascending
+GET /api/v1/admin/users?sortBy=firstName&sortOrder=ASC # Sort by firstName ascending
+GET /api/v1/admin/users?sortBy=createdAt&sortOrder=DESC # Sort by createdAt descending (default)
+```
 
 **Response (200):**
 
@@ -794,10 +813,125 @@ Lấy danh sách tất cả users (admin view).
       "isActive": true,
       "createdAt": "2024-01-24T12:00:00.000Z",
       "updatedAt": "2024-01-24T12:00:00.000Z"
+    },
+    {
+      "id": "uuid-2",
+      "email": "inactive@example.com",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "role": "user",
+      "isActive": false,
+      "createdAt": "2024-01-23T10:00:00.000Z",
+      "updatedAt": "2024-01-23T10:00:00.000Z"
     }
-  ]
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5
+  }
 }
 ```
+
+**Response Fields:**
+- `data`: Array of users (bao gồm cả users có `isActive = false`)
+- `meta.page`: Trang hiện tại
+- `meta.limit`: Số lượng users mỗi trang
+- `meta.total`: Tổng số users
+- `meta.totalPages`: Tổng số trang
+
+---
+
+### Admin Users - Search Users
+
+**GET** `/api/v1/admin/users/search`
+
+Tìm kiếm users với các filters và pagination. **Hiển thị cả users có `isActive = false`**.
+
+**Authentication:** Required (JWT + Admin Role)
+
+**Query Parameters:**
+- `search` (string, optional): Từ khóa tìm kiếm (tìm trong `email`, `firstName`, `lastName`)
+- `role` (string, optional): Lọc theo role (`user` hoặc `admin`)
+- `isActive` (string, optional): Lọc theo trạng thái active (`true` hoặc `false`)
+- `page` (number, optional): Số trang (default: `1`, min: `1`)
+- `limit` (number, optional): Số lượng users mỗi trang (default: `10`, min: `1`, max: `100`)
+- `sortBy` (string, optional): Field để sort (default: `createdAt`)
+  - Allowed values: `createdAt`, `updatedAt`, `email`, `firstName`, `lastName`, `role`, `isActive`
+- `sortOrder` (string, optional): Thứ tự sort (default: `DESC`)
+  - Allowed values: `ASC`, `DESC`
+
+**Examples:**
+```
+# Search by keyword
+GET /api/v1/admin/users/search?search=john
+
+# Search by email
+GET /api/v1/admin/users/search?search=example.com
+
+# Filter by role
+GET /api/v1/admin/users/search?role=admin
+
+# Filter by isActive
+GET /api/v1/admin/users/search?isActive=true
+
+# Combine search and filters
+GET /api/v1/admin/users/search?search=john&role=user&isActive=true
+
+# With pagination
+GET /api/v1/admin/users/search?search=john&page=2&limit=20
+
+# With sorting
+GET /api/v1/admin/users/search?search=john&sortBy=email&sortOrder=ASC
+
+# Full example
+GET /api/v1/admin/users/search?search=john&role=user&isActive=true&page=1&limit=10&sortBy=createdAt&sortOrder=DESC
+```
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Users found successfully",
+  "data": [
+    {
+      "id": "uuid",
+      "email": "john@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "user",
+      "isActive": true,
+      "createdAt": "2024-01-24T12:00:00.000Z",
+      "updatedAt": "2024-01-24T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 5,
+    "totalPages": 1
+  }
+}
+```
+
+**Search Behavior:**
+- Search là **case-insensitive** (không phân biệt hoa thường)
+- Tìm kiếm trong các trường: `email`, `firstName`, `lastName`
+- Sử dụng pattern matching (LIKE) - tìm kiếm một phần của chuỗi
+- Có thể kết hợp với filters (`role`, `isActive`)
+- Có thể kết hợp với pagination và sorting
+
+**Examples:**
+- `search=john` → Tìm users có email, firstName hoặc lastName chứa "john"
+- `search=example.com` → Tìm users có email chứa "example.com"
+- `search=doe` → Tìm users có lastName là "Doe" hoặc chứa "doe"
+
+**Error Responses:**
+- `401`: Unauthorized
+- `403`: Forbidden (not admin)
 
 ---
 

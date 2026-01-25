@@ -130,4 +130,120 @@ export class UsersRepository extends BaseRepository<User> {
 
     return user;
   }
+
+  /**
+   * Find all users (including inactive) with pagination and sorting
+   */
+  async findAllUsersPaginated(
+    page: number = 1,
+    limit: number = 10,
+    sortBy: string = 'createdAt',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<{ users: User[]; total: number }> {
+    const skip = (page - 1) * limit;
+    
+    // Validate sortBy field - chỉ cho phép các field hợp lệ
+    const allowedSortFields = ['createdAt', 'updatedAt', 'email', 'firstName', 'lastName', 'role', 'isActive'];
+    const validSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const validSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    
+    const [users, total] = await this.repository.findAndCount({
+      select: [
+        'id',
+        'email',
+        'firstName',
+        'lastName',
+        'role',
+        'isActive',
+        'createdAt',
+        'updatedAt',
+      ],
+      skip,
+      take: limit,
+      order: {
+        [validSortBy]: validSortOrder,
+      },
+    });
+
+    return { users, total };
+  }
+
+  /**
+   * Search users with filters, pagination and sorting
+   */
+  async searchUsers(
+    searchTerm?: string,
+    role?: string,
+    isActive?: boolean,
+    page: number = 1,
+    limit: number = 10,
+    sortBy: string = 'createdAt',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<{ users: User[]; total: number }> {
+    const skip = (page - 1) * limit;
+    
+    // Validate sortBy field
+    const allowedSortFields = ['createdAt', 'updatedAt', 'email', 'firstName', 'lastName', 'role', 'isActive'];
+    const validSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const validSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    
+    // Build query builder
+    const queryBuilder = this.repository.createQueryBuilder('user');
+    
+    // Apply search conditions
+    const hasSearchTerm = searchTerm && searchTerm.trim();
+    const hasRole = role && role.trim();
+    const hasIsActive = isActive !== undefined;
+    
+    if (hasSearchTerm) {
+      const searchPattern = `%${searchTerm.trim()}%`;
+      queryBuilder.where(
+        '(user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search)',
+        { search: searchPattern },
+      );
+      
+      if (hasRole) {
+        queryBuilder.andWhere('user.role = :role', { role });
+      }
+      
+      if (hasIsActive) {
+        queryBuilder.andWhere('user.isActive = :isActive', { isActive });
+      }
+    } else {
+      // No search term, just filters
+      if (hasRole) {
+        queryBuilder.where('user.role = :role', { role });
+      }
+      
+      if (hasIsActive) {
+        if (hasRole) {
+          queryBuilder.andWhere('user.isActive = :isActive', { isActive });
+        } else {
+          queryBuilder.where('user.isActive = :isActive', { isActive });
+        }
+      }
+    }
+    
+    // Apply sorting
+    queryBuilder.orderBy(`user.${validSortBy}`, validSortOrder);
+    
+    // Apply pagination
+    queryBuilder.skip(skip).take(limit);
+    
+    // Select only needed fields
+    queryBuilder.select([
+      'user.id',
+      'user.email',
+      'user.firstName',
+      'user.lastName',
+      'user.role',
+      'user.isActive',
+      'user.createdAt',
+      'user.updatedAt',
+    ]);
+    
+    const [users, total] = await queryBuilder.getManyAndCount();
+    
+    return { users, total };
+  }
 }
