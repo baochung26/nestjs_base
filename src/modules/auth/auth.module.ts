@@ -4,8 +4,10 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { jwtConfig } from '../../config/configuration';
 import { AuthService } from './services/auth.service';
+import { RefreshTokenService } from './services/refresh-token.service';
 import { AuthController } from './controllers/auth.controller';
 import { UsersModule } from '../users/users.module';
+import { CacheModule } from '../../infrastructure/cache/cache.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
@@ -14,6 +16,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
   imports: [
     UsersModule,
     PassportModule,
+    CacheModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -22,7 +25,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
         return {
           secret: jwt?.secret || process.env.JWT_SECRET || 'your-secret-key',
           signOptions: {
-            expiresIn: jwt?.expiresIn || process.env.JWT_EXPIRES_IN || '7d',
+            expiresIn: jwt?.accessTokenExpiresIn || jwt?.expiresIn || process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m',
           },
         };
       },
@@ -30,7 +33,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, GoogleStrategy],
-  exports: [AuthService],
+  providers: [AuthService, RefreshTokenService, JwtStrategy, LocalStrategy, GoogleStrategy],
+  exports: [AuthService, RefreshTokenService],
 })
 export class AuthModule {}

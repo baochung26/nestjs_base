@@ -7,7 +7,6 @@ import appConfig, {
   googleOAuthConfig,
   mailConfig,
   storageConfig,
-  corsConfig,
 } from './config/configuration';
 import { validationSchema, validationOptions } from './config/validation.schema';
 import { DatabaseModule } from './infrastructure/database/database.module';
@@ -24,14 +23,13 @@ import { HealthModule } from './infrastructure/health/health.module';
 import { SecurityModule } from './infrastructure/security/security.module';
 import { SeederModule } from './infrastructure/database/seed/seeder.module';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
-import { AppController } from './app.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, databaseConfig, redisConfig, jwtConfig, googleOAuthConfig, mailConfig, storageConfig, corsConfig],
+      load: [appConfig, databaseConfig, redisConfig, jwtConfig, googleOAuthConfig, mailConfig, storageConfig],
       validationSchema,
       validationOptions,
     }),
@@ -49,7 +47,6 @@ import { AppController } from './app.controller';
     SecurityModule,
     SeederModule,
   ],
-  controllers: [AppController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

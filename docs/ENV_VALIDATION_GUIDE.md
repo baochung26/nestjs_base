@@ -319,8 +319,7 @@ STORAGE_MAX_FILE_SIZE=10485760
 STORAGE_ALLOWED_MIME_TYPES=image/jpeg,image/png,image/gif,application/pdf,text/plain
 
 # CORS (Optional)
-# Comma-separated list of allowed origins for CORS
-CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001
 
 # pgAdmin (Optional)
 PGADMIN_EMAIL=admin@example.com

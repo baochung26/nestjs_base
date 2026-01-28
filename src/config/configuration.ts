@@ -26,7 +26,10 @@ export const redisConfig = registerAs('redis', () => ({
 
 export const jwtConfig = registerAs('jwt', () => ({
   secret: process.env.JWT_SECRET || 'your-secret-key',
-  expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  accessTokenExpiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m', // Short-lived access token
+  refreshTokenExpiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '7d', // Long-lived refresh token
+  // Backward compatibility
+  expiresIn: process.env.JWT_EXPIRES_IN || process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m',
 }));
 
 export const googleOAuthConfig = registerAs('google', () => ({
@@ -58,30 +61,3 @@ export const storageConfig = registerAs('storage', () => ({
       : ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain'],
   },
 }));
-
-/**
- * CORS Configuration
- * Load từ environment variable CORS_ORIGINS
- * Format: comma-separated list of origins
- * Example: "http://localhost:3000,http://localhost:3001,http://localhost:3002"
- */
-export const corsConfig = registerAs('cors', () => {
-  const defaultOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-  ];
-
-  const origins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim()).filter(Boolean)
-    : defaultOrigins;
-
-  return {
-    origins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-ID'],
-    exposedHeaders: ['X-Correlation-ID'],
-    maxAge: 86400, // 24 hours
-  };
-});

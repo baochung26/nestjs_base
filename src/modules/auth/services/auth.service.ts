@@ -3,11 +3,17 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../../users/services/users.service';
+import { RefreshTokenService } from './refresh-token.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
 import { User } from '../../users/entities/user.entity';
 import { UnauthorizedException } from '../../../shared/errors/custom-exceptions';
 import { ERROR_MESSAGES } from '../../../common/constants';
+
+export interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -17,6 +23,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private refreshTokenService: RefreshTokenService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -39,10 +46,12 @@ export class AuthService {
       throw new Error('User not found after creation');
     }
 
+    const tokens = await this.generateTokens(user);
+
     this.logger.log(`User registered successfully: ${userDto.email} (ID: ${userDto.id})`);
     return {
       ...userDto,
-      access_token: this.generateToken(user),
+      ...tokens,
     };
   }
 
@@ -55,10 +64,18 @@ export class AuthService {
       throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
+    // Get full user entity for token generation
+    const fullUser = await this.usersService.findOne(user.id);
+    if (!fullUser) {
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
+    }
+
+    const tokens = await this.generateTokens(fullUser);
+
     this.logger.log(`User logged in successfully: ${user.email} (ID: ${user.id})`);
     return {
       ...user,
-      access_token: this.generateToken(user),
+      ...tokens,
     };
   }
 
@@ -71,18 +88,75 @@ export class AuthService {
     const user = await this.usersService.findOrCreateGoogleUser(googleUser);
     const { password, ...result } = user;
 
+    const tokens = await this.generateTokens(user);
+
     return {
       ...result,
-      access_token: this.generateToken(user),
+      ...tokens,
     };
   }
 
-  private generateToken(user: User): string {
+  /**
+   * Refresh access token using refresh token
+   */
+  async refreshAccessToken(refreshToken: string): Promise<TokenResponse> {
+    const payload = await this.refreshTokenService.validateRefreshToken(refreshToken);
+    
+    if (!payload) {
+      this.logger.warn('Invalid refresh token');
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_REFRESH_TOKEN);
+    }
+
+    // Get user to ensure they still exist and are active
+    const user = await this.usersService.findOne(payload.userId);
+    if (!user || !user.isActive) {
+      this.logger.warn({ userId: payload.userId }, 'User not found or inactive');
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_REFRESH_TOKEN);
+    }
+
+    // Generate new tokens
+    const tokens = await this.generateTokens(user);
+
+    // Revoke old refresh token (optional: you can keep multiple refresh tokens)
+    await this.refreshTokenService.revokeRefreshToken(refreshToken);
+
+    this.logger.log({ userId: user.id }, 'Access token refreshed');
+    return tokens;
+  }
+
+  /**
+   * Logout user by revoking refresh token
+   */
+  async logout(refreshToken: string): Promise<void> {
+    await this.refreshTokenService.revokeRefreshToken(refreshToken);
+    this.logger.debug('User logged out');
+  }
+
+  /**
+   * Generate both access token and refresh token
+   */
+  private async generateTokens(user: User): Promise<TokenResponse> {
+    const accessToken = this.generateAccessToken(user);
+    const refreshToken = await this.refreshTokenService.generateRefreshToken(
+      user.id,
+      user.email,
+    );
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
+  }
+
+  /**
+   * Generate access token (short-lived)
+   */
+  private generateAccessToken(user: User): string {
     const jwt = this.configService.get('jwt');
     const payload = { email: user.email, sub: user.id, role: user.role };
     return this.jwtService.sign(payload, {
       secret: jwt?.secret || 'your-secret-key',
-      expiresIn: jwt?.expiresIn || '7d',
+      expiresIn: jwt?.accessTokenExpiresIn || jwt?.expiresIn || '15m',
     });
   }
 }

@@ -126,10 +126,6 @@ FRONTEND_URL=http://localhost:3001
 APP_PORT=3000
 NODE_ENV=development
 
-# CORS Configuration
-# Comma-separated list of allowed origins
-CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
-
 # pgAdmin Configuration
 PGADMIN_EMAIL=admin@admin.com
 PGADMIN_PASSWORD=admin
@@ -137,8 +133,6 @@ PGADMIN_PORT=5050
 ```
 
 **⚠️ Lưu ý:** Trước khi deploy production, hãy thay đổi `JWT_SECRET`, `DB_PASSWORD` và `PGADMIN_PASSWORD` thành các giá trị mạnh và bảo mật.
-
-**📝 CORS Configuration:** Thêm các frontend URLs vào `CORS_ORIGINS` để cho phép cross-origin requests. Format: `http://localhost:3000,http://localhost:3001,http://localhost:3002`
 
 #### Bước 3: Build và chạy containers
 
@@ -730,7 +724,6 @@ getProfile(@CurrentUser() user: User) {
 
 ## 📚 Documentation
 
-- [API Documentation](./docs/API_DOCUMENTATION.md) - **Tài liệu đầy đủ về tất cả API endpoints**
 - [API Response Format](./docs/API_RESPONSE_FORMAT.md) - Chuẩn hóa API response và error
 - [Google OAuth Setup](./docs/GOOGLE_OAUTH_SETUP.md) - Hướng dẫn setup Google OAuth
 - [Queue Guide](./docs/QUEUE_GUIDE.md) - Hướng dẫn sử dụng Queue System

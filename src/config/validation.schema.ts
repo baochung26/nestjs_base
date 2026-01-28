@@ -35,9 +35,15 @@ export const validationSchema = Joi.object({
     .min(32)
     .required()
     .description('JWT secret key (minimum 32 characters)'),
-  JWT_EXPIRES_IN: Joi.string()
+  JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string()
+    .default('15m')
+    .description('Access token expiration time (e.g., 15m, 1h)'),
+  JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string()
     .default('7d')
-    .description('JWT expiration time (e.g., 7d, 24h, 60m)'),
+    .description('Refresh token expiration time (e.g., 7d, 30d)'),
+  JWT_EXPIRES_IN: Joi.string()
+    .default('15m')
+    .description('JWT expiration time - backward compatibility (e.g., 7d, 24h, 60m)'),
 
   // Google OAuth Configuration
   GOOGLE_CLIENT_ID: Joi.string()
@@ -91,7 +97,7 @@ export const validationSchema = Joi.object({
   // CORS Configuration
   CORS_ORIGINS: Joi.string()
     .allow('')
-    .default('http://localhost:3000,http://localhost:3001,http://localhost:3002')
+    .default('http://localhost:3000,http://localhost:3001')
     .description('Comma-separated list of allowed CORS origins'),
 
   // pgAdmin Configuration (optional)

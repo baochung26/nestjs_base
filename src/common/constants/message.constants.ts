@@ -55,6 +55,7 @@ export const ERROR_MESSAGES = {
   INVALID_CREDENTIALS: 'Invalid email or password',
   EMAIL_ALREADY_EXISTS: 'Email already exists',
   INVALID_TOKEN: 'Invalid or expired token',
+  INVALID_REFRESH_TOKEN: 'Invalid or expired refresh token',
   TOKEN_EXPIRED: 'Token has expired',
   ACCOUNT_INACTIVE: 'Account is inactive',
   ACCOUNT_LOCKED: 'Account is locked',

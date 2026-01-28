@@ -37,14 +37,40 @@ Production: https://yourdomain.com/api/v1
 Hầu hết các endpoints yêu cầu JWT authentication. Gửi token trong header:
 
 ```
-Authorization: Bearer <your-jwt-token>
+Authorization: Bearer <your-access-token>
+```
+
+### Token Types
+
+API sử dụng **2 loại token**:
+
+1. **Access Token** (JWT)
+   - Thời gian sống: **15 phút** (có thể cấu hình qua `JWT_ACCESS_TOKEN_EXPIRES_IN`)
+   - Dùng để authenticate các API requests
+   - Được gửi trong header: `Authorization: Bearer <access-token>`
+
+2. **Refresh Token**
+   - Thời gian sống: **7 ngày** (có thể cấu hình qua `JWT_REFRESH_TOKEN_EXPIRES_IN`)
+   - Dùng để lấy access token mới khi access token hết hạn
+   - Được lưu trữ an toàn ở client (không gửi trong mỗi request)
+   - Format: `user-id:token-id`
+
+### Authentication Flow
+
+```
+1. Register/Login → Nhận access_token + refresh_token
+2. Sử dụng access_token để gọi API
+3. Khi access_token hết hạn (401) → Dùng refresh_token để lấy access_token mới
+4. Logout → Revoke refresh_token
 ```
 
 ### Lấy Token
 
-1. **Register:** `POST /api/v1/auth/register`
-2. **Login:** `POST /api/v1/auth/login`
-3. **Google OAuth:** `GET /api/v1/auth/google`
+1. **Register:** `POST /api/v1/auth/register` → Trả về `access_token` + `refresh_token`
+2. **Login:** `POST /api/v1/auth/login` → Trả về `access_token` + `refresh_token`
+3. **Google OAuth:** `GET /api/v1/auth/google` → Trả về `access_token` + `refresh_token`
+4. **Refresh Token:** `POST /api/v1/auth/refresh` → Lấy access token mới từ refresh token
+5. **Logout:** `POST /api/v1/auth/logout` → Revoke refresh token
 
 ## 📦 Response Format
 
@@ -205,21 +231,23 @@ Lấy thông tin chi tiết về các endpoints có sẵn.
 
 ```json
 {
-  "success": true,
-  "statusCode": 201,
-  "message": "User registered successfully",
-  "data": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "role": "user",
-    "isActive": true,
-    "createdAt": "2024-01-24T12:00:00.000Z",
-    "updatedAt": "2024-01-24T12:00:00.000Z"
-  }
+  "id": "uuid",
+  "email": "user@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "user",
+  "isActive": true,
+  "createdAt": "2024-01-24T12:00:00.000Z",
+  "updatedAt": "2024-01-24T12:00:00.000Z",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "user-id:token-id"
 }
 ```
+
+**Lưu ý:**
+- `access_token`: JWT token, hết hạn sau **15 phút**
+- `refresh_token`: Token để refresh access token, hết hạn sau **7 ngày**
+- Lưu trữ `refresh_token` ở client một cách an toàn (không gửi trong mỗi request)
 
 **Error Responses:**
 - `400`: Validation failed
@@ -254,22 +282,23 @@ Lấy thông tin chi tiết về các endpoints có sẵn.
 
 ```json
 {
-  "success": true,
-  "statusCode": 200,
-  "message": "Login successful",
-  "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": "uuid",
-      "email": "user@example.com",
-      "firstName": "John",
-      "lastName": "Doe",
-      "role": "user",
-      "isActive": true
-    }
-  }
+  "id": "uuid",
+  "email": "user@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "user",
+  "isActive": true,
+  "createdAt": "2024-01-24T12:00:00.000Z",
+  "updatedAt": "2024-01-24T12:00:00.000Z",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "user-id:token-id"
 }
 ```
+
+**Lưu ý:**
+- `access_token`: JWT token, hết hạn sau **15 phút**
+- `refresh_token`: Token để refresh access token, hết hạn sau **7 ngày**
+- Lưu trữ `refresh_token` ở client một cách an toàn (không gửi trong mỗi request)
 
 **Error Responses:**
 - `400`: Validation failed
@@ -309,7 +338,122 @@ Callback endpoint từ Google OAuth. Tự động redirect về frontend với t
 
 **Redirect URL Format:**
 ```
-{FRONTEND_URL}/auth/callback?token={jwt_token}&user={encoded_user_data}
+{FRONTEND_URL}/auth/callback?access_token={access_token}&refresh_token={refresh_token}&user={encoded_user_data}
+```
+
+**Lưu ý:**
+- `access_token`: JWT token, hết hạn sau **15 phút**
+- `refresh_token`: Token để refresh access token, hết hạn sau **7 ngày**
+
+---
+
+### Refresh Access Token
+
+**POST** `/api/v1/auth/refresh`
+
+Lấy access token mới từ refresh token khi access token đã hết hạn.
+
+**Authentication:** Không cần (sử dụng refresh token)
+
+**Rate Limit:** 10 requests per 10 seconds
+
+**Request Body:**
+
+```json
+{
+  "refreshToken": "user-id:token-id"
+}
+```
+
+**Validation:**
+- `refreshToken`: Required, string (format: `user-id:token-id`)
+
+**Response (200):**
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "user-id:new-token-id"
+}
+```
+
+**Lưu ý:**
+- Refresh token cũ sẽ bị **revoke** (token rotation)
+- Refresh token mới sẽ được trả về và có thời gian sống **7 ngày** từ thời điểm refresh
+- Nếu refresh token không hợp lệ hoặc đã hết hạn, sẽ trả về lỗi 401
+
+**Error Responses:**
+- `400`: Validation failed
+- `401`: Invalid or expired refresh token
+
+**Example Usage:**
+
+```javascript
+// Khi access token hết hạn (401)
+if (response.status === 401) {
+  const refreshResponse = await fetch('/api/v1/auth/refresh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken: storedRefreshToken })
+  });
+  
+  const { access_token, refresh_token } = await refreshResponse.json();
+  // Lưu tokens mới và retry request
+}
+```
+
+---
+
+### Logout
+
+**POST** `/api/v1/auth/logout`
+
+Đăng xuất user bằng cách revoke refresh token.
+
+**Authentication:** Không cần (sử dụng refresh token)
+
+**Rate Limit:** 10 requests per 10 seconds
+
+**Request Body:**
+
+```json
+{
+  "refreshToken": "user-id:token-id"
+}
+```
+
+**Validation:**
+- `refreshToken`: Required, string (format: `user-id:token-id`)
+
+**Response (200):**
+
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+**Lưu ý:**
+- Refresh token sẽ bị **revoke** và không thể sử dụng lại
+- Access token vẫn còn hiệu lực cho đến khi hết hạn (15 phút), nhưng không thể refresh được nữa
+- Client nên xóa cả access token và refresh token khỏi storage sau khi logout
+
+**Error Responses:**
+- `400`: Validation failed
+- `401`: Invalid refresh token (có thể đã bị revoke hoặc không tồn tại)
+
+**Example Usage:**
+
+```javascript
+await fetch('/api/v1/auth/logout', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ refreshToken: storedRefreshToken })
+});
+
+// Xóa tokens khỏi client storage
+localStorage.removeItem('access_token');
+localStorage.removeItem('refresh_token');
 ```
 
 ---
@@ -1561,11 +1705,86 @@ Kiểm tra health của disk storage.
 
 ---
 
+## 🔒 Security Best Practices
+
+### Token Storage
+
+**Access Token:**
+- Có thể lưu trong **memory** (JavaScript variable) hoặc **sessionStorage**
+- Không nên lưu trong **localStorage** (dễ bị XSS attack)
+- Tự động xóa khi browser tab đóng (nếu dùng sessionStorage)
+
+**Refresh Token:**
+- Nên lưu trong **httpOnly cookie** (server-side) hoặc **secure storage** (mobile app)
+- Nếu phải lưu ở client (SPA), dùng **localStorage** với encryption
+- Luôn gửi qua HTTPS
+
+### Token Rotation
+
+API tự động **rotate refresh token** mỗi lần refresh:
+- Refresh token cũ bị revoke ngay lập tức
+- Refresh token mới được tạo với thời gian sống mới (7 ngày)
+- Giúp giảm thiểu rủi ro nếu refresh token bị lộ
+
+### Error Handling
+
+Khi access token hết hạn (401):
+1. Dùng refresh token để lấy access token mới
+2. Nếu refresh token cũng hết hạn → Yêu cầu user đăng nhập lại
+3. Nếu refresh token không hợp lệ → Yêu cầu user đăng nhập lại
+
+**Example Flow:**
+
+```javascript
+async function apiCall(url, options = {}) {
+  let response = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+  
+  // Access token expired
+  if (response.status === 401) {
+    // Try to refresh
+    const refreshResponse = await fetch('/api/v1/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refreshToken })
+    });
+    
+    if (refreshResponse.ok) {
+      const { access_token, refresh_token } = await refreshResponse.json();
+      // Update tokens
+      accessToken = access_token;
+      refreshToken = refresh_token;
+      
+      // Retry original request
+      response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+    } else {
+      // Refresh failed, redirect to login
+      window.location.href = '/login';
+    }
+  }
+  
+  return response;
+}
+```
+
+---
+
 ## 📝 Notes
 
 ### Rate Limiting
 
-- **Auth endpoints** (register, login): 10 requests per 10 seconds
+- **Auth endpoints** (register, login, refresh, logout): 10 requests per 10 seconds
 - **Other endpoints**: Default rate limit (100 requests per minute)
 - **Health endpoints**: No rate limiting
 
@@ -1585,13 +1804,49 @@ Hiện tại các list endpoints chưa có filtering và sorting. Sẽ được 
 
 ---
 
+## ⚙️ Environment Variables
+
+### JWT Configuration
+
+Các biến môi trường liên quan đến JWT và refresh token:
+
+```env
+# JWT Secret (required, minimum 32 characters)
+JWT_SECRET=your-secret-key-change-in-production-min-32-chars
+
+# Access Token Expiration (default: 15m)
+JWT_ACCESS_TOKEN_EXPIRES_IN=15m
+
+# Refresh Token Expiration (default: 7d)
+JWT_REFRESH_TOKEN_EXPIRES_IN=7d
+
+# Backward compatibility (defaults to JWT_ACCESS_TOKEN_EXPIRES_IN)
+JWT_EXPIRES_IN=15m
+```
+
+**Format cho expiresIn:**
+- `s` = seconds (e.g., `30s`)
+- `m` = minutes (e.g., `15m`)
+- `h` = hours (e.g., `1h`)
+- `d` = days (e.g., `7d`)
+
+**Recommendations:**
+- Access token: `15m` - `1h` (ngắn để giảm rủi ro)
+- Refresh token: `7d` - `30d` (dài để UX tốt hơn)
+
+---
+
 ## 🔗 Tài liệu liên quan
 
 - [API Response Format](./API_RESPONSE_FORMAT.md)
 - [Next.js Integration](./NEXTJS_INTEGRATION.md)
 - [CORS Configuration](./CORS_CONFIG_GUIDE.md)
 - [Environment Variables](./ENV_VALIDATION_GUIDE.md)
+- [Security Guide](./SECURITY_GUIDE.md)
 
 ---
 
-**Last Updated:** 2024-01-24
+**Last Updated:** 2026-01-28
+
+**Changelog:**
+- 2026-01-28: Added refresh token support (access token + refresh token flow)
