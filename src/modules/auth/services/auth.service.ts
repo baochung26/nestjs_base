@@ -7,6 +7,7 @@ import { RefreshTokenService } from './refresh-token.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
 import { User } from '../../users/entities/user.entity';
+import { UserDto } from '../../users/dtos/user.dto';
 import { UnauthorizedException } from '../../../shared/errors/custom-exceptions';
 import { ERROR_MESSAGES } from '../../../common/constants';
 
@@ -134,8 +135,9 @@ export class AuthService {
 
   /**
    * Generate both access token and refresh token
+   * Accepts UserDto (no password needed for token generation)
    */
-  private async generateTokens(user: User): Promise<TokenResponse> {
+  private async generateTokens(user: UserDto | User): Promise<TokenResponse> {
     const accessToken = this.generateAccessToken(user);
     const refreshToken = await this.refreshTokenService.generateRefreshToken(
       user.id,
@@ -150,8 +152,9 @@ export class AuthService {
 
   /**
    * Generate access token (short-lived)
+   * Accepts UserDto (only needs id, email, role)
    */
-  private generateAccessToken(user: User): string {
+  private generateAccessToken(user: UserDto | User): string {
     const jwt = this.configService.get('jwt');
     const payload = { email: user.email, sub: user.id, role: user.role };
     return this.jwtService.sign(payload, {
