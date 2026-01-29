@@ -57,7 +57,10 @@ async function bootstrap() {
     defaultVersion: '1',
   });
 
-  const port = appConfig?.port || parseInt(process.env.APP_PORT || '3000', 10);
+  // Port đã được config trong appConfig (từ configuration.ts)
+  // - Docker: PORT=3000 (hardcode)
+  // - Local: APP_PORT từ .env hoặc default 3000
+  const port = appConfig?.port || 3000;
   await app.listen(port);
 
   const logger = app.get(Logger);

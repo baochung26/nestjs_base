@@ -11,7 +11,13 @@ export const validationSchema = Joi.object({
     .default('development')
     .description('Node environment'),
 
-  APP_PORT: Joi.number().port().default(3000).description('Application port'),
+  // PORT: Standard environment variable (12-Factor App, Docker, Heroku, Railway)
+  // Được set trong docker-compose.yml cho container port (hardcode 3000)
+  PORT: Joi.number().port().optional().description('Container port (12-Factor App standard)'),
+  
+  // APP_PORT: Application port (local development, host port for Docker mapping)
+  // Dùng trong .env để config host port cho Docker port mapping
+  APP_PORT: Joi.number().port().default(3001).description('Application port (host port for Docker mapping)'),
 
   // Database Configuration
   DB_HOST: Joi.string().required().description('Database host'),

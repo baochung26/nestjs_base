@@ -1,7 +1,17 @@
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('app', () => ({
-  port: parseInt(process.env.APP_PORT || '3000', 10),
+  // Port configuration (đơn giản hóa):
+  // - Trong Docker: PORT=3000 (hardcode, container port luôn là 3000)
+  // - Local dev: APP_PORT từ .env hoặc default 3000
+  // - Cloud platforms: PORT được set tự động (Heroku, Railway, etc.)
+  // Default: 3000 (đơn giản nhất, không cần config)
+  port: parseInt(
+    process.env.PORT ||        // Cloud platforms hoặc Docker (ưu tiên)
+    process.env.APP_PORT ||     // Local development
+    '3000',                     // Default: 3000 (đơn giản)
+    10
+  ),
   env: process.env.NODE_ENV || 'development',
   prefix: 'api',
 }));
