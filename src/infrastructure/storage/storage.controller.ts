@@ -12,6 +12,7 @@ import {
   Query,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { StorageService } from './storage.service';
@@ -20,13 +21,11 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../modules/users/entities/user.entity';
 
+@ApiExcludeController()
 @Controller('storage')
 export class StorageController {
   constructor(private readonly storageService: StorageService) {}
 
-  /**
-   * Upload single file
-   */
   @Post('upload')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
@@ -49,13 +48,10 @@ export class StorageController {
     };
   }
 
-  /**
-   * Upload multiple files
-   */
   @Post('upload/multiple')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
-  @UseInterceptors(FilesInterceptor('files', 10)) // Max 10 files
+  @UseInterceptors(FilesInterceptor('files', 10))
   async uploadFiles(
     @UploadedFiles() files: Express.Multer.File[],
     @Query('subfolder') subfolder?: string,
@@ -74,9 +70,6 @@ export class StorageController {
     };
   }
 
-  /**
-   * Get file (public access)
-   */
   @Get('files/*')
   async getFile(
     @Param('0') path: string,
@@ -94,9 +87,6 @@ export class StorageController {
     res.send(file);
   }
 
-  /**
-   * Get file info
-   */
   @Get('info/*')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
@@ -109,9 +99,6 @@ export class StorageController {
     return fileInfo;
   }
 
-  /**
-   * List files
-   */
   @Get('list')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
@@ -123,9 +110,6 @@ export class StorageController {
     };
   }
 
-  /**
-   * Delete file
-   */
   @Delete('files/*')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -140,9 +124,6 @@ export class StorageController {
     };
   }
 
-  /**
-   * Get storage statistics
-   */
   @Get('stats')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
