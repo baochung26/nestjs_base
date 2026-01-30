@@ -18,7 +18,8 @@ import { UsersListResponseDto } from '../../users/dtos/users-list-response.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
-import { ApiProtectedCommonResponses, ApiBadRequestResponse } from '../../../common/decorators/api-common-responses.decorator';
+import { ApiProtectedCommonResponses, ApiBadRequestResponse, ApiNotFoundResponse, ApiConflictResponse } from '../../../common/decorators/api-common-responses.decorator';
+import { ApiStandardResponse, ApiPaginatedResponse } from '../../../common/decorators/api-response.decorator';
 import { UserRole } from '../../users/entities/user.entity';
 import { PaginationQueryDto, SortOrder } from '../../../shared/pagination/pagination.dto';
 
@@ -37,7 +38,8 @@ export class AdminUsersController {
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'sortBy', required: false, type: String, example: 'createdAt' })
   @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrder, example: SortOrder.DESC })
-  @ApiResponse({ status: 200, type: UsersListResponseDto, description: 'List of users retrieved successfully' })
+  @ApiPaginatedResponse(UserResponseDto, 'List of users retrieved successfully')
+  @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
   @ApiProtectedCommonResponses()
   getAllUsers(
     @Query() query: PaginationQueryDto & { sortBy?: string; sortOrder?: SortOrder },
@@ -59,7 +61,8 @@ export class AdminUsersController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrder })
-  @ApiResponse({ status: 200, type: UsersListResponseDto, description: 'Search results retrieved successfully' })
+  @ApiPaginatedResponse(UserResponseDto, 'Search results retrieved successfully')
+  @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
   @ApiProtectedCommonResponses()
   searchUsers(
     @Query()
@@ -90,8 +93,8 @@ export class AdminUsersController {
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID (Admin)', description: 'Lấy thông tin user theo ID. Chỉ admin mới có quyền.' })
   @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, type: UserResponseDto, description: 'User retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiStandardResponse(UserResponseDto, 'User retrieved successfully', 200)
+  @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
   getUserById(@Param('id') id: string) {
     return this.adminUsersService.getUserById(id);
@@ -100,9 +103,9 @@ export class AdminUsersController {
   @Post()
   @ApiOperation({ summary: 'Create user (Admin)', description: 'Tạo user mới. Chỉ admin mới có quyền.' })
   @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ status: 201, type: UserResponseDto, description: 'User created successfully' })
+  @ApiStandardResponse(UserResponseDto, 'User created successfully', 201)
   @ApiBadRequestResponse('Bad request — validation failed')
-  @ApiResponse({ status: 409, description: 'Email already exists' })
+  @ApiConflictResponse('Email already exists')
   @ApiProtectedCommonResponses()
   createUser(@Body() createUserDto: CreateUserDto) {
     return this.adminUsersService.createUser(createUserDto);
@@ -112,9 +115,9 @@ export class AdminUsersController {
   @ApiOperation({ summary: 'Update user (Admin)', description: 'Cập nhật thông tin user. Chỉ admin mới có quyền.' })
   @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({ status: 200, type: UserResponseDto, description: 'User updated successfully' })
+  @ApiStandardResponse(UserResponseDto, 'User updated successfully', 200)
   @ApiBadRequestResponse('Bad request — validation failed')
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
   updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.adminUsersService.updateUser(id, updateUserDto);
@@ -123,8 +126,21 @@ export class AdminUsersController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user (Admin)', description: 'Xóa user. Chỉ admin mới có quyền.' })
   @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User deleted successfully',
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/ApiResponseDto' },
+        {
+          properties: {
+            data: { type: 'object', nullable: true, example: null }
+          }
+        }
+      ]
+    }
+  })
+  @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
   deleteUser(@Param('id') id: string) {
     return this.adminUsersService.deleteUser(id);
@@ -133,8 +149,8 @@ export class AdminUsersController {
   @Patch(':id/activate')
   @ApiOperation({ summary: 'Activate user (Admin)', description: 'Kích hoạt user. Chỉ admin mới có quyền.' })
   @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, type: UserResponseDto, description: 'User activated successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiStandardResponse(UserResponseDto, 'User activated successfully', 200)
+  @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
   activateUser(@Param('id') id: string) {
     return this.adminUsersService.activateUser(id);
@@ -143,8 +159,8 @@ export class AdminUsersController {
   @Patch(':id/deactivate')
   @ApiOperation({ summary: 'Deactivate user (Admin)', description: 'Vô hiệu hóa user. Chỉ admin mới có quyền.' })
   @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, type: UserResponseDto, description: 'User deactivated successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiStandardResponse(UserResponseDto, 'User deactivated successfully', 200)
+  @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
   deactivateUser(@Param('id') id: string) {
     return this.adminUsersService.deactivateUser(id);

@@ -12,6 +12,7 @@ import { Connection } from 'typeorm';
 import { SkipThrottle } from '../../common/decorators/skip-throttle.decorator';
 import { RedisHealthIndicator } from './indicators/redis.health-indicator';
 import { HealthResponseDto } from './dtos/health-response.dto';
+import { ApiStandardResponse } from '../../common/decorators/api-response.decorator';
 
 @ApiTags('health')
 @Controller('health')
@@ -30,7 +31,7 @@ export class HealthController {
   @Get()
   @HealthCheck()
   @ApiOperation({ summary: 'Health check (all services)', description: 'Kiểm tra sức khỏe của tất cả services: database, Redis, memory, disk.' })
-  @ApiResponse({ status: 200, type: HealthResponseDto, description: 'Health check results' })
+  @ApiStandardResponse(HealthResponseDto, 'Health check results', 200)
   check() {
     return this.health.check([
       () => this.db.pingCheck('database', { connection: this.connection }),
@@ -48,7 +49,7 @@ export class HealthController {
   @Get('db')
   @HealthCheck()
   @ApiOperation({ summary: 'Database health check', description: 'Kiểm tra kết nối database.' })
-  @ApiResponse({ status: 200, type: HealthResponseDto, description: 'Database health check result' })
+  @ApiStandardResponse(HealthResponseDto, 'Database health check result', 200)
   checkDatabase() {
     return this.health.check([
       () => this.db.pingCheck('database', { connection: this.connection }),
@@ -58,7 +59,7 @@ export class HealthController {
   @Get('redis')
   @HealthCheck()
   @ApiOperation({ summary: 'Redis health check', description: 'Kiểm tra kết nối Redis.' })
-  @ApiResponse({ status: 200, type: HealthResponseDto, description: 'Redis health check result' })
+  @ApiStandardResponse(HealthResponseDto, 'Redis health check result', 200)
   checkRedis() {
     return this.health.check([() => this.redis.isHealthy('redis')]);
   }
@@ -66,7 +67,7 @@ export class HealthController {
   @Get('memory')
   @HealthCheck()
   @ApiOperation({ summary: 'Memory health check', description: 'Kiểm tra memory usage (heap và RSS).' })
-  @ApiResponse({ status: 200, type: HealthResponseDto, description: 'Memory health check result' })
+  @ApiStandardResponse(HealthResponseDto, 'Memory health check result', 200)
   checkMemory() {
     return this.health.check([
       () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
@@ -77,7 +78,7 @@ export class HealthController {
   @Get('disk')
   @HealthCheck()
   @ApiOperation({ summary: 'Disk health check', description: 'Kiểm tra disk storage usage.' })
-  @ApiResponse({ status: 200, type: HealthResponseDto, description: 'Disk health check result' })
+  @ApiStandardResponse(HealthResponseDto, 'Disk health check result', 200)
   checkDisk() {
     return this.health.check([
       () =>

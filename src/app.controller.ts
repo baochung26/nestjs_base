@@ -1,6 +1,7 @@
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiExtraModels } from '@nestjs/swagger';
 import { ApiInfoResponseDto, ApiRootResponseDto } from './app/dtos/api-info-response.dto';
+import { ApiStandardResponse } from './common/decorators/api-response.decorator';
 
 @ApiTags('App')
 @ApiExtraModels(ApiInfoResponseDto, ApiRootResponseDto)
@@ -11,7 +12,7 @@ import { ApiInfoResponseDto, ApiRootResponseDto } from './app/dtos/api-info-resp
 export class AppController {
   @Get()
   @ApiOperation({ summary: 'API Information', description: 'Thông tin về API và các endpoints có sẵn.' })
-  @ApiResponse({ status: 200, type: ApiInfoResponseDto, description: 'API information retrieved successfully' })
+  @ApiStandardResponse(ApiInfoResponseDto, 'API information retrieved successfully', 200)
   getApiInfo() {
     return {
       success: true,
@@ -30,7 +31,7 @@ export class AppController {
 
   @Get('api')
   @ApiOperation({ summary: 'API Root', description: 'Thông tin chi tiết về API root và các endpoints với HTTP methods.' })
-  @ApiResponse({ status: 200, type: ApiRootResponseDto, description: 'API root information retrieved successfully' })
+  @ApiStandardResponse(ApiRootResponseDto, 'API root information retrieved successfully', 200)
   getApiRoot() {
     return {
       success: true,

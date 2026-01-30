@@ -14,14 +14,16 @@ import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { SkipThrottle, ThrottlePreset } from '../../../common/decorators/skip-throttle.decorator';
-import { ApiAuthCommonResponses, ApiProtectedCommonResponses, ApiTooManyRequestsResponse, ApiBadRequestResponse } from '../../../common/decorators/api-common-responses.decorator';
+import { ApiAuthCommonResponses, ApiProtectedCommonResponses, ApiTooManyRequestsResponse, ApiBadRequestResponse, ApiConflictResponse } from '../../../common/decorators/api-common-responses.decorator';
+import { ApiStandardResponse } from '../../../common/decorators/api-response.decorator';
 import { User } from '../../users/entities/user.entity';
+import { UserResponseDto } from '../../users/dtos/user-response.dto';
 import { Request, Response } from 'express';
 import { googleOAuthConfig } from '../../../config/configuration';
 import { SUCCESS_MESSAGES } from '../../../common/constants';
 
 @ApiTags('auth')
-@ApiExtraModels(LoginResponseDto, RefreshTokenResponseDto, RegisterResponseDto, LogoutResponseDto)
+@ApiExtraModels(LoginResponseDto, RefreshTokenResponseDto, RegisterResponseDto, LogoutResponseDto, UserResponseDto)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -36,9 +38,9 @@ export class AuthController {
     description: 'Đăng ký user mới. Sau khi đăng ký thành công, trả về thông tin user cùng access_token và refresh_token.',
   })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ status: 201, type: RegisterResponseDto, description: 'User registered successfully' })
+  @ApiStandardResponse(RegisterResponseDto, 'User registered successfully', 201)
   @ApiBadRequestResponse('Bad request — validation failed')
-  @ApiResponse({ status: 409, description: 'Conflict — email already exists' })
+  @ApiConflictResponse('Conflict — email already exists')
   @ApiTooManyRequestsResponse('Too many requests — vượt giới hạn throttle (10 requests / 10 giây)')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
@@ -53,7 +55,7 @@ export class AuthController {
       'Xác thực email và mật khẩu, trả về thông tin user cùng access_token (JWT) và refresh_token. Dùng access_token trong header `Authorization: Bearer <token>` cho các API bảo vệ. Dùng refresh_token gọi POST /auth/refresh khi access_token hết hạn.',
   })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, type: LoginResponseDto, description: 'Đăng nhập thành công. Trả về user và cặp token.' })
+  @ApiStandardResponse(LoginResponseDto, 'Đăng nhập thành công. Trả về user và cặp token.', 200)
   @ApiAuthCommonResponses()
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
@@ -105,7 +107,7 @@ export class AuthController {
     description: 'Dùng refresh_token để lấy access_token mới. Refresh token cũ sẽ bị revoke sau khi refresh thành công.',
   })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ status: 200, type: RefreshTokenResponseDto, description: 'Access token refreshed successfully' })
+  @ApiStandardResponse(RefreshTokenResponseDto, 'Access token refreshed successfully', 200)
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   @ApiTooManyRequestsResponse('Too many requests — vượt giới hạn throttle (10 requests / 10 giây)')
   async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
@@ -119,7 +121,7 @@ export class AuthController {
     description: 'Đăng xuất bằng cách revoke refresh_token. Sau khi logout, refresh_token không thể dùng để refresh access_token nữa.',
   })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ status: 200, type: LogoutResponseDto, description: 'Logout successful' })
+  @ApiStandardResponse(LogoutResponseDto, 'Logout successful', 200)
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   @ApiTooManyRequestsResponse('Too many requests — vượt giới hạn throttle (10 requests / 10 giây)')
   async logout(@Body() refreshTokenDto: RefreshTokenDto) {
@@ -134,7 +136,7 @@ export class AuthController {
     summary: 'Get current user profile',
     description: 'Lấy thông tin profile của user hiện tại từ JWT token trong header Authorization.',
   })
-  @ApiResponse({ status: 200, type: User, description: 'User profile retrieved successfully' })
+  @ApiStandardResponse(UserResponseDto, 'User profile retrieved successfully', 200)
   @ApiProtectedCommonResponses()
   getProfile(@CurrentUser() user: User) {
     return user;

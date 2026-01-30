@@ -1,5 +1,6 @@
 import { IsOptional, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 import { ApiResponseDto } from '../response/api-response.dto';
 import { PAGINATION, HTTP_STATUS, SUCCESS_MESSAGES } from '../../common/constants';
 
@@ -7,9 +8,16 @@ import { PAGINATION, HTTP_STATUS, SUCCESS_MESSAGES } from '../../common/constant
  * Pagination Metadata
  */
 export class PaginationMetaDto {
+  @ApiProperty({ example: 1, description: 'Current page number' })
   page: number;
+
+  @ApiProperty({ example: 10, description: 'Number of items per page' })
   limit: number;
+
+  @ApiProperty({ example: 100, description: 'Total number of items' })
   total: number;
+
+  @ApiProperty({ example: 10, description: 'Total number of pages' })
   totalPages: number;
 
   constructor(page: number, limit: number, total: number) {
@@ -24,6 +32,7 @@ export class PaginationMetaDto {
  * Paginated Response
  */
 export class PaginatedResponseDto<T = any> extends ApiResponseDto<T[]> {
+  @ApiProperty({ type: PaginationMetaDto, description: 'Pagination metadata' })
   meta: PaginationMetaDto;
 
   constructor(

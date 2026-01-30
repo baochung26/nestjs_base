@@ -24,12 +24,21 @@ export class AdminDashboardController {
     status: 200,
     description: 'Dashboard statistics retrieved successfully',
     schema: {
-      type: 'object',
-      properties: {
-        totalUsers: { type: 'number', example: 100 },
-        activeUsers: { type: 'number', example: 85 },
-        totalAdmins: { type: 'number', example: 5 },
-      },
+      allOf: [
+        { $ref: '#/components/schemas/ApiResponseDto' },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                totalUsers: { type: 'number', example: 100 },
+                activeUsers: { type: 'number', example: 85 },
+                totalAdmins: { type: 'number', example: 5 },
+              },
+            },
+          },
+        },
+      ],
     },
   })
   @ApiProtectedCommonResponses()

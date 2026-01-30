@@ -24,11 +24,20 @@ export class AdminSettingsController {
     status: 200,
     description: 'Settings retrieved successfully',
     schema: {
-      type: 'object',
-      properties: {
-        database: { type: 'object' },
-        redis: { type: 'object' },
-      },
+      allOf: [
+        { $ref: '#/components/schemas/ApiResponseDto' },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                database: { type: 'object' },
+                redis: { type: 'object' },
+              },
+            },
+          },
+        },
+      ],
     },
   })
   @ApiProtectedCommonResponses()
@@ -54,10 +63,19 @@ export class AdminSettingsController {
     status: 200,
     description: 'Settings updated successfully',
     schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Settings updated successfully' },
-      },
+      allOf: [
+        { $ref: '#/components/schemas/ApiResponseDto' },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: { type: 'string', example: 'Settings updated successfully' },
+              },
+            },
+          },
+        },
+      ],
     },
   })
   @ApiBadRequestResponse('Bad request — validation failed')
