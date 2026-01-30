@@ -1,109 +1,81 @@
 # Kiểm tra Cấu hình Port - Tổng hợp
 
-## ✅ Đã kiểm tra và cấu hình đúng
+## Quy ước đặt tên (tránh nhầm host port vs container/connection port)
+
+| Loại | Biến | Ý nghĩa | Dùng ở đâu |
+|------|------|---------|------------|
+| **Host port** (port trên máy host) | `APP_HOST_PORT`, `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, `PGADMIN_HOST_PORT` | Port bên trái trong mapping `HOST:CONTAINER` | Chỉ trong **docker-compose** (port mapping) |
+| **Container / connection port** | `PORT`, `DB_PORT`, `REDIS_PORT`, `APP_PORT` | Port app **lắng nghe** hoặc **kết nối tới** service | **App** (configuration.ts, env khi chạy local); **docker-compose** set cứng cho container |
+
+- **Trong Docker**: App nhận `PORT=3000`, `DB_PORT=5432`, `REDIS_PORT=6379` từ docker-compose (port **trong** mạng container).
+- **Chạy local**: App đọc `.env` → `APP_PORT=3000` (listen), `DB_PORT=5432`, `REDIS_PORT=6380` (= `REDIS_HOST_PORT`, kết nối tới Redis qua host).
+
+---
+
+## Cấu hình hiện tại
 
 ### 1. Docker Compose (`docker-compose.yml`)
 
 ```yaml
+# Port mapping: *_HOST_PORT (host) : port cố định (container)
 ports:
-  - "${APP_PORT:-3001}:3000"  # Host:Container
+  - "${APP_HOST_PORT:-3001}:3000"      # app
+  - "${POSTGRES_HOST_PORT:-5432}:5432" # postgres
+  - "${REDIS_HOST_PORT:-6380}:6379"    # redis
+  - "${PGADMIN_HOST_PORT:-5050}:80"    # pgadmin
+
+# App container: port listen + kết nối (container-internal)
 environment:
-  PORT: 3000  # Hardcode cho container
+  PORT: 3000
+  DB_HOST: postgres
+  DB_PORT: 5432
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
 ```
 
-**✅ Đúng:**
-- Host port: `${APP_PORT:-3001}` (từ .env hoặc default 3001)
-- Container port: `3000` (cố định)
-- App listen: `PORT: 3000` (hardcode)
+- Host port lấy từ `.env` (`*_HOST_PORT`).
+- Port trong container cố định (3000, 5432, 6379, 80).
 
-### 2. Environment Variables
+### 2. Environment Variables (`.env`)
 
-#### `.env` (thực tế):
+#### Docker port mapping (chỉ dùng trong docker-compose)
+
 ```env
-APP_PORT=3001  # Host port
+APP_HOST_PORT=3001
+POSTGRES_HOST_PORT=5432
+REDIS_HOST_PORT=6380
+PGADMIN_HOST_PORT=5050
 ```
 
-#### `.env.example`:
+#### App / service connection (app đọc khi chạy local)
+
 ```env
-APP_PORT=3001  # Host port (khớp với .env)
+APP_PORT=3000          # port app lắng nghe (local)
+DB_HOST=postgres
+DB_PORT=5432           # port kết nối DB (local = POSTGRES_HOST_PORT)
+REDIS_HOST=redis
+REDIS_PORT=6380        # port kết nối Redis (local = REDIS_HOST_PORT)
 ```
 
-**✅ Đúng:** Nhất quán giữa .env và .env.example
+- Trong Docker: app **không** dùng `*_HOST_PORT`; docker-compose set `DB_PORT=5432`, `REDIS_PORT=6379` cho container.
 
 ### 3. Configuration (`src/config/configuration.ts`)
 
-```typescript
-port: parseInt(
-  process.env.PORT ||        // Docker/Cloud (ưu tiên)
-  process.env.APP_PORT ||     // Local dev
-  '3000',                     // Default
-  10
-)
-```
+- App đọc `PORT` (Docker) hoặc `APP_PORT` (local) cho port lắng nghe.
+- App đọc `DB_HOST`, `DB_PORT` và `REDIS_HOST`, `REDIS_PORT` để kết nối DB/Redis.
 
-**✅ Đúng:**
-- Ưu tiên PORT (Docker/Cloud)
-- Fallback APP_PORT (Local)
-- Default 3000
+### 4. Validation Schema (`src/config/validation.schema.ts`)
 
-### 4. Main.ts (`src/main.ts`)
+- `APP_HOST_PORT`, `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, `PGADMIN_HOST_PORT`: optional (dùng bởi docker-compose).
+- `APP_PORT`, `DB_PORT`, `REDIS_PORT`: dùng bởi app (listen / connection port).
 
-```typescript
-const port = appConfig?.port || 3000;
-await app.listen(port);
-```
+---
 
-**✅ Đúng:** Đơn giản, fallback về 3000
+## Tóm tắt
 
-### 5. Validation Schema (`src/config/validation.schema.ts`)
+| File | Biến host port | Biến connection/listen port |
+|------|----------------|------------------------------|
+| **docker-compose** | `APP_HOST_PORT`, `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, `PGADMIN_HOST_PORT` | Trong container: `PORT=3000`, `DB_PORT=5432`, `REDIS_PORT=6379` (hardcode) |
+| **.env** | Cùng các `*_HOST_PORT` ở trên | `APP_PORT`, `DB_PORT`, `REDIS_PORT` (cho app chạy local) |
 
-```typescript
-PORT: Joi.number().port().optional()
-APP_PORT: Joi.number().port().default(3001)
-```
-
-**✅ Đúng:** Validation hợp lý
-
-## 📊 Tóm tắt Cấu hình
-
-| File | Cấu hình | Giá trị | Trạng thái |
-|------|----------|---------|------------|
-| **docker-compose.yml** | Port mapping | `3001:3000` | ✅ Đúng |
-| **docker-compose.yml** | PORT env | `3000` | ✅ Đúng |
-| **.env** | APP_PORT | `3001` | ✅ Đúng |
-| **.env.example** | APP_PORT | `3001` | ✅ Đúng |
-| **configuration.ts** | Port logic | `PORT → APP_PORT → 3000` | ✅ Đúng |
-| **main.ts** | Port usage | `appConfig.port \|\| 3000` | ✅ Đúng |
-| **validation.schema.ts** | PORT | Optional | ✅ Đúng |
-| **validation.schema.ts** | APP_PORT | Default 3001 | ✅ Đúng |
-
-## 🔄 Luồng hoạt động
-
-```
-1. Docker Compose:
-   - Port mapping: "3001:3000"
-   - Environment: PORT=3000
-
-2. App khởi động:
-   - Đọc PORT=3000 từ environment
-   - configuration.ts: port = 3000
-   - main.ts: app.listen(3000)
-
-3. Kết quả:
-   - App listen trên port 3000 trong container
-   - Port mapping forward từ host 3001 → container 3000
-   - Truy cập: http://localhost:3001/api/v1
-```
-
-## ✅ Kết luận
-
-**Tất cả cấu hình đã đúng và nhất quán!**
-
-- ✅ Port mapping đúng
-- ✅ Environment variables đúng
-- ✅ Code logic đúng
-- ✅ Validation đúng
-- ✅ Comments rõ ràng
-- ✅ Đơn giản, dễ hiểu
-
-**Không cần thay đổi gì thêm!**
+- Không dùng chung một biến vừa cho host port vừa cho connection port → tránh nhầm giữa local và Docker.

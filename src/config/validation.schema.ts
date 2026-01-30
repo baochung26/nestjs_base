@@ -11,17 +11,21 @@ export const validationSchema = Joi.object({
     .default('development')
     .description('Node environment'),
 
-  // PORT: Standard environment variable (12-Factor App, Docker, Heroku, Railway)
-  // Được set trong docker-compose.yml cho container port (hardcode 3000)
-  PORT: Joi.number().port().optional().description('Container port (12-Factor App standard)'),
-  
-  // APP_PORT: Application port (local development, host port for Docker mapping)
-  // Dùng trong .env để config host port cho Docker port mapping
-  APP_PORT: Joi.number().port().default(3001).description('Application port (host port for Docker mapping)'),
+  // PORT: Set trong docker-compose cho container (3000). App local dùng APP_PORT.
+  PORT: Joi.number().port().optional().description('Container listen port (12-Factor App)'),
 
-  // Database Configuration
+  // Docker port mapping (chỉ dùng trong docker-compose, port trên host)
+  APP_HOST_PORT: Joi.number().port().optional().description('Host port for app (Docker mapping)'),
+  POSTGRES_HOST_PORT: Joi.number().port().optional().description('Host port for Postgres (Docker mapping)'),
+  REDIS_HOST_PORT: Joi.number().port().optional().description('Host port for Redis (Docker mapping)'),
+  PGADMIN_HOST_PORT: Joi.number().port().optional().description('Host port for pgAdmin (Docker mapping)'),
+
+  // APP_PORT: port app lắng nghe khi chạy local. Trong Docker dùng PORT=3000.
+  APP_PORT: Joi.number().port().default(3000).description('App listen port (local dev)'),
+
+  // Database Configuration (port app dùng để kết nối DB)
   DB_HOST: Joi.string().required().description('Database host'),
-  DB_PORT: Joi.number().port().default(5432).description('Database port'),
+  DB_PORT: Joi.number().port().default(5432).description('Database connection port'),
   DB_USER: Joi.string().required().description('Database username'),
   DB_PASSWORD: Joi.string().required().description('Database password'),
   DB_NAME: Joi.string().required().description('Database name'),
@@ -30,9 +34,9 @@ export const validationSchema = Joi.object({
     .default('false')
     .description('Enable SSL for database connection'),
 
-  // Redis Configuration
+  // Redis Configuration (port app dùng để kết nối Redis)
   REDIS_HOST: Joi.string().default('localhost').description('Redis host'),
-  REDIS_PORT: Joi.number().port().default(6379).description('Redis port'),
+  REDIS_PORT: Joi.number().port().default(6379).description('Redis connection port'),
   REDIS_PASSWORD: Joi.string().allow('').default('').description('Redis password'),
   REDIS_DB: Joi.number().integer().min(0).max(15).default(0).description('Redis database number'),
 
@@ -109,7 +113,7 @@ export const validationSchema = Joi.object({
   // pgAdmin Configuration (optional)
   PGADMIN_EMAIL: Joi.string().email().allow('').default('').description('pgAdmin email'),
   PGADMIN_PASSWORD: Joi.string().allow('').default('').description('pgAdmin password'),
-  PGADMIN_PORT: Joi.number().port().default(5050).description('pgAdmin port'),
+  PGADMIN_PORT: Joi.number().port().optional().description('pgAdmin host port (deprecated, use PGADMIN_HOST_PORT)'),
 });
 
 /**

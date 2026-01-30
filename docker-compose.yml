@@ -1,3 +1,6 @@
+# Quy ước port mapping (đọc từ .env):
+#   *_HOST_PORT = port trên máy host (bên trái HOST:CONTAINER), dùng khi truy cập từ browser/redis-cli/pgAdmin
+#   Bên phải (5432, 6379, 3000, 80) = port trong container (cố định, không đổi)
 services:
   postgres:
     image: postgres:15-alpine
@@ -8,11 +11,14 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-nestjs_db}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - nestjs_network
+      nestjs_network:
+        aliases:
+          - postgres
+          - nestjs_postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 5s
@@ -24,11 +30,14 @@ services:
     container_name: nestjs_redis
     restart: always
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_HOST_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     networks:
-      - nestjs_network
+      nestjs_network:
+        aliases:
+          - redis
+          - nestjs_redis
     command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -46,7 +55,8 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      # Host:Container — pgAdmin lắng nghe 80 trong container
+      - "${PGADMIN_HOST_PORT:-5050}:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
@@ -62,24 +72,21 @@ services:
     container_name: nestjs_app
     restart: always
     ports:
-      # Port mapping: HOST_PORT:CONTAINER_PORT
-      # - Host port: ${APP_PORT:-3001} (từ .env, có thể thay đổi)
-      # - Container port: 3000 (cố định, không đổi)
-      - "${APP_PORT:-3001}:3000"
+      # Host:Container — App luôn lắng nghe 3000 trong container
+      - "${APP_HOST_PORT:-3001}:3000"
     environment:
       NODE_ENV: development
-      # PORT: 3000 - Hardcode cho container (đơn giản, không cần config)
-      # App sẽ luôn listen trên port 3000 trong container
+      # Ghi đè giá trị từ .env. Dùng tên container để tránh ENOTFOUND (một số môi trường DNS resolve container name ổn hơn).
       PORT: 3000
-      DB_HOST: postgres
+      DB_HOST: nestjs_postgres
       DB_PORT: 5432
+      REDIS_HOST: nestjs_redis
+      REDIS_PORT: 6379
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-nestjs_db}
       JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

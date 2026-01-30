@@ -51,12 +51,46 @@ Content-Type: application/json
 ### 2.2. LocalAuthGuard + LocalStrategy
 
 - Route `login` dùng `@UseGuards(LocalAuthGuard)`.
-- **LocalAuthGuard** dùng Passport strategy tên `'local'` → gọi **LocalStrategy**.
 - **LocalStrategy** (`src/modules/auth/strategies/local.strategy.ts`):
   - `usernameField: 'email'`: lấy `email`, `password` từ body.
   - Gọi `authService.validateUser(email, password)` (so sánh bcrypt).
   - Nếu hợp lệ → trả user; không hợp lệ → `UnauthorizedException`.
 - User hợp lệ được gán vào `request.user`.
+
+#### LocalAuthGuard gọi LocalStrategy như thế nào, ở đâu?
+
+**LocalAuthGuard** chỉ là một dòng:
+
+```ts
+// src/modules/auth/guards/local-auth.guard.ts
+export class LocalAuthGuard extends AuthGuard('local') {}
+```
+
+- `AuthGuard('local')` là guard của `@nestjs/passport`. Chuỗi `'local'` là **tên strategy** (strategy name).
+- **LocalStrategy** kế thừa `PassportStrategy(Strategy)` với `Strategy` từ `passport-local`. Trong NestJS/Passport, strategy này được đăng ký mặc định với tên **`'local'`**.
+- Khi request vào route có `LocalAuthGuard`, thứ tự xảy ra:
+  1. Nest gọi `LocalAuthGuard.canActivate(context)`.
+  2. Bên trong, guard gọi Passport với tên strategy `'local'` → Passport tìm strategy có tên `'local'` và gọi nó.
+  3. Strategy `'local'` chính là **LocalStrategy** → Passport gọi `LocalStrategy.validate(...)` (tự lấy `email`, `password` từ request body theo `usernameField: 'email'`).
+  4. Nếu `validate` throw → guard trả về lỗi, request bị chặn (401). Nếu `validate` return user → Passport gán user vào `request.user`, guard cho request đi tiếp.
+
+**Kết nối Guard ↔ Strategy** là qua **tên**: Guard dùng `AuthGuard('local')`, Strategy được đăng ký với tên `'local'` (do `PassportStrategy(Strategy)` từ `passport-local`). Không có chỗ nào trong code của bạn “gọi trực tiếp” LocalStrategy; Passport làm việc đó khi guard chạy.
+
+#### Tại sao cần guard trong khi controller đã gọi `authService.login(loginDto)`?
+
+Vì **guard chạy trước controller**:
+
+1. **Thứ tự thực thi**: Request → **Guard** (LocalAuthGuard) → (nếu pass) → **Controller** (`login(loginDto)` → `authService.login(loginDto)`).
+2. **Nếu sai email/password**: Guard chạy → LocalStrategy.validate throw `UnauthorizedException` → guard fail → **controller không bao giờ chạy**, client nhận 401. Nhờ đó endpoint login được “bảo vệ”: chỉ khi đã xác thực đúng mới tới bước tạo token.
+3. **Nếu đúng**: Guard set `request.user`, cho request đi tiếp → controller chạy `authService.login(loginDto)` để tạo token và trả response.
+
+Tách **xác thực** (guard + strategy) và **tạo token/response** (controller + service) giúp:
+
+- Route login chỉ “mở” cho request đã qua xác thực local.
+- Có thể tái dùng guard/strategy cho route khác (nếu cần).
+- Đúng convention Passport: guard quyết định “có phải user hợp lệ không”, controller chỉ lo “làm gì với user đó”.
+
+**Lưu ý**: Trong `AuthService.login` hiện tại vẫn gọi lại `validateUser(email, password)`. Về logic thì có thể dùng luôn `request.user` (đã được LocalStrategy set) để giảm gọi DB hai lần; guard vẫn cần để chặn request sai credentials trước khi tới controller.
 
 ### 2.3. AuthController.login
 
