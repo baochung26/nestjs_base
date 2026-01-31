@@ -1,4 +1,5 @@
 import { IsOptional, IsString, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { USER_DEFAULTS } from '../../../common/constants';
 
 /**
@@ -7,14 +8,17 @@ import { USER_DEFAULTS } from '../../../common/constants';
  * Không cho phép sửa: email, role, isActive (chỉ admin mới sửa được).
  */
 export class UpdateProfileDto {
+  @ApiProperty({ example: 'John', required: false })
   @IsOptional()
   @IsString()
   firstName?: string;
 
+  @ApiProperty({ example: 'Doe', required: false })
   @IsOptional()
   @IsString()
   lastName?: string;
 
+  @ApiProperty({ example: 'newpassword123', required: false, minLength: USER_DEFAULTS.MIN_PASSWORD_LENGTH })
   @IsOptional()
   @IsString()
   @MinLength(USER_DEFAULTS.MIN_PASSWORD_LENGTH, {

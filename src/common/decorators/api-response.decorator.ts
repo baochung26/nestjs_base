@@ -10,10 +10,12 @@ import { PaginatedResponseDto } from '../../shared/pagination/pagination.dto';
 export const ApiStandardResponse = <TModel extends Type<any>>(
   model: TModel,
   description: string = 'Success',
+  status: number = 200,
 ) => {
   return applyDecorators(
     ApiExtraModels(ApiResponseDto, model),
     ApiResponse({
+      status,
       description,
       schema: {
         allOf: [
