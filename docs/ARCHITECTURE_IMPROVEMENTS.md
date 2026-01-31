@@ -493,7 +493,7 @@ return new ApiResponseDto<T>(
 - `docs/TYPEORM_GUIDE.md` - Database & TypeORM
 - `docs/QUEUE_GUIDE.md` - Queue module & Bull
 - `docs/SEEDER_GUIDE.md` - Seeder & sample data
-- `docs/LOGGER_GUIDE.md` - Logging & correlation ID
+- `docs/LOGGING_AND_DEBUG_GUIDE.md` - Logging & debug
 - `docs/CACHE_GUIDE.md` - Cache module
 - `docs/SCHEDULER_GUIDE.md` - Scheduler & cron jobs
 - `docs/MAIL_GUIDE.md` - Mail module

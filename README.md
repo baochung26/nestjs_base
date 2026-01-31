@@ -728,7 +728,7 @@ getProfile(@CurrentUser() user: User) {
 - [Google OAuth Setup](./docs/GOOGLE_OAUTH_SETUP.md) - Hướng dẫn setup Google OAuth
 - [Queue Guide](./docs/QUEUE_GUIDE.md) - Hướng dẫn sử dụng Queue System
 - [Seeder Guide](./docs/SEEDER_GUIDE.md) - Hướng dẫn sử dụng Data Seeder
-- [Logger Guide](./docs/LOGGER_GUIDE.md) - Hướng dẫn sử dụng Logger với Pino
+- [Logging and Debug Guide](./docs/LOGGING_AND_DEBUG_GUIDE.md) - Hệ thống logging và hướng dẫn debug khi có error
 - [TypeORM Guide](./docs/TYPEORM_GUIDE.md) - Hướng dẫn sử dụng TypeORM và Migrations
 - [Cache Guide](./docs/CACHE_GUIDE.md) - Hướng dẫn sử dụng Cache Module với Redis
 - [Scheduler Guide](./docs/SCHEDULER_GUIDE.md) - Hướng dẫn sử dụng Scheduler Module với Cron Jobs
