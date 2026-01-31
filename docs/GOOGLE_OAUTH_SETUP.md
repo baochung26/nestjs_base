@@ -4,6 +4,10 @@ Tài liệu này giả định:
 - **Frontend** chạy tại `http://localhost:3000`
 - **Backend** (NestJS API) chạy tại `http://localhost:3001`
 
+**Luồng hoạt động chi tiết** (Next.js ↔ NestJS ↔ Google) xem: [GOOGLE_LOGIN_FLOW.md](./GOOGLE_LOGIN_FLOW.md).
+
+---
+
 ## Bước 1: Tạo Google OAuth Credentials
 
 1. Truy cập [Google Cloud Console](https://console.cloud.google.com/)
@@ -157,6 +161,8 @@ Backend redirects to http://localhost:3000/auth/callback?access_token=... (front
     ↓
 Frontend saves token and redirects to dashboard
 ```
+
+Chi tiết từng bước, sơ đồ sequence và ví dụ Next.js: [GOOGLE_LOGIN_FLOW.md](./GOOGLE_LOGIN_FLOW.md).
 
 ## Troubleshooting
 
