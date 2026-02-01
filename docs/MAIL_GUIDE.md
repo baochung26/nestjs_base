@@ -195,7 +195,38 @@ await this.mailService.sendBulkEmails(emails);
 
 ## 🎨 Mail Templates
 
-### MailTemplateService
+### Cấu trúc thư mục
+
+```
+src/infrastructure/mail/
+├── mail.module.ts
+├── mail.service.ts
+├── mail-template.service.ts   # Logic load + render template
+└── templates/                 # HTML templates riêng biệt
+    ├── welcome.html
+    ├── password-reset.html
+    ├── verification.html
+    └── notification.html
+```
+
+Templates được lưu dưới dạng file `.html` trong thư mục `templates/`, dùng placeholder `{{key}}` để thay thế bằng context.
+
+### MailService (dùng sẵn template)
+
+`sendWelcomeEmail`, `sendPasswordResetEmail`, `sendVerificationEmail` đã tự động dùng templates:
+
+```typescript
+// Welcome - dùng templates/welcome.html
+await this.mailService.sendWelcomeEmail('user@example.com', 'John Doe', 'https://...');
+
+// Password reset - dùng templates/password-reset.html
+await this.mailService.sendPasswordResetEmail('user@example.com', 'https://...');
+
+// Verification - dùng templates/verification.html
+await this.mailService.sendVerificationEmail('user@example.com', 'https://...');
+```
+
+### MailTemplateService - render trực tiếp
 
 ```typescript
 import { MailTemplateService } from '../infrastructure/mail/mail-template.service';
@@ -208,16 +239,12 @@ export class YourService {
   ) {}
 
   async sendTemplatedEmail() {
-    // Get template
-    const template = this.mailTemplateService.getWelcomeTemplate();
-
-    // Render with context
-    const html = this.mailTemplateService.renderTemplate(template, {
+    // Cách 1: Dùng helper có sẵn
+    const html = this.mailTemplateService.renderWelcome({
       name: 'John Doe',
       activationLink: 'https://example.com/activate?token=123',
     });
 
-    // Send email
     await this.mailService.sendMail({
       to: 'user@example.com',
       subject: 'Welcome!',
@@ -227,34 +254,33 @@ export class YourService {
 }
 ```
 
-### Available Templates
-
-- `getWelcomeTemplate()` - Welcome email template
-- `getPasswordResetTemplate()` - Password reset template
-- `getVerificationTemplate()` - Email verification template
-- `getNotificationTemplate()` - Generic notification template
-
-### Custom Templates
+### sendTemplatedEmail (template tổng quát)
 
 ```typescript
-const customTemplate = `
-  <html>
-    <body>
-      <h1>Hello {{name}}!</h1>
-      <p>{{message}}</p>
-      {{#if link}}
-      <a href="{{link}}">Click here</a>
-      {{/if}}
-    </body>
-  </html>
-`;
+import { TemplateName } from '../infrastructure/mail/mail-template.service';
 
-const html = this.mailTemplateService.renderTemplate(customTemplate, {
-  name: 'John',
-  message: 'This is a custom message',
-  link: 'https://example.com',
-});
+await this.mailService.sendTemplatedEmail(
+  'user@example.com',
+  'Subject',
+  'notification',
+  { title: 'Alert', message: 'Your message here', link: 'https://...' },
+);
 ```
+
+### Các template và context
+
+| Template          | Method                   | Context                                              |
+|-------------------|--------------------------|------------------------------------------------------|
+| welcome           | `renderWelcome()`        | `name`, `activationLink?`                            |
+| password-reset    | `renderPasswordReset()`  | `resetLink`                                          |
+| verification      | `renderVerification()`   | `verificationLink`                                   |
+| notification      | `renderNotification()`   | `title`, `message`, `link?`                          |
+
+### Thêm template mới
+
+1. Tạo file `templates/my-template.html` với placeholders `{{key}}`
+2. Thêm tên vào `TemplateName` trong `mail-template.service.ts`
+3. Thêm method helper (nếu cần) hoặc dùng `render('my-template', context)`
 
 ## 🔄 Tích hợp với Queue
 

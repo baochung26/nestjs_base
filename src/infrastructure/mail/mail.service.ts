@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { Transporter, SendMailOptions } from 'nodemailer';
+import { MailTemplateService, TemplateName } from './mail-template.service';
 
 export interface MailOptions {
   to: string | string[];
@@ -23,7 +24,10 @@ export class MailService {
   private transporter: Transporter;
   private readonly logger = new Logger(MailService.name);
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private mailTemplateService: MailTemplateService,
+  ) {
     const mail = this.configService.get('mail');
 
     this.transporter = nodemailer.createTransport({
@@ -100,12 +104,22 @@ export class MailService {
   async sendTemplatedEmail(
     to: string | string[],
     subject: string,
-    template: string,
+    templateName: TemplateName,
     context: Record<string, any> = {},
   ): Promise<void> {
-    // This will be implemented with MailTemplateService
-    // For now, just a placeholder
-    throw new Error('Template email not implemented yet. Use sendMail instead.');
+    const html = this.mailTemplateService.render(templateName, context);
+    const text = this.getPlainTextFromHtml(html);
+
+    await this.sendMail({
+      to,
+      subject,
+      html,
+      text,
+    });
+  }
+
+  private getPlainTextFromHtml(html: string): string {
+    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   /**
@@ -131,7 +145,7 @@ export class MailService {
   }
 
   /**
-   * Send welcome email
+   * Send welcome email (uses template from templates/welcome.html)
    */
   async sendWelcomeEmail(
     to: string,
@@ -139,12 +153,7 @@ export class MailService {
     activationLink?: string,
   ): Promise<void> {
     const subject = 'Welcome to our platform!';
-    const html = `
-      <h1>Welcome, ${name}!</h1>
-      <p>Thank you for registering with us.</p>
-      ${activationLink ? `<p><a href="${activationLink}">Click here to activate your account</a></p>` : ''}
-      <p>Best regards,<br>The Team</p>
-    `;
+    const html = this.mailTemplateService.renderWelcome({ name, activationLink });
 
     await this.sendMail({
       to,
@@ -155,18 +164,11 @@ export class MailService {
   }
 
   /**
-   * Send password reset email
+   * Send password reset email (uses template from templates/password-reset.html)
    */
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
     const subject = 'Password Reset Request';
-    const html = `
-      <h1>Password Reset Request</h1>
-      <p>You have requested to reset your password.</p>
-      <p><a href="${resetLink}">Click here to reset your password</a></p>
-      <p>This link will expire in 1 hour.</p>
-      <p>If you didn't request this, please ignore this email.</p>
-      <p>Best regards,<br>The Team</p>
-    `;
+    const html = this.mailTemplateService.renderPasswordReset({ resetLink });
 
     await this.sendMail({
       to,
@@ -177,17 +179,11 @@ export class MailService {
   }
 
   /**
-   * Send verification email
+   * Send verification email (uses template from templates/verification.html)
    */
   async sendVerificationEmail(to: string, verificationLink: string): Promise<void> {
     const subject = 'Verify your email address';
-    const html = `
-      <h1>Verify Your Email</h1>
-      <p>Please verify your email address by clicking the link below:</p>
-      <p><a href="${verificationLink}">Verify Email</a></p>
-      <p>This link will expire in 24 hours.</p>
-      <p>Best regards,<br>The Team</p>
-    `;
+    const html = this.mailTemplateService.renderVerification({ verificationLink });
 
     await this.sendMail({
       to,
