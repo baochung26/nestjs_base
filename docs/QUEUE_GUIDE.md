@@ -20,8 +20,9 @@ Queue system sử dụng **Bull** và **Redis** để xử lý background jobs m
 - ✅ Retry tự động khi job fail
 - ✅ Delay jobs để thực thi sau
 - ✅ Priority queues
-- ✅ Monitoring và statistics
+- ✅ Monitoring và statistics với **Bull Board UI** (giống Laravel Horizon)
 - ✅ Job scheduling
+- ✅ Xem và retry failed jobs qua UI
 
 ### Queues có sẵn
 
@@ -461,7 +462,76 @@ Content-Type: application/json
 
 ## 📊 Monitoring và Debugging
 
-### 1. Xem Queue Stats
+### 1. 🎨 Bull Board UI (Khuyến nghị - giống Laravel Horizon)
+
+**Bull Board** cung cấp giao diện web để monitor và quản lý queues, tương tự Laravel Horizon.
+
+#### Truy cập Bull Board
+
+```
+http://localhost:3000/admin/queues
+```
+
+**Bảo vệ bằng secret key:**
+- Đặt `BULL_BOARD_SECRET_KEY` trong `.env`
+- Nếu để trống thì không có bảo vệ
+
+**Cách truy cập:**
+
+```bash
+# Cách 1: Qua query string (dễ nhất cho browser)
+http://localhost:3000/admin/queues?key=YOUR_SECRET_KEY
+
+# Cách 2: Qua header (dùng curl/Postman)
+curl "http://localhost:3000/admin/queues" \
+  -H "X-Bull-Board-Key: YOUR_SECRET_KEY"
+```
+
+#### Tính năng Bull Board
+
+Bull Board UI cho phép bạn:
+
+- ✅ **Xem tất cả queues** (default, email, notification)
+- ✅ **Monitor real-time** - số lượng jobs (waiting, active, completed, failed, delayed)
+- ✅ **Xem failed jobs** với error details và stack trace (giống `failed_jobs` table)
+- ✅ **Retry failed jobs** - click button để retry từng job hoặc tất cả
+- ✅ **Remove jobs** - xóa jobs không cần thiết
+- ✅ **View job details** - xem data, logs, attempts, timestamps
+- ✅ **Clean queues** - dọn dẹp completed/failed jobs
+- ✅ **Pause/Resume queues** - tạm dừng xử lý jobs
+
+#### Screenshot các tính năng
+
+**Dashboard:**
+```
+┌─────────────────────────────────────────────┐
+│ Bull Board - Queue Monitor                  │
+├─────────────────────────────────────────────┤
+│ Queues:                                     │
+│  • default     [5 waiting] [0 active]       │
+│  • email       [0 waiting] [2 active]       │
+│  • notification [3 waiting] [0 active]      │
+└─────────────────────────────────────────────┘
+```
+
+**Failed Jobs View:**
+```
+┌─────────────────────────────────────────────┐
+│ Email Queue - Failed Jobs (5)               │
+├─────────────────────────────────────────────┤
+│ Job #123 | send-email | Failed 2h ago       │
+│ Error: SMTP connection timeout              │
+│ [Retry] [Remove] [Details]                  │
+├─────────────────────────────────────────────┤
+│ Job #124 | send-email | Failed 1h ago       │
+│ Error: Invalid email address                │
+│ [Retry] [Remove] [Details]                  │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+### 2. Xem Queue Stats qua API
 
 ```typescript
 // Trong code
@@ -469,11 +539,11 @@ const stats = await this.queueService.getQueueStats('email');
 console.log('Email queue stats:', stats);
 
 // Hoặc qua API
-curl -X GET http://localhost:3000/api/queue/stats \
+curl -X GET http://localhost:3000/api/v1/queue/stats \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-### 2. Xem Job Details
+### 3. Xem Job Details (Code)
 
 ```typescript
 // Lấy job từ queue
@@ -483,7 +553,7 @@ console.log('Job state:', await job.getState());
 console.log('Job progress:', job.progress());
 ```
 
-### 3. Xem Failed Jobs
+### 4. Xem Failed Jobs (Code)
 
 ```typescript
 // Lấy failed jobs
@@ -491,18 +561,24 @@ const failed = await this.emailQueue.getFailed();
 failed.forEach(job => {
   console.log('Failed job:', job.id);
   console.log('Error:', job.failedReason);
+  console.log('Stack trace:', job.stacktrace);
+  console.log('Attempts:', job.attemptsMade);
 });
 ```
 
-### 4. Retry Failed Job
+### 5. Retry Failed Job (Code)
 
 ```typescript
 // Retry một job đã fail
 const job = await this.emailQueue.getJob(jobId);
 await job.retry();
+
+// Retry tất cả failed jobs
+const failed = await this.emailQueue.getFailed();
+await Promise.all(failed.map(job => job.retry()));
 ```
 
-### 5. Xem Logs
+### 6. Xem Logs
 
 ```bash
 # Xem logs của app
@@ -511,7 +587,7 @@ docker compose logs -f app | grep -i queue
 # Hoặc trong code, logs sẽ tự động được ghi bởi Logger
 ```
 
-### 6. Redis CLI
+### 7. Redis CLI (Low-level)
 
 ```bash
 # Vào Redis container
@@ -520,8 +596,14 @@ docker compose exec redis redis-cli
 # Xem keys
 KEYS bull:*
 
-# Xem queue data
+# Xem failed jobs của email queue
+LRANGE bull:email:failed 0 -1
+
+# Xem chi tiết job
 HGETALL bull:email:123
+
+# Xem số lượng failed jobs
+LLEN bull:email:failed
 
 # Xem queue length
 LLEN bull:email:waiting
@@ -629,7 +711,7 @@ BullModule.registerQueue({
 }),
 ```
 
-### 7. Monitoring
+### 7. Monitoring với Scheduled Tasks
 
 Thường xuyên kiểm tra queue stats:
 
@@ -645,6 +727,17 @@ async checkQueueHealth() {
   }
 }
 ```
+
+### 8. So sánh với Laravel Queue
+
+| Laravel | NestJS Bull + Bull Board |
+|---------|--------------------------|
+| `failed_jobs` table | Redis key: `bull:{queue}:failed` + Bull Board UI |
+| `php artisan queue:failed` | Bull Board UI hoặc `queue.getFailed()` |
+| Laravel Horizon | **Bull Board UI** ✅ |
+| `php artisan queue:retry {id}` | Bull Board UI hoặc `job.retry()` |
+| `php artisan queue:forget {id}` | Bull Board UI hoặc `job.remove()` |
+| `php artisan queue:work` | Tự động chạy (processors) |
 
 ## 🐛 Troubleshooting
 
@@ -682,7 +775,12 @@ async checkQueueHealth() {
    docker compose logs -f app | grep -i "job\|queue"
    ```
 
-2. **Xem failed jobs:**
+2. **Xem failed jobs qua Bull Board UI:**
+   - Truy cập `http://localhost:3000/admin/queues?key=YOUR_SECRET_KEY`
+   - Click vào queue → tab "Failed"
+   - Xem error details, stack trace, retry jobs
+
+3. **Hoặc xem qua code:**
    ```typescript
    const failed = await this.emailQueue.getFailed();
    console.log(failed);

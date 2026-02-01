@@ -61,6 +61,15 @@ export const mailConfig = registerAs('mail', () => ({
   fromName: process.env.MAIL_FROM_NAME || 'NestJS App',
 }));
 
+const BULL_BOARD_DEFAULT_PATH = '/admin/queues';
+
+export const bullBoardConfig = registerAs('bullBoard', () => ({
+  path: process.env.BULL_BOARD_PATH ?? BULL_BOARD_DEFAULT_PATH,
+  enabled: process.env.BULL_BOARD_ENABLED !== 'false',
+  /** Secret key bảo vệ truy cập. Truyền qua ?key=XXX hoặc header X-Bull-Board-Key */
+  secretKey: process.env.BULL_BOARD_SECRET_KEY ?? '',
+}));
+
 export const storageConfig = registerAs('storage', () => ({
   type: process.env.STORAGE_TYPE || 'local',
   local: {

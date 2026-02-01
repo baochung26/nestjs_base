@@ -6,6 +6,7 @@ import appConfig, {
   jwtConfig,
   googleOAuthConfig,
   mailConfig,
+  bullBoardConfig,
   storageConfig,
 } from './config/configuration';
 import { validationSchema, validationOptions } from './config/validation.schema';
@@ -29,7 +30,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, databaseConfig, redisConfig, jwtConfig, googleOAuthConfig, mailConfig, storageConfig],
+      load: [appConfig, databaseConfig, redisConfig, jwtConfig, googleOAuthConfig, mailConfig, bullBoardConfig, storageConfig],
       validationSchema,
       validationOptions,
     }),

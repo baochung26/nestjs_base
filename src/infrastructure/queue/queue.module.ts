@@ -10,6 +10,8 @@ import {
 } from './queue.processor';
 import { QueueController } from './queue.controller';
 import { MailModule } from '../mail/mail.module';
+import { BullBoardService } from './bull-board.service';
+import { BullBoardSetupService } from './bull-board/bull-board-setup.service';
 
 @Module({
   imports: [
@@ -52,10 +54,12 @@ import { MailModule } from '../mail/mail.module';
   controllers: [QueueController],
   providers: [
     QueueService,
+    BullBoardService,
+    BullBoardSetupService,
     DefaultQueueProcessor,
     EmailQueueProcessor,
     NotificationQueueProcessor,
   ],
-  exports: [QueueService, BullModule],
+  exports: [QueueService, BullBoardService, BullBoardSetupService, BullModule],
 })
 export class QueueModule {}

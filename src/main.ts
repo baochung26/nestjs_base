@@ -10,25 +10,20 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { createValidationExceptionFactory } from './config/validation';
 import { Logger } from 'nestjs-pino';
 import { getHelmetConfig, getCorsConfig } from './infrastructure/security/security.config';
+import { BullBoardSetupService, BULL_BOARD_DEFAULT_PATH } from './infrastructure/queue/bull-board';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
 
-  // Use Pino logger
   app.useLogger(app.get(Logger));
 
-  // Get ConfigService
   const configService = app.get(ConfigService);
 
-  // Security: Helmet
   app.use(getHelmetConfig(configService));
-
-  // Security: CORS
   app.enableCors(getCorsConfig(configService));
 
-  // Global validation pipe with custom exception
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -38,25 +33,28 @@ async function bootstrap() {
     }),
   );
 
-  // Global interceptors
   app.useGlobalInterceptors(new LoggingInterceptor(app.get(Logger)));
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Global exception filters - Handle all exceptions
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global prefix + API Versioning (URI-based: /api/v1)
-  const configServiceAgain = app.get(ConfigService);
-  const appConfig = configServiceAgain.get('app');
-  const prefix = appConfig?.prefix || 'api';
+  const appConfig = configService.get('app');
+  const prefix = appConfig?.prefix ?? 'api';
+  const bullBoardPath = configService.get('bullBoard.path') ?? BULL_BOARD_DEFAULT_PATH;
 
-  app.setGlobalPrefix(prefix);
+  app.setGlobalPrefix(prefix, {
+    exclude: [bullBoardPath, `${bullBoardPath}/(.*)`],
+  });
 
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
+
+  // Bull Board UI - mount (dev only, auth + router)
+  const bullBoardSetup = app.get(BullBoardSetupService);
+  const bullBoardMounted = bullBoardSetup.mount(app);
 
   // Swagger/OpenAPI Documentation
   const isDevelopment = configService.get('app.env') !== 'production';
@@ -101,6 +99,9 @@ async function bootstrap() {
   logger.log(`Application is running on: http://localhost:${port}/${prefix}/v1`);
   if (configService.get('app.env') !== 'production') {
     logger.log(`Swagger documentation: http://localhost:${port}/${prefix}/docs`);
+    if (bullBoardMounted) {
+      logger.log(`Bull Board (Queue Monitor): http://localhost:${port}${bullBoardSetup.getPath()}`);
+    }
   }
 }
 bootstrap();
