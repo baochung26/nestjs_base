@@ -6,6 +6,7 @@
 - [Kiến trúc Queue](#kiến-trúc-queue)
 - [Cấu hình](#cấu-hình)
 - [Sử dụng QueueService](#sử-dụng-queueservice)
+- [Flow xử lý Job](#flow-xử-lý-job)
 - [Types và Constants](#types-và-constants)
 - [Tạo Processors Mới](#tạo-processors-mới)
 - [API Endpoints](#api-endpoints)
@@ -233,6 +234,163 @@ await this.queueService.addJob(
     },
   },
 );
+```
+
+## 🔄 Flow xử lý Job
+
+### Ví dụ: Flow xử lý Email Job
+
+Khi bạn gọi `addEmailJob()`, đây là flow hoàn chỉnh từ lúc đẩy job đến khi mail được gửi:
+
+#### 1. Đẩy Job vào Queue (`queue.service.ts`)
+
+```typescript
+// Service/Controller của bạn
+await this.queueService.addEmailJob({
+  to: 'user@example.com',
+  subject: 'Welcome!',
+  template: 'welcome',
+  data: { name: 'John' },
+});
+```
+
+**Chuyện gì xảy ra:**
+- `addEmailJob()` đẩy job vào Redis queue (`email`)
+- Function trả về ngay lập tức (không chờ gửi mail)
+- Mail chưa được gửi ở bước này
+
+```typescript
+// queue.service.ts
+async addEmailJob(data: EmailJobData, options?: Partial<QueueJobOptions>) {
+  // Chỉ đẩy job vào Redis queue
+  return this.emailQueue.add('send-email', data, jobOptions);
+  // ↑ Job được lưu trong Redis, chưa được xử lý
+}
+```
+
+#### 2. Processor tự động xử lý (`queue.processor.ts`)
+
+**EmailQueueProcessor** (worker) tự động:
+- Lấy job từ queue `email`
+- Gọi `handleSendEmail()` để xử lý
+- Gửi mail thực tế qua `MailService`
+
+```typescript
+// queue.processor.ts
+@Processor('email')  // ← Đăng ký processor cho queue 'email'
+export class EmailQueueProcessor {
+  constructor(
+    private readonly mailService?: MailService,  // ← Inject MailService
+  ) {}
+
+  @Process('send-email')  // ← Xử lý job có name 'send-email'
+  async handleSendEmail(job: Job<EmailJobData>) {
+    // Processor tự động lấy job từ queue và xử lý
+    
+    if (this.mailService) {
+      // ← GỬI MAIL THỰC TẾ Ở ĐÂY
+      await this.mailService.sendMail({
+        to: job.data.to,
+        subject: job.data.subject,
+        html: job.data.html,
+      });
+    }
+  }
+}
+```
+
+#### 3. MailService gửi mail (`mail.service.ts`)
+
+```typescript
+// mail.service.ts
+async sendMail(options: MailOptions): Promise<void> {
+  // Gửi mail thực tế qua SMTP (nodemailer)
+  await this.transporter.sendMail(mailOptions);
+  // ↑ Kết nối SMTP server và gửi email
+}
+```
+
+### Sơ đồ Flow hoàn chỉnh
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 1. Service/Controller                                       │
+│    queueService.addEmailJob({ to, subject, ... })          │
+└────────────────────┬──────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. QueueService (queue.service.ts)                         │
+│    emailQueue.add('send-email', data, options)             │
+│    → Đẩy job vào Redis queue                               │
+│    → Return ngay (không chờ)                               │
+└────────────────────┬──────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 3. Redis Queue                                              │
+│    Queue 'email' lưu job:                                   │
+│    { id: 123, name: 'send-email', data: {...} }            │
+└────────────────────┬──────────────────────────────────────┘
+                      │
+                      │ Processor tự động lấy job
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 4. EmailQueueProcessor (queue.processor.ts)                │
+│    @Process('send-email')                                   │
+│    handleSendEmail(job)                                     │
+│    → Lấy job từ queue                                       │
+│    → Xử lý bất đồng bộ (không block main thread)          │
+└────────────────────┬──────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 5. MailService (mail.service.ts)                            │
+│    mailService.sendMail({ to, subject, html })              │
+│    → Gửi mail qua SMTP server                              │
+└────────────────────┬──────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 6. SMTP Server                                              │
+│    Email được gửi đến user@example.com                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Tóm tắt
+
+| Bước | File | Hành động | Kết quả |
+|------|------|-----------|---------|
+| 1. Đẩy job | `queue.service.ts` | `addEmailJob()` → đẩy vào Redis | Job được lưu trong queue |
+| 2. Xử lý job | `queue.processor.ts` | `EmailQueueProcessor` tự động lấy và xử lý | Job được process bất đồng bộ |
+| 3. Gửi mail | `mail.service.ts` | `MailService.sendMail()` → SMTP | Email được gửi thực tế |
+
+### Lưu ý quan trọng
+
+- **`addEmailJob()` không gửi mail ngay** - chỉ đẩy job vào queue
+- **Processor tự động chạy** - không cần gọi thủ công, NestJS tự động khởi động worker khi app start
+- **Xử lý bất đồng bộ** - không block main thread, có thể xử lý nhiều jobs đồng thời
+- **Retry tự động** - nếu gửi mail fail, Bull tự động retry theo config (mặc định 3 lần)
+
+### Ví dụ trong thực tế
+
+```typescript
+// users.service.ts - Khi user đăng ký
+async create(createUserDto: CreateUserDto) {
+  const user = await this.usersRepository.save(userData);
+  
+  // Đẩy job gửi welcome email vào queue
+  await this.queueService.addEmailJob({
+    to: user.email,
+    subject: 'Welcome!',
+    template: 'welcome',
+    data: { name: user.firstName },
+  });
+  
+  // Function return ngay, không chờ email được gửi
+  return user;
+  // Email sẽ được gửi sau đó bởi EmailQueueProcessor
+}
 ```
 
 ## 📦 Types và Constants
