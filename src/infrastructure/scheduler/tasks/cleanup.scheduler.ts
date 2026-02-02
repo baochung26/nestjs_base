@@ -5,6 +5,7 @@ import { CacheService } from '../../cache/cache.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../../modules/users/entities/user.entity';
+import { QueueName } from '../../queue/queue.types';
 
 @Injectable()
 export class CleanupScheduler {
@@ -25,7 +26,7 @@ export class CleanupScheduler {
     this.logger.log('Starting cleanup of completed queue jobs');
 
     try {
-      const queues = ['default', 'email', 'notification'];
+      const queues: QueueName[] = ['default', 'email', 'notification'];
       const grace = 3600000; // 1 hour
 
       for (const queueName of queues) {
@@ -53,7 +54,7 @@ export class CleanupScheduler {
     this.logger.log('Starting cleanup of failed queue jobs');
 
     try {
-      const queues = ['default', 'email', 'notification'];
+      const queues: QueueName[] = ['default', 'email', 'notification'];
       const grace = 86400000; // 24 hours
 
       for (const queueName of queues) {
