@@ -222,7 +222,7 @@ async remove(@Param('id') id: string) {
 ### Sử dụng Custom Exceptions
 
 ```typescript
-import { NotFoundException, ConflictException } from '../common/exceptions/custom-exceptions';
+import { NotFoundException, ConflictException } from '../../shared/errors/custom-exceptions';
 
 // Trong service
 async findOne(id: string) {
