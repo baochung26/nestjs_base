@@ -195,8 +195,10 @@ async create(@Body() dto: CreateUserDto) {
 
 Nếu muốn kiểm soát response format rõ ràng hơn:
 
+> **Note:** `ResponseHelper` không conflict với `TransformInterceptor`. Interceptor tự động detect nếu response đã là `ApiResponseDto` instance và sẽ return nguyên vẹn, không wrap lại.
+
 ```typescript
-import { ResponseHelper } from '../common/helpers/response.helper';
+import { ResponseHelper } from '../../shared/response/response.helper';
 
 @Get(':id')
 async findOne(@Param('id') id: string) {
