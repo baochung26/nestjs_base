@@ -2,6 +2,7 @@ import { Processor, Process } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { MailService } from '../mail/mail.service';
+import { EmailJobData, NotificationJobData } from './queue.types';
 
 @Processor('default')
 export class DefaultQueueProcessor {
@@ -30,9 +31,7 @@ export class EmailQueueProcessor {
   ) {}
 
   @Process('send-email')
-  async handleSendEmail(
-    job: Job<{ to: string; subject: string; text?: string; html?: string; template?: string; data?: any }>,
-  ) {
+  async handleSendEmail(job: Job<EmailJobData>) {
     this.logger.log(
       `Processing email job: id=${job.id}, to=${job.data.to}, subject=${job.data.subject}`,
     );
@@ -76,9 +75,7 @@ export class NotificationQueueProcessor {
   private readonly logger = new Logger(NotificationQueueProcessor.name);
 
   @Process('send-notification')
-  async handleSendNotification(
-    job: Job<{ userId: string; type: string; message: string; data?: any }>,
-  ) {
+  async handleSendNotification(job: Job<NotificationJobData>) {
     this.logger.log(
       `Processing notification job: id=${job.id}, userId=${job.data.userId}, type=${job.data.type}`,
     );

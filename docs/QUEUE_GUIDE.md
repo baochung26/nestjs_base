@@ -6,6 +6,7 @@
 - [Kiến trúc Queue](#kiến-trúc-queue)
 - [Cấu hình](#cấu-hình)
 - [Sử dụng QueueService](#sử-dụng-queueservice)
+- [Types và Constants](#types-và-constants)
 - [Tạo Processors Mới](#tạo-processors-mới)
 - [API Endpoints](#api-endpoints)
 - [Monitoring và Debugging](#monitoring-và-debugging)
@@ -55,6 +56,20 @@ Queue system sử dụng **Bull** và **Redis** để xử lý background jobs m
 2. **Queue** lưu job vào Redis
 3. **Processor** (worker) lấy job từ queue và xử lý
 4. Kết quả được lưu lại (completed/failed)
+
+### Cấu trúc Code
+
+```
+src/infrastructure/queue/
+├── queue.types.ts          # Types: EmailJobData, NotificationJobData, QueueJobOptions, QueueStats
+├── queue.constants.ts      # Constants: DEFAULT_JOB_OPTIONS
+├── queue.service.ts         # QueueService - main service
+├── queue.processor.ts       # Processors - xử lý jobs
+├── queue.controller.ts      # API endpoints (admin only)
+└── ...
+```
+
+**Types được định nghĩa tập trung** trong `queue.types.ts` để đảm bảo type safety và consistency.
 
 ## ⚙️ Cấu hình
 
@@ -116,9 +131,20 @@ async sendWelcomeEmail(userEmail: string, userName: string) {
 }
 ```
 
-**Options mặc định:**
+**Options mặc định** (từ `DEFAULT_JOB_OPTIONS` trong `queue.constants.ts`):
 - `attempts: 3` - Retry 3 lần nếu fail
 - `backoff: exponential` - Exponential backoff với delay 2s
+- `removeOnComplete: true` - Xóa job sau khi complete
+- `removeOnFail: false` - Giữ lại job failed để debug
+
+Bạn có thể override options khi gọi:
+
+```typescript
+await this.queueService.addEmailJob(data, {
+  attempts: 5,
+  delay: 10000, // Delay 10 giây
+});
+```
 
 ### 2. Thêm Notification Job
 
@@ -139,7 +165,9 @@ async notifyUser(userId: string, message: string) {
 ### 3. Thêm Custom Job vào Default Queue
 
 ```typescript
-async processData(data: any) {
+import { DefaultJobData, QueueJobOptions } from '../queue/queue.types';
+
+async processData(data: DefaultJobData) {
   await this.queueService.addJob(
     {
       type: 'data-processing',
@@ -149,7 +177,7 @@ async processData(data: any) {
       attempts: 5,
       delay: 5000,        // Delay 5 giây trước khi xử lý
       priority: 1,        // Priority (higher = processed first)
-    },
+    } as QueueJobOptions,
   );
 }
 ```
@@ -207,16 +235,79 @@ await this.queueService.addJob(
 );
 ```
 
+## 📦 Types và Constants
+
+### Types (`queue.types.ts`)
+
+Tất cả types được định nghĩa tập trung trong `queue.types.ts`:
+
+```typescript
+// Job data types
+export interface EmailJobData { ... }
+export interface NotificationJobData { ... }
+export interface DefaultJobData { ... }
+
+// Job options
+export interface QueueJobOptions { ... }
+
+// Stats types
+export interface QueueStats { ... }
+export interface AllQueuesStats { ... }
+
+// Queue name type
+export type QueueName = 'default' | 'email' | 'notification';
+```
+
+**Lợi ích:**
+- ✅ Type safety - đảm bảo consistency giữa service, processor, controller
+- ✅ Dễ maintain - thay đổi một chỗ, áp dụng toàn bộ
+- ✅ IntelliSense - IDE tự động suggest fields
+
+### Constants (`queue.constants.ts`)
+
+```typescript
+export const DEFAULT_JOB_OPTIONS: QueueJobOptions = {
+  attempts: 3,
+  backoff: { type: 'exponential', delay: 2000 },
+  removeOnComplete: true,
+  removeOnFail: false,
+};
+```
+
+**Sử dụng:**
+
+```typescript
+import { DEFAULT_JOB_OPTIONS } from './queue.constants';
+
+const jobOptions = {
+  ...DEFAULT_JOB_OPTIONS,
+  ...customOptions, // Override nếu cần
+};
+```
+
 ## 🔧 Tạo Processors Mới
 
-### Bước 1: Tạo Processor
+### Bước 1: Định nghĩa Types
+
+Thêm types vào `queue.types.ts`:
+
+```typescript
+export interface YourJobData {
+  field1: string;
+  field2: number;
+  data?: Record<string, any>;
+}
+```
+
+### Bước 2: Tạo Processor
 
 Tạo file mới hoặc thêm vào `queue.processor.ts`:
 
 ```typescript
 import { Processor, Process } from '@nestjs/bull';
-import { Logger } from 'nestjs-pino';
+import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
+import { YourJobData } from './queue.types';
 
 @Processor('your-queue-name')
 export class YourQueueProcessor {
@@ -247,15 +338,11 @@ export class YourQueueProcessor {
     return { processed: true };
   }
 }
-
-interface YourJobData {
-  // Define your job data structure
-  field1: string;
-  field2: number;
-}
 ```
 
-### Bước 2: Đăng ký Queue trong Module
+> **Note:** Import types từ `queue.types.ts` thay vì định nghĩa inline trong processor.
+
+### Bước 3: Đăng ký Queue trong Module
 
 Thêm queue mới vào `queue.module.ts`:
 
@@ -265,7 +352,7 @@ BullModule.registerQueue({
 }),
 ```
 
-### Bước 3: Thêm Processor vào Providers
+### Bước 4: Thêm Processor vào Providers
 
 ```typescript
 providers: [
@@ -277,36 +364,68 @@ providers: [
 ],
 ```
 
-### Bước 4: Thêm Method vào QueueService
+### Bước 4: Thêm Types và Method vào QueueService
+
+**4.1. Thêm types vào `queue.types.ts`:**
 
 ```typescript
-@InjectQueue('your-queue-name') 
-private yourQueue: Queue,
-
-async addYourJob(data: YourJobData, options?: any) {
-  return this.yourQueue.add('your-job-name', data, {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 2000,
-    },
-    ...options,
-  });
+export interface YourJobData {
+  field1: string;
+  field2: number;
+  data?: Record<string, any>;
 }
 ```
 
+**4.2. Thêm method vào `queue.service.ts`:**
+
+```typescript
+import { YourJobData } from './queue.types';
+import { DEFAULT_JOB_OPTIONS } from './queue.constants';
+
+@InjectQueue('your-queue-name') 
+private yourQueue: Queue,
+
+async addYourJob(data: YourJobData, options?: Partial<QueueJobOptions>) {
+  this.logger.debug(`Adding your job: ${JSON.stringify(data)}`);
+  
+  const jobOptions: QueueJobOptions = {
+    ...DEFAULT_JOB_OPTIONS,
+    ...options,
+  };
+
+  return this.yourQueue.add('your-job-name', data, jobOptions);
+}
+```
+
+> **Note:** Sử dụng `DEFAULT_JOB_OPTIONS` từ `queue.constants.ts` và `QueueJobOptions` từ `queue.types.ts` để đảm bảo consistency.
+
 ### Ví dụ: PDF Generation Queue
+
+**1. Thêm types vào `queue.types.ts`:**
+
+```typescript
+export interface PdfJobData {
+  userId: string;
+  documentId: string;
+  options?: Record<string, any>;
+}
+```
+
+**2. Tạo processor:**
 
 ```typescript
 // queue.processor.ts
+import { Processor, Process } from '@nestjs/bull';
+import { Logger } from '@nestjs/common';
+import { Job } from 'bull';
+import { PdfJobData } from './queue.types';
+
 @Processor('pdf')
 export class PdfQueueProcessor {
   private readonly logger = new Logger(PdfQueueProcessor.name);
 
   @Process('generate-pdf')
-  async handleGeneratePdf(
-    job: Job<{ userId: string; documentId: string }>,
-  ) {
+  async handleGeneratePdf(job: Job<PdfJobData>) {
     this.logger.info({ jobId: job.id, userId: job.data.userId }, 'Generating PDF');
     
     try {
@@ -328,15 +447,29 @@ export class PdfQueueProcessor {
     }
   }
 
-  private async generatePdf(data: { userId: string; documentId: string }) {
+  private async generatePdf(data: PdfJobData) {
     // PDF generation logic
     return '/path/to/generated.pdf';
   }
 }
+```
 
-// queue.service.ts
-async addPdfJob(data: { userId: string; documentId: string }) {
-  return this.pdfQueue.add('generate-pdf', data, {
+**3. Thêm method vào `queue.service.ts`:**
+
+```typescript
+import { PdfJobData } from './queue.types';
+import { DEFAULT_JOB_OPTIONS } from './queue.constants';
+
+async addPdfJob(data: PdfJobData, options?: Partial<QueueJobOptions>) {
+  this.logger.debug(`Adding PDF job: userId=${data.userId}, documentId=${data.documentId}`);
+  
+  const jobOptions: QueueJobOptions = {
+    ...DEFAULT_JOB_OPTIONS,
+    ...options,
+  };
+
+  return this.pdfQueue.add('generate-pdf', data, jobOptions);
+}
     attempts: 3,
     backoff: {
       type: 'exponential',
@@ -613,20 +746,38 @@ LLEN bull:email:waiting
 
 ### 1. Job Data Structure
 
-Luôn định nghĩa interface cho job data:
+Luôn định nghĩa interface cho job data trong `queue.types.ts`:
 
 ```typescript
-interface EmailJobData {
+// queue.types.ts
+export interface EmailJobData {
   to: string;
   subject: string;
   template?: string;
-  data?: any;
+  data?: Record<string, any>;
+  text?: string;
+  html?: string;
 }
 
-async addEmailJob(data: EmailJobData) {
+export interface NotificationJobData {
+  userId: string;
+  type: string;
+  message: string;
+  data?: Record<string, any>;
+}
+```
+
+**Sử dụng trong service:**
+
+```typescript
+import { EmailJobData } from './queue.types';
+
+async addEmailJob(data: EmailJobData, options?: Partial<QueueJobOptions>) {
   // ...
 }
 ```
+
+> **Note:** Types được định nghĩa tập trung trong `queue.types.ts` để dùng chung giữa service, processor và controller.
 
 ### 2. Error Handling
 
