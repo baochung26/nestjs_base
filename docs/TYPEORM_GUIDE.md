@@ -223,6 +223,10 @@ const users = await this.userRepository
 ### Tạo Migration
 
 ```bash
+
+# Init db
+npm run migration:generate src/infrastructure/database/migrations/InitialSchema
+
 # Generate migration từ entities
 npm run migration:generate src/infrastructure/database/migrations/CreateUserTable
 
