@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiExtraModels, ApiParam } from '@nestjs/swagger';
 import { UsersService } from '../services/users.service';
@@ -20,12 +21,17 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ApiProtectedCommonResponses, ApiBadRequestResponse, ApiNotFoundResponse } from '../../../common/decorators/api-common-responses.decorator';
 import { ApiStandardResponse, ApiPaginatedResponse } from '../../../common/decorators/api-response.decorator';
 import { User } from '../entities/user.entity';
+import { CacheInterceptor } from '../../../common/interceptors/cache.interceptor';
+import { Cache } from '../../../common/decorators/cache.decorator';
+import { CacheEvictInterceptor } from '../../../common/interceptors/cache-evict.interceptor';
+import { CacheEvict } from '../../../common/decorators/cache-evict.decorator';
 
 @ApiTags('users')
 @ApiExtraModels(UserResponseDto, UsersListResponseDto)
 @ApiBearerAuth('JWT-auth')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(CacheInterceptor, CacheEvictInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -35,6 +41,7 @@ export class UsersController {
   @ApiStandardResponse(UserResponseDto, 'User created successfully', 201)
   @ApiBadRequestResponse('Bad request — validation failed')
   @ApiProtectedCommonResponses()
+  @CacheEvict(['users:list']) // xóa cache danh sách sau khi tạo mới
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -44,6 +51,7 @@ export class UsersController {
   @ApiPaginatedResponse(UserResponseDto, 'List of users retrieved successfully')
   @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
   @ApiProtectedCommonResponses()
+  @Cache(300, 'users:list') // cache danh sách 5 phút
   findAll() {
     return this.usersService.findAll();
   }
@@ -80,6 +88,7 @@ export class UsersController {
   @ApiStandardResponse(UserResponseDto, 'User retrieved successfully', 200)
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
+  @Cache(600) // cache 10 phút, key tự sinh theo url/params/user
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
@@ -92,6 +101,8 @@ export class UsersController {
   @ApiBadRequestResponse('Bad request — validation failed')
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
+  @CacheEvict(['users:list']) // xóa cache danh sách sau khi update
+  @CacheEvict() // xóa cache GET /users/:id (key tự sinh) sau khi update
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
@@ -115,6 +126,8 @@ export class UsersController {
   })
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
+  @CacheEvict(['users:list']) // xóa cache danh sách sau khi delete
+  @CacheEvict() // xóa cache GET /users/:id (key tự sinh) sau khi delete
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }

@@ -3,25 +3,17 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  SetMetadata,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
-import { CACHE_KEY_KEY } from '../decorators/cache.decorator';
+import {
+  CACHE_EVICT_KEY,
+  CacheEvict,
+  type CacheEvictValue,
+} from '../decorators/cache-evict.decorator';
 import { CacheService } from '../../infrastructure/cache/cache.service';
 import { Request } from 'express';
-
-export const CACHE_EVICT_KEY = 'cache:evict';
-
-/**
- * Cache evict decorator metadata
- */
-export const CacheEvict = (key?: string) => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    SetMetadata(CACHE_EVICT_KEY, key || true)(target, propertyKey, descriptor);
-  };
-};
 
 @Injectable()
 export class CacheEvictInterceptor implements NestInterceptor {
@@ -39,34 +31,46 @@ export class CacheEvictInterceptor implements NestInterceptor {
     const controller = context.getClass();
 
     // Get cache evict key from decorator
-    const evictKey = this.reflector.getAllAndOverride<string | boolean>(
+    const evictValue = this.reflector.getAllAndOverride<CacheEvictValue>(
       CACHE_EVICT_KEY,
       [handler, controller],
     );
 
-    if (!evictKey) {
+    if (!evictValue) {
       return next.handle();
     }
 
     return next.handle().pipe(
-      tap(async () => {
-        if (typeof evictKey === 'string') {
-          // Evict specific key
-          await this.cacheService.del(evictKey);
-        } else {
-          // Evict based on request
-          const cacheKey = this.generateCacheKey(request);
-          await this.cacheService.del(cacheKey);
-        }
-      }),
+      tap(async () => this.evict(evictValue, request)),
     );
   }
 
-  private generateCacheKey(request: Request): string {
-    const { method, url, query, params } = request;
+  private async evict(evictValue: CacheEvictValue, request: Request): Promise<void> {
+    if (Array.isArray(evictValue)) {
+      await this.cacheService.delMultiple(evictValue);
+      return;
+    }
+
+    if (typeof evictValue === 'string') {
+      await this.cacheService.del(evictValue);
+      return;
+    }
+
+    // true => Evict theo request hiện tại (match cách tạo key của CacheInterceptor)
+    const cacheKey = this.generateCacheKeyForGet(request);
+    await this.cacheService.del(cacheKey);
+  }
+
+  /**
+   * Tạo cache key theo cùng format với CacheInterceptor,
+   * nhưng force method = GET để phù hợp với cache của các endpoint đọc dữ liệu.
+   */
+  private generateCacheKeyForGet(request: Request): string {
+    const { url, query, params, user } = request as any;
     const queryString = JSON.stringify(query);
     const paramsString = JSON.stringify(params);
+    const userId = (user as any)?.id || 'anonymous';
 
-    return `cache:${method}:${url}:${queryString}:${paramsString}`;
+    return `cache:GET:${url}:${queryString}:${paramsString}:${userId}`;
   }
 }
