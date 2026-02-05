@@ -9,7 +9,10 @@ import appConfig, {
   bullBoardConfig,
   storageConfig,
 } from './config/configuration';
-import { validationSchema, validationOptions } from './config/validation.schema';
+import {
+  validationSchema,
+  validationOptions,
+} from './config/validation.schema';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { LoggerModule } from './infrastructure/logger/logger.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
@@ -30,7 +33,16 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, databaseConfig, redisConfig, jwtConfig, googleOAuthConfig, mailConfig, bullBoardConfig, storageConfig],
+      load: [
+        appConfig,
+        databaseConfig,
+        redisConfig,
+        jwtConfig,
+        googleOAuthConfig,
+        mailConfig,
+        bullBoardConfig,
+        storageConfig,
+      ],
       validationSchema,
       validationOptions,
     }),
@@ -54,4 +66,3 @@ export class AppModule implements NestModule {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
   }
 }
-

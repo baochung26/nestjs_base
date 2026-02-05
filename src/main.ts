@@ -9,8 +9,14 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { createValidationExceptionFactory } from './config/validation';
 import { Logger } from 'nestjs-pino';
-import { getHelmetConfig, getCorsConfig } from './infrastructure/security/security.config';
-import { BullBoardSetupService, BULL_BOARD_DEFAULT_PATH } from './infrastructure/queue/bull-board';
+import {
+  getHelmetConfig,
+  getCorsConfig,
+} from './infrastructure/security/security.config';
+import {
+  BullBoardSetupService,
+  BULL_BOARD_DEFAULT_PATH,
+} from './infrastructure/queue/bull-board';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -41,7 +47,8 @@ async function bootstrap() {
 
   const appConfig = configService.get('app');
   const prefix = appConfig?.prefix ?? 'api';
-  const bullBoardPath = configService.get('bullBoard.path') ?? BULL_BOARD_DEFAULT_PATH;
+  const bullBoardPath =
+    configService.get('bullBoard.path') ?? BULL_BOARD_DEFAULT_PATH;
 
   app.setGlobalPrefix(prefix, {
     exclude: [bullBoardPath, `${bullBoardPath}/(.*)`],
@@ -74,7 +81,6 @@ async function bootstrap() {
         },
         'JWT-auth',
       )
-      .addTag('App', 'Application information')
       .addTag('auth', 'Authentication endpoints')
       .addTag('users', 'User management endpoints')
       .addTag('admin', 'Admin endpoints')
@@ -96,11 +102,17 @@ async function bootstrap() {
   await app.listen(port);
 
   const logger = app.get(Logger);
-  logger.log(`Application is running on: http://localhost:${port}/${prefix}/v1`);
+  logger.log(
+    `Application is running on: http://localhost:${port}/${prefix}/v1`,
+  );
   if (configService.get('app.env') !== 'production') {
-    logger.log(`Swagger documentation: http://localhost:${port}/${prefix}/docs`);
+    logger.log(
+      `Swagger documentation: http://localhost:${port}/${prefix}/docs`,
+    );
     if (bullBoardMounted) {
-      logger.log(`Bull Board (Queue Monitor): http://localhost:${port}${bullBoardSetup.getPath()}`);
+      logger.log(
+        `Bull Board (Queue Monitor): http://localhost:${port}${bullBoardSetup.getPath()}`,
+      );
     }
   }
 }
