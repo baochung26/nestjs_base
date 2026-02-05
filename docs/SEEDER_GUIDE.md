@@ -44,12 +44,12 @@ npm run seed
 
 Seeder sẽ tạo các users mẫu sau:
 
-| Email | Password | Role | Status | Mô tả |
-|-------|----------|------|--------|-------|
-| `admin@example.com` | `admin123` | admin | Active | Admin user để test admin features |
-| `user@example.com` | `user123` | user | Active | Regular user mẫu |
-| `jane@example.com` | `user123` | user | Active | Regular user mẫu thứ 2 |
-| `inactive@example.com` | `user123` | user | Inactive | User không active để test inactive features |
+| Email                  | Password   | Role  | Status   | Mô tả                                       |
+| ---------------------- | ---------- | ----- | -------- | ------------------------------------------- |
+| `admin@example.com`    | `admin123` | admin | Active   | Admin user để test admin features           |
+| `user@example.com`     | `user123`  | user  | Active   | Regular user mẫu                            |
+| `jane@example.com`     | `user123`  | user  | Active   | Regular user mẫu thứ 2                      |
+| `inactive@example.com` | `user123`  | user  | Inactive | User không active để test inactive features |
 
 **Lưu ý:** Seeder sẽ **không tạo duplicate** - nếu user đã tồn tại, nó sẽ bỏ qua.
 
@@ -62,6 +62,7 @@ docker compose ps
 ```
 
 Bạn sẽ thấy các containers:
+
 - `nestjs_app` - Container ứng dụng
 - `nestjs_postgres` - Container database
 - `nestjs_redis` - Container Redis
@@ -75,6 +76,7 @@ docker compose exec app npm run seed
 ```
 
 **Output mẫu:**
+
 ```
 [Nest] Starting database seeding...
 [Nest] Seeding users...
@@ -89,6 +91,7 @@ docker compose exec app npm run seed
 ### Bước 3: Xác nhận dữ liệu đã được tạo
 
 Bạn có thể kiểm tra qua:
+
 - **pgAdmin:** Truy cập `http://localhost:5050` và xem table `users`
 - **API:** Đăng nhập với các tài khoản trên
 
@@ -140,6 +143,7 @@ npm run seed:refresh
 **Mô tả:** Tạo dữ liệu mẫu vào database. Nếu dữ liệu đã tồn tại, sẽ bỏ qua.
 
 **Sử dụng:**
+
 ```bash
 # Docker
 docker compose exec app npm run seed
@@ -149,6 +153,7 @@ npm run seed
 ```
 
 **Khi nào sử dụng:**
+
 - Lần đầu setup project
 - Cần thêm dữ liệu mẫu mới
 - Sau khi clear database
@@ -160,6 +165,7 @@ npm run seed
 **⚠️ Cảnh báo:** Lệnh này sẽ xóa TẤT CẢ users, không chỉ dữ liệu mẫu!
 
 **Sử dụng:**
+
 ```bash
 # Docker
 docker compose exec app npm run seed:clear
@@ -169,6 +175,7 @@ npm run seed:clear
 ```
 
 **Khi nào sử dụng:**
+
 - Cần xóa toàn bộ dữ liệu
 - Reset database về trạng thái ban đầu
 - Trước khi seed lại
@@ -178,6 +185,7 @@ npm run seed:clear
 **Mô tả:** Xóa tất cả users và seed lại dữ liệu mẫu.
 
 **Sử dụng:**
+
 ```bash
 # Docker
 docker compose exec app npm run seed:refresh
@@ -187,6 +195,7 @@ npm run seed:refresh
 ```
 
 **Khi nào sử dụng:**
+
 - Cần reset database về trạng thái mẫu
 - Sau khi test và muốn quay về dữ liệu ban đầu
 - Khi có thay đổi trong seeder
@@ -209,7 +218,7 @@ Chỉnh sửa file `src/database/seeder/seeder.service.ts`:
 ```typescript
 async seedUsers() {
   this.logger.log('Seeding users...');
-  
+
   const users = [
     // ... existing users
     {
@@ -221,7 +230,7 @@ async seedUsers() {
       isActive: true,
     },
   ];
-  
+
   // ... rest of the code
 }
 ```
@@ -248,7 +257,7 @@ async seedUsers() {
 // seeder.service.ts
 async seedProducts() {
   this.logger.log('Seeding products...');
-  
+
   const products = [
     {
       name: 'Product 1',
@@ -279,7 +288,7 @@ async seedProducts() {
 // Thêm vào method seed()
 async seed() {
   this.logger.log('Starting database seeding...');
-  
+
   try {
     await this.seedUsers();
     await this.seedProducts(); // Thêm dòng này
@@ -294,11 +303,13 @@ async seed() {
 ### Sử dụng Faker để tạo dữ liệu ngẫu nhiên
 
 **Cài đặt:**
+
 ```bash
 npm install @faker-js/faker
 ```
 
 **Sử dụng:**
+
 ```typescript
 import { faker } from '@faker-js/faker';
 
@@ -324,6 +335,7 @@ async seedUsers(count: number = 10) {
 **Nguyên nhân:** Dependencies chưa được cài đặt.
 
 **Giải pháp:**
+
 ```bash
 # Docker
 docker compose exec app npm install
@@ -339,15 +351,17 @@ npm install
 **Giải pháp:**
 
 1. **Kiểm tra database đang chạy:**
+
    ```bash
    # Docker
    docker compose ps postgres
-   
+
    # Local
    # Kiểm tra PostgreSQL service đang chạy
    ```
 
 2. **Kiểm tra file `.env`:**
+
    ```env
    DB_HOST=postgres  # hoặc localhost nếu không dùng Docker
    DB_PORT=5432
@@ -407,6 +421,7 @@ docker compose exec app npm run seed
 ### 1. Idempotent Seeding
 
 Seeder được thiết kế để có thể chạy nhiều lần mà không tạo duplicate:
+
 - ✅ Luôn kiểm tra data đã tồn tại trước khi tạo
 - ✅ Skip nếu đã tồn tại
 - ✅ Log rõ ràng quá trình seeding

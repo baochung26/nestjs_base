@@ -226,6 +226,7 @@ Nếu port đã được sử dụng, thay đổi `PGADMIN_PORT` trong `.env`.
 ### Không thể kết nối với PostgreSQL
 
 1. **Kiểm tra PostgreSQL đang chạy:**
+
    ```bash
    docker-compose ps postgres
    ```
@@ -255,6 +256,7 @@ Sau đó đăng nhập với mật khẩu mặc định hoặc mật khẩu tron
 ### pgAdmin chạy chậm
 
 1. Kiểm tra tài nguyên hệ thống:
+
    ```bash
    docker stats
    ```

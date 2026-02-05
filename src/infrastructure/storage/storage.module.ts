@@ -6,9 +6,7 @@ import { StorageController } from './storage.controller';
 
 @Global()
 @Module({
-  imports: [
-    ConfigModule.forFeature(storageConfig),
-  ],
+  imports: [ConfigModule.forFeature(storageConfig)],
   providers: [StorageService],
   controllers: [StorageController],
   exports: [StorageService],

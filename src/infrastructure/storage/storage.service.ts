@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -65,7 +70,10 @@ export class StorageService {
   /**
    * Validate file
    */
-  private validateFile(file: Express.Multer.File, options?: StorageOptions): void {
+  private validateFile(
+    file: Express.Multer.File,
+    options?: StorageOptions,
+  ): void {
     // Check file size
     const maxSize = options?.maxFileSize || this.maxFileSize;
     if (file.size > maxSize) {
@@ -129,7 +137,10 @@ export class StorageService {
       await mkdir(storagePath, { recursive: true });
     }
 
-    const filename = this.generateFilename(file.originalname, options?.filename);
+    const filename = this.generateFilename(
+      file.originalname,
+      options?.filename,
+    );
     const filePath = path.join(storagePath, filename);
 
     // Save file
@@ -230,7 +241,9 @@ export class StorageService {
    * Delete multiple files
    */
   async deleteFiles(filenames: string[], subfolder?: string): Promise<void> {
-    await Promise.all(filenames.map((filename) => this.deleteFile(filename, subfolder)));
+    await Promise.all(
+      filenames.map((filename) => this.deleteFile(filename, subfolder)),
+    );
     this.logger.log(`Multiple files deleted: ${filenames.length} files`);
   }
 

@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersService } from '../../../src/modules/users/services/users.service';
 import { UsersRepository } from '../../../src/modules/users/repositories/users.repository';
 import { User } from '../../../src/modules/users/entities/user.entity';
@@ -44,7 +43,12 @@ describe('UsersService', () => {
   describe('findAll', () => {
     it('should return array of users', async () => {
       const users = [
-        { id: '1', email: 'test@example.com', firstName: 'John', lastName: 'Doe' } as User,
+        {
+          id: '1',
+          email: 'test@example.com',
+          firstName: 'John',
+          lastName: 'Doe',
+        } as User,
       ];
       usersRepository.findActiveUsers.mockResolvedValue(users);
 

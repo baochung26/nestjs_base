@@ -4,7 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
  * Standard API Response Format
  */
 export class ApiResponseDto<T = any> {
-  @ApiProperty({ example: true, description: 'Indicates if the request was successful' })
+  @ApiProperty({
+    example: true,
+    description: 'Indicates if the request was successful',
+  })
   success: boolean;
 
   @ApiProperty({ example: 200, description: 'HTTP status code' })
@@ -16,10 +19,17 @@ export class ApiResponseDto<T = any> {
   @ApiProperty({ description: 'Response data', required: false })
   data?: T;
 
-  @ApiProperty({ example: '2024-01-19T10:30:00.000Z', description: 'Response timestamp' })
+  @ApiProperty({
+    example: '2024-01-19T10:30:00.000Z',
+    description: 'Response timestamp',
+  })
   timestamp: string;
 
-  @ApiProperty({ example: '/api/v1/users', description: 'Request path', required: false })
+  @ApiProperty({
+    example: '/api/v1/users',
+    description: 'Request path',
+    required: false,
+  })
   path?: string;
 
   constructor(
@@ -42,35 +52,39 @@ export class ApiResponseDto<T = any> {
  * Standard API Error Response Format
  */
 export class ApiErrorResponseDto {
-  @ApiProperty({ example: false, description: 'Indicates if the request was successful' })
+  @ApiProperty({
+    example: false,
+    description: 'Indicates if the request was successful',
+  })
   success: boolean;
 
   @ApiProperty({ example: 400, description: 'HTTP status code' })
   statusCode: number;
 
-  @ApiProperty({ 
-    example: 'Bad Request', 
-    description: 'Error message (can be string or array of strings for validation errors)',
-    oneOf: [
-      { type: 'string' },
-      { type: 'array', items: { type: 'string' } }
-    ]
+  @ApiProperty({
+    example: 'Bad Request',
+    description:
+      'Error message (can be string or array of strings for validation errors)',
+    oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
   })
   message: string | string[];
 
-  @ApiProperty({ 
-    example: 'Validation failed', 
+  @ApiProperty({
+    example: 'Validation failed',
     description: 'Error details (optional)',
     required: false,
     oneOf: [
       { type: 'string' },
       { type: 'array', items: { type: 'string' } },
-      { type: 'object' }
-    ]
+      { type: 'object' },
+    ],
   })
   error?: string | string[] | object;
 
-  @ApiProperty({ example: '2024-01-19T10:30:00.000Z', description: 'Error timestamp' })
+  @ApiProperty({
+    example: '2024-01-19T10:30:00.000Z',
+    description: 'Error timestamp',
+  })
   timestamp: string;
 
   @ApiProperty({ example: '/api/v1/users', description: 'Request path' })

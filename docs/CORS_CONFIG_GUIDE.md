@@ -12,6 +12,7 @@
 ## 🎯 Tổng quan
 
 CORS (Cross-Origin Resource Sharing) được cấu hình tập trung trong:
+
 - **File config:** `src/config/configuration.ts` - `corsConfig`
 - **File security:** `src/infrastructure/security/security.config.ts` - `getCorsConfig()`
 - **Environment variable:** `CORS_ORIGINS` trong `.env`
@@ -29,12 +30,14 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,h
 ```
 
 **Format:**
+
 - Các origins cách nhau bởi dấu phẩy (`,`)
 - Không có khoảng trắng (hoặc sẽ được tự động trim)
 - Hỗ trợ cả HTTP và HTTPS
 - Hỗ trợ custom ports
 
 **Ví dụ:**
+
 ```env
 # Development
 CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
@@ -51,11 +54,7 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:3001,https://staging.yourdom
 Nếu không set `CORS_ORIGINS` trong `.env`, hệ thống sẽ sử dụng default:
 
 ```typescript
-[
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-]
+['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
 ```
 
 ## 💻 Cấu hình trong Code
@@ -71,7 +70,9 @@ export const corsConfig = registerAs('cors', () => {
   ];
 
   const origins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim()).filter(Boolean)
+    ? process.env.CORS_ORIGINS.split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
     : defaultOrigins;
 
   return {
@@ -93,7 +94,10 @@ export const getCorsConfig = (configService: ConfigService) => {
   const allowedOrigins = corsConfig?.origins || [];
 
   return {
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) {
         return callback(null, true);
@@ -102,12 +106,27 @@ export const getCorsConfig = (configService: ConfigService) => {
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error(`Not allowed by CORS. Origin: ${origin} is not in allowed list: ${allowedOrigins.join(', ')}`));
+        callback(
+          new Error(
+            `Not allowed by CORS. Origin: ${origin} is not in allowed list: ${allowedOrigins.join(', ')}`,
+          ),
+        );
       }
     },
     credentials: corsConfig?.credentials ?? true,
-    methods: corsConfig?.methods || ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: corsConfig?.allowedHeaders || ['Content-Type', 'Authorization', 'X-Correlation-ID'],
+    methods: corsConfig?.methods || [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'OPTIONS',
+    ],
+    allowedHeaders: corsConfig?.allowedHeaders || [
+      'Content-Type',
+      'Authorization',
+      'X-Correlation-ID',
+    ],
     exposedHeaders: corsConfig?.exposedHeaders || ['X-Correlation-ID'],
     maxAge: corsConfig?.maxAge || 86400,
   };
@@ -186,6 +205,7 @@ CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 ### 5. Credentials
 
 CORS config đã enable `credentials: true` để hỗ trợ:
+
 - Cookies
 - Authorization headers
 - Custom headers
@@ -199,6 +219,7 @@ CORS config đã enable `credentials: true` để hỗ trợ:
 **Giải pháp:**
 
 1. **Kiểm tra origin của frontend:**
+
    ```javascript
    // Trong browser console
    console.log(window.location.origin);
@@ -206,6 +227,7 @@ CORS config đã enable `credentials: true` để hỗ trợ:
    ```
 
 2. **Thêm vào .env:**
+
    ```env
    CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
    ```
@@ -222,6 +244,7 @@ CORS config đã enable `credentials: true` để hỗ trợ:
 **Giải pháp:**
 
 1. **Kiểm tra config đã load:**
+
    ```bash
    docker compose exec app sh
    # Trong container
@@ -229,6 +252,7 @@ CORS config đã enable `credentials: true` để hỗ trợ:
    ```
 
 2. **Kiểm tra logs:**
+
    ```bash
    docker compose logs app | grep -i cors
    ```
@@ -246,6 +270,7 @@ CORS config đã enable `credentials: true` để hỗ trợ:
 Config đã có `credentials: true` mặc định. Nếu vẫn lỗi, kiểm tra:
 
 1. **Frontend fetch:**
+
    ```typescript
    fetch('http://localhost:3000/api/v1/auth/login', {
      method: 'POST',
@@ -266,15 +291,17 @@ Config đã có `credentials: true` mặc định. Nếu vẫn lỗi, kiểm tra
 **Giải pháp:**
 
 1. **Kiểm tra format trong .env:**
+
    ```env
    # ✅ Good - Không có khoảng trắng thừa
    CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
-   
+
    # ❌ Bad - Có khoảng trắng
    CORS_ORIGINS=http://localhost:3000, http://localhost:3001
    ```
 
 2. **Restart application:**
+
    ```bash
    docker compose restart app
    ```

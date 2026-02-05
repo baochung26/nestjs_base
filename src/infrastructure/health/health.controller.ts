@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckService,
@@ -30,7 +30,11 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
-  @ApiOperation({ summary: 'Health check (all services)', description: 'Kiểm tra sức khỏe của tất cả services: database, Redis, memory, disk.' })
+  @ApiOperation({
+    summary: 'Health check (all services)',
+    description:
+      'Kiểm tra sức khỏe của tất cả services: database, Redis, memory, disk.',
+  })
   @ApiStandardResponse(HealthResponseDto, 'Health check results', 200)
   check() {
     return this.health.check([
@@ -48,7 +52,10 @@ export class HealthController {
 
   @Get('db')
   @HealthCheck()
-  @ApiOperation({ summary: 'Database health check', description: 'Kiểm tra kết nối database.' })
+  @ApiOperation({
+    summary: 'Database health check',
+    description: 'Kiểm tra kết nối database.',
+  })
   @ApiStandardResponse(HealthResponseDto, 'Database health check result', 200)
   checkDatabase() {
     return this.health.check([
@@ -58,7 +65,10 @@ export class HealthController {
 
   @Get('redis')
   @HealthCheck()
-  @ApiOperation({ summary: 'Redis health check', description: 'Kiểm tra kết nối Redis.' })
+  @ApiOperation({
+    summary: 'Redis health check',
+    description: 'Kiểm tra kết nối Redis.',
+  })
   @ApiStandardResponse(HealthResponseDto, 'Redis health check result', 200)
   checkRedis() {
     return this.health.check([() => this.redis.isHealthy('redis')]);
@@ -66,7 +76,10 @@ export class HealthController {
 
   @Get('memory')
   @HealthCheck()
-  @ApiOperation({ summary: 'Memory health check', description: 'Kiểm tra memory usage (heap và RSS).' })
+  @ApiOperation({
+    summary: 'Memory health check',
+    description: 'Kiểm tra memory usage (heap và RSS).',
+  })
   @ApiStandardResponse(HealthResponseDto, 'Memory health check result', 200)
   checkMemory() {
     return this.health.check([
@@ -77,7 +90,10 @@ export class HealthController {
 
   @Get('disk')
   @HealthCheck()
-  @ApiOperation({ summary: 'Disk health check', description: 'Kiểm tra disk storage usage.' })
+  @ApiOperation({
+    summary: 'Disk health check',
+    description: 'Kiểm tra disk storage usage.',
+  })
   @ApiStandardResponse(HealthResponseDto, 'Disk health check result', 200)
   checkDisk() {
     return this.health.check([

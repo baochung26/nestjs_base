@@ -14,6 +14,7 @@
 ## 🎯 Tổng quan
 
 Cache Module sử dụng **Redis** để lưu trữ cache với các tính năng:
+
 - ✅ Redis-based caching
 - ✅ TTL (Time To Live) support
 - ✅ Cache-aside pattern
@@ -267,12 +268,14 @@ export class UsersController {
 ### 1. Cache Key Naming
 
 ✅ **Good:**
+
 ```typescript
 const key = this.cacheService.generateKey('user', userId, 'profile');
 // Result: "user:123:profile"
 ```
 
 ❌ **Bad:**
+
 ```typescript
 const key = `user_${userId}_profile`; // Inconsistent naming
 ```
@@ -310,14 +313,14 @@ async getUser(id: string) {
 ```typescript
 async updateUser(id: string, data: UpdateUserDto) {
   const user = await this.userRepository.update(id, data);
-  
+
   // Invalidate related cache
   await this.cacheService.delMultiple([
     `user:${id}`,
     'users:list',
     `user:${id}:profile`,
   ]);
-  
+
   return user;
 }
 ```
@@ -444,9 +447,20 @@ export class UsersService {
 ### Controller với Cache Decorators
 
 ```typescript
-import { Controller, Get, Put, Delete, Param, Body, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Cache, SkipCache } from '../common/decorators/cache.decorator';
-import { CacheInterceptor, CacheEvictInterceptor } from '../common/interceptors';
+import {
+  CacheInterceptor,
+  CacheEvictInterceptor,
+} from '../common/interceptors';
 
 @Controller('users')
 @UseInterceptors(CacheInterceptor)
@@ -494,7 +508,9 @@ export class UsersController {
 **Nguyên nhân:** Redis chưa kết nối hoặc CacheModule chưa được import.
 
 **Giải pháp:**
+
 1. Kiểm tra Redis đang chạy:
+
    ```bash
    docker-compose ps redis
    ```
@@ -509,6 +525,7 @@ export class UsersController {
 **Nguyên nhân:** Cache keys trùng nhau giữa các modules.
 
 **Giải pháp:** Sử dụng prefix cho cache keys:
+
 ```typescript
 const key = this.cacheService.generateKey('module', 'entity', id);
 ```
@@ -518,6 +535,7 @@ const key = this.cacheService.generateKey('module', 'entity', id);
 **Nguyên nhân:** Cache quá nhiều data.
 
 **Giải pháp:**
+
 1. Giảm TTL
 2. Giảm max items trong cache config
 3. Implement cache eviction strategy
@@ -525,6 +543,7 @@ const key = this.cacheService.generateKey('module', 'entity', id);
 ### Performance issues
 
 **Giải pháp:**
+
 1. Sử dụng cache-aside pattern
 2. Cache only frequently accessed data
 3. Monitor cache hit rate

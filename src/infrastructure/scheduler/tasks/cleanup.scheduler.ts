@@ -109,9 +109,7 @@ export class CleanupScheduler {
         .andWhere('updatedAt < :date', { date: sixMonthsAgo })
         .execute();
 
-      this.logger.log(
-        `Cleaned up ${result.affected || 0} inactive users`,
-      );
+      this.logger.log(`Cleaned up ${result.affected || 0} inactive users`);
     } catch (error: any) {
       this.logger.error(
         { error: error.message },
@@ -132,7 +130,10 @@ export class CleanupScheduler {
       // This would typically clean up old uploaded files, logs, etc.
       this.logger.log('Old files cleanup completed');
     } catch (error: any) {
-      this.logger.error({ error: error.message }, 'Error cleaning up old files');
+      this.logger.error(
+        { error: error.message },
+        'Error cleaning up old files',
+      );
     }
   }
 }

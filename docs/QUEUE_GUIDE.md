@@ -28,11 +28,11 @@ Queue system sử dụng **Bull** và **Redis** để xử lý background jobs m
 
 ### Queues có sẵn
 
-| Queue Name | Mô tả | Processor |
-|------------|-------|-----------|
-| `default` | Queue mặc định cho các job chung | `DefaultQueueProcessor` |
-| `email` | Queue cho email jobs | `EmailQueueProcessor` |
-| `notification` | Queue cho notification jobs | `NotificationQueueProcessor` |
+| Queue Name     | Mô tả                            | Processor                    |
+| -------------- | -------------------------------- | ---------------------------- |
+| `default`      | Queue mặc định cho các job chung | `DefaultQueueProcessor`      |
+| `email`        | Queue cho email jobs             | `EmailQueueProcessor`        |
+| `notification` | Queue cho notification jobs      | `NotificationQueueProcessor` |
 
 ## 🏗️ Kiến trúc Queue
 
@@ -133,6 +133,7 @@ async sendWelcomeEmail(userEmail: string, userName: string) {
 ```
 
 **Options mặc định** (từ `DEFAULT_JOB_OPTIONS` trong `queue.constants.ts`):
+
 - `attempts: 3` - Retry 3 lần nếu fail
 - `backoff: exponential` - Exponential backoff với delay 2s
 - `removeOnComplete: true` - Xóa job sau khi complete
@@ -255,6 +256,7 @@ await this.queueService.addEmailJob({
 ```
 
 **Chuyện gì xảy ra:**
+
 - `addEmailJob()` đẩy job vào Redis queue (`email`)
 - Function trả về ngay lập tức (không chờ gửi mail)
 - Mail chưa được gửi ở bước này
@@ -271,22 +273,23 @@ async addEmailJob(data: EmailJobData, options?: Partial<QueueJobOptions>) {
 #### 2. Processor tự động xử lý (`queue.processor.ts`)
 
 **EmailQueueProcessor** (worker) tự động:
+
 - Lấy job từ queue `email`
 - Gọi `handleSendEmail()` để xử lý
 - Gửi mail thực tế qua `MailService`
 
 ```typescript
 // queue.processor.ts
-@Processor('email')  // ← Đăng ký processor cho queue 'email'
+@Processor('email') // ← Đăng ký processor cho queue 'email'
 export class EmailQueueProcessor {
   constructor(
-    private readonly mailService?: MailService,  // ← Inject MailService
+    private readonly mailService?: MailService, // ← Inject MailService
   ) {}
 
-  @Process('send-email')  // ← Xử lý job có name 'send-email'
+  @Process('send-email') // ← Xử lý job có name 'send-email'
   async handleSendEmail(job: Job<EmailJobData>) {
     // Processor tự động lấy job từ queue và xử lý
-    
+
     if (this.mailService) {
       // ← GỬI MAIL THỰC TẾ Ở ĐÂY
       await this.mailService.sendMail({
@@ -359,11 +362,11 @@ async sendMail(options: MailOptions): Promise<void> {
 
 ### Tóm tắt
 
-| Bước | File | Hành động | Kết quả |
-|------|------|-----------|---------|
-| 1. Đẩy job | `queue.service.ts` | `addEmailJob()` → đẩy vào Redis | Job được lưu trong queue |
+| Bước         | File                 | Hành động                                  | Kết quả                      |
+| ------------ | -------------------- | ------------------------------------------ | ---------------------------- |
+| 1. Đẩy job   | `queue.service.ts`   | `addEmailJob()` → đẩy vào Redis            | Job được lưu trong queue     |
 | 2. Xử lý job | `queue.processor.ts` | `EmailQueueProcessor` tự động lấy và xử lý | Job được process bất đồng bộ |
-| 3. Gửi mail | `mail.service.ts` | `MailService.sendMail()` → SMTP | Email được gửi thực tế |
+| 3. Gửi mail  | `mail.service.ts`    | `MailService.sendMail()` → SMTP            | Email được gửi thực tế       |
 
 ### Lưu ý quan trọng
 
@@ -378,7 +381,7 @@ async sendMail(options: MailOptions): Promise<void> {
 // users.service.ts - Khi user đăng ký
 async create(createUserDto: CreateUserDto) {
   const user = await this.usersRepository.save(userData);
-  
+
   // Đẩy job gửi welcome email vào queue
   await this.queueService.addEmailJob({
     to: user.email,
@@ -386,7 +389,7 @@ async create(createUserDto: CreateUserDto) {
     template: 'welcome',
     data: { name: user.firstName },
   });
-  
+
   // Function return ngay, không chờ email được gửi
   return user;
   // Email sẽ được gửi sau đó bởi EmailQueueProcessor
@@ -417,6 +420,7 @@ export type QueueName = 'default' | 'email' | 'notification';
 ```
 
 **Lợi ích:**
+
 - ✅ Type safety - đảm bảo consistency giữa service, processor, controller
 - ✅ Dễ maintain - thay đổi một chỗ, áp dụng toàn bộ
 - ✅ IntelliSense - IDE tự động suggest fields
@@ -474,11 +478,11 @@ export class YourQueueProcessor {
   @Process('your-job-name')
   async handleYourJob(job: Job<YourJobData>) {
     this.logger.log(`Processing job ${job.id}`);
-    
+
     try {
       // Xử lý job của bạn
       const result = await this.processData(job.data);
-      
+
       this.logger.log(`Job ${job.id} completed successfully`);
       return {
         success: true,
@@ -540,12 +544,12 @@ export interface YourJobData {
 import { YourJobData } from './queue.types';
 import { DEFAULT_JOB_OPTIONS } from './queue.constants';
 
-@InjectQueue('your-queue-name') 
+@InjectQueue('your-queue-name')
 private yourQueue: Queue,
 
 async addYourJob(data: YourJobData, options?: Partial<QueueJobOptions>) {
   this.logger.debug(`Adding your job: ${JSON.stringify(data)}`);
-  
+
   const jobOptions: QueueJobOptions = {
     ...DEFAULT_JOB_OPTIONS,
     ...options,
@@ -584,13 +588,19 @@ export class PdfQueueProcessor {
 
   @Process('generate-pdf')
   async handleGeneratePdf(job: Job<PdfJobData>) {
-    this.logger.info({ jobId: job.id, userId: job.data.userId }, 'Generating PDF');
-    
+    this.logger.info(
+      { jobId: job.id, userId: job.data.userId },
+      'Generating PDF',
+    );
+
     try {
       // Generate PDF logic
       const pdfPath = await this.generatePdf(job.data);
-      
-      this.logger.info({ jobId: job.id, pdfPath }, 'PDF generated successfully');
+
+      this.logger.info(
+        { jobId: job.id, pdfPath },
+        'PDF generated successfully',
+      );
       return {
         success: true,
         jobId: job.id,
@@ -620,7 +630,7 @@ import { DEFAULT_JOB_OPTIONS } from './queue.constants';
 
 async addPdfJob(data: PdfJobData, options?: Partial<QueueJobOptions>) {
   this.logger.debug(`Adding PDF job: userId=${data.userId}, documentId=${data.documentId}`);
-  
+
   const jobOptions: QueueJobOptions = {
     ...DEFAULT_JOB_OPTIONS,
     ...options,
@@ -649,6 +659,7 @@ Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -710,6 +721,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -764,6 +776,7 @@ http://localhost:3000/admin/queues
 ```
 
 **Bảo vệ bằng secret key:**
+
 - Đặt `BULL_BOARD_SECRET_KEY` trong `.env`
 - Nếu để trống thì không có bảo vệ
 
@@ -794,6 +807,7 @@ Bull Board UI cho phép bạn:
 #### Screenshot các tính năng
 
 **Dashboard:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Bull Board - Queue Monitor                  │
@@ -806,6 +820,7 @@ Bull Board UI cho phép bạn:
 ```
 
 **Failed Jobs View:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Email Queue - Failed Jobs (5)               │
@@ -849,7 +864,7 @@ console.log('Job progress:', job.progress());
 ```typescript
 // Lấy failed jobs
 const failed = await this.emailQueue.getFailed();
-failed.forEach(job => {
+failed.forEach((job) => {
   console.log('Failed job:', job.id);
   console.log('Error:', job.failedReason);
   console.log('Stack trace:', job.stacktrace);
@@ -866,7 +881,7 @@ await job.retry();
 
 // Retry tất cả failed jobs
 const failed = await this.emailQueue.getFailed();
-await Promise.all(failed.map(job => job.retry()));
+await Promise.all(failed.map((job) => job.retry()));
 ```
 
 ### 6. Xem Logs
@@ -970,7 +985,7 @@ async handleSendEmail(job: Job<EmailJobData>) {
     this.logger.info({ jobId: job.id }, 'Email already sent, skipping');
     return { skipped: true };
   }
-  
+
   // Send email
   await this.sendEmail(job.data);
   await this.markEmailSent(job.data.to, job.data.subject);
@@ -1029,7 +1044,7 @@ Thường xuyên kiểm tra queue stats:
 @Cron('*/5 * * * *') // Mỗi 5 phút
 async checkQueueHealth() {
   const stats = await this.queueService.getAllQueuesStats();
-  
+
   // Alert nếu có quá nhiều failed jobs
   if (stats.email.failed > 10) {
     await this.sendAlert('Email queue has many failed jobs');
@@ -1039,14 +1054,14 @@ async checkQueueHealth() {
 
 ### 8. So sánh với Laravel Queue
 
-| Laravel | NestJS Bull + Bull Board |
-|---------|--------------------------|
-| `failed_jobs` table | Redis key: `bull:{queue}:failed` + Bull Board UI |
-| `php artisan queue:failed` | Bull Board UI hoặc `queue.getFailed()` |
-| Laravel Horizon | **Bull Board UI** ✅ |
-| `php artisan queue:retry {id}` | Bull Board UI hoặc `job.retry()` |
-| `php artisan queue:forget {id}` | Bull Board UI hoặc `job.remove()` |
-| `php artisan queue:work` | Tự động chạy (processors) |
+| Laravel                         | NestJS Bull + Bull Board                         |
+| ------------------------------- | ------------------------------------------------ |
+| `failed_jobs` table             | Redis key: `bull:{queue}:failed` + Bull Board UI |
+| `php artisan queue:failed`      | Bull Board UI hoặc `queue.getFailed()`           |
+| Laravel Horizon                 | **Bull Board UI** ✅                             |
+| `php artisan queue:retry {id}`  | Bull Board UI hoặc `job.retry()`                 |
+| `php artisan queue:forget {id}` | Bull Board UI hoặc `job.remove()`                |
+| `php artisan queue:work`        | Tự động chạy (processors)                        |
 
 ## 🐛 Troubleshooting
 
@@ -1057,11 +1072,13 @@ async checkQueueHealth() {
 **Giải pháp:**
 
 1. **Kiểm tra Redis đang chạy:**
+
    ```bash
    docker compose ps redis
    ```
 
 2. **Kiểm tra cấu hình:**
+
    ```env
    REDIS_HOST=redis  # hoặc localhost
    REDIS_PORT=6379
@@ -1080,6 +1097,7 @@ async checkQueueHealth() {
 **Giải pháp:**
 
 1. **Xem logs:**
+
    ```bash
    docker compose logs -f app | grep -i "job\|queue"
    ```
@@ -1090,12 +1108,13 @@ async checkQueueHealth() {
    - Xem error details, stack trace, retry jobs
 
 3. **Hoặc xem qua code:**
+
    ```typescript
    const failed = await this.emailQueue.getFailed();
    console.log(failed);
    ```
 
-3. **Retry job:**
+4. **Retry job:**
    ```typescript
    const job = await this.emailQueue.getJob(jobId);
    await job.retry();
@@ -1104,6 +1123,7 @@ async checkQueueHealth() {
 ### Jobs không được xử lý
 
 **Nguyên nhân có thể:**
+
 - Processor không được đăng ký
 - Queue name không khớp
 - Redis connection issue
@@ -1111,6 +1131,7 @@ async checkQueueHealth() {
 **Giải pháp:**
 
 1. **Kiểm tra processor đã được đăng ký:**
+
    ```typescript
    // queue.module.ts
    providers: [
@@ -1119,6 +1140,7 @@ async checkQueueHealth() {
    ```
 
 2. **Kiểm tra queue name:**
+
    ```typescript
    // Queue name phải khớp
    @Processor('email') // Queue name
@@ -1153,6 +1175,7 @@ await this.queueService.addEmailJob(data, {
 **Giải pháp:**
 
 1. **Giới hạn queue size:**
+
    ```typescript
    BullModule.registerQueue({
      name: 'email',
@@ -1176,6 +1199,7 @@ await this.queueService.addEmailJob(data, {
 **Giải pháp:**
 
 1. **Tăng concurrency:**
+
    ```typescript
    processors: [
      {
@@ -1218,7 +1242,7 @@ async onUserRegistered(user: User) {
 // Upload image
 async uploadImage(file: Express.Multer.File) {
   const imageId = await this.saveImage(file);
-  
+
   // Process image in background
   await this.queueService.addJob({
     type: 'process-image',

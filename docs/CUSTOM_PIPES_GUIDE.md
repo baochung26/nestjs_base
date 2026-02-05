@@ -34,6 +34,7 @@ findOne(@Param('id', new ParseIntPipe(1, 100)) id: number) {
 ```
 
 **Features:**
+
 - Parse string to integer
 - Optional min/max validation
 - Custom error messages
@@ -52,6 +53,7 @@ findOne(@Param('id', ParseUUIDPipe) id: string) {
 ```
 
 **Features:**
+
 - UUID format validation
 - Clear error messages
 
@@ -70,6 +72,7 @@ findByRole(@Param('role', new ParseEnumPipe(UserRole)) role: UserRole) {
 ```
 
 **Features:**
+
 - Enum value validation
 - Lists valid values in error message
 
@@ -93,6 +96,7 @@ create(@Body(new TrimPipe()) createDto: CreateUserDto) {
 ```
 
 **Features:**
+
 - Trim specific fields or all strings
 - Works with nested objects
 - Works with arrays
@@ -111,6 +115,7 @@ findAll(@Query(new PaginationPipe()) pagination: { page: number; limit: number; 
 ```
 
 **Features:**
+
 - Default values từ constants
 - Min/max limit validation
 - Calculate skip value
@@ -121,7 +126,13 @@ findAll(@Query(new PaginationPipe()) pagination: { page: number; limit: number; 
 
 ```typescript
 import { Controller, Get, Param, Query, Body, Post } from '@nestjs/common';
-import { ParseIntPipe, ParseUUIDPipe, ParseEnumPipe, TrimPipe, PaginationPipe } from '../common/pipes';
+import {
+  ParseIntPipe,
+  ParseUUIDPipe,
+  ParseEnumPipe,
+  TrimPipe,
+  PaginationPipe,
+} from '../common/pipes';
 
 @Controller('users')
 export class UsersController {
@@ -223,7 +234,13 @@ remove(@Param('id', userIdPipe) id: number) { }
 
 ```typescript
 import { Controller, Get, Post, Param, Query, Body } from '@nestjs/common';
-import { ParseIntPipe, ParseUUIDPipe, ParseEnumPipe, TrimPipe, PaginationPipe } from '../common/pipes';
+import {
+  ParseIntPipe,
+  ParseUUIDPipe,
+  ParseEnumPipe,
+  TrimPipe,
+  PaginationPipe,
+} from '../common/pipes';
 import { UserRole } from '../entities/user.entity';
 
 @Controller('users')
@@ -242,7 +259,9 @@ export class UsersController {
 
   // Parse enum
   @Get('by-role/:role')
-  findByRole(@Param('role', new ParseEnumPipe(UserRole, 'role')) role: UserRole) {
+  findByRole(
+    @Param('role', new ParseEnumPipe(UserRole, 'role')) role: UserRole,
+  ) {
     return this.service.findByRole(role);
   }
 
@@ -254,7 +273,10 @@ export class UsersController {
 
   // Trim body
   @Post()
-  create(@Body(new TrimPipe(['email', 'firstName', 'lastName'])) createDto: CreateUserDto) {
+  create(
+    @Body(new TrimPipe(['email', 'firstName', 'lastName']))
+    createDto: CreateUserDto,
+  ) {
     return this.service.create(createDto);
   }
 
@@ -272,7 +294,12 @@ Tạo custom pipe cho specific use case:
 
 ```typescript
 // src/common/pipes/parse-date.pipe.ts
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import {
+  PipeTransform,
+  Injectable,
+  ArgumentMetadata,
+  BadRequestException,
+} from '@nestjs/common';
 
 @Injectable()
 export class ParseDatePipe implements PipeTransform<string, Date> {
@@ -283,7 +310,9 @@ export class ParseDatePipe implements PipeTransform<string, Date> {
 
     const date = new Date(value);
     if (isNaN(date.getTime())) {
-      throw new BadRequestException(`${metadata.data || 'Date'} must be a valid date`);
+      throw new BadRequestException(
+        `${metadata.data || 'Date'} must be a valid date`,
+      );
     }
 
     return date;

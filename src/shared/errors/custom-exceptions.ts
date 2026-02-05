@@ -2,7 +2,10 @@ import { HttpException } from '@nestjs/common';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../../common/constants';
 
 export class BadRequestException extends HttpException {
-  constructor(message: string | string[] = ERROR_MESSAGES.BAD_REQUEST, error?: string) {
+  constructor(
+    message: string | string[] = ERROR_MESSAGES.BAD_REQUEST,
+    error?: string,
+  ) {
     super(
       {
         statusCode: HTTP_STATUS.BAD_REQUEST,
@@ -67,7 +70,10 @@ export class ConflictException extends HttpException {
 }
 
 export class InternalServerErrorException extends HttpException {
-  constructor(message: string = ERROR_MESSAGES.INTERNAL_SERVER_ERROR, error?: string) {
+  constructor(
+    message: string = ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+    error?: string,
+  ) {
     super(
       {
         statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
@@ -80,7 +86,10 @@ export class InternalServerErrorException extends HttpException {
 }
 
 export class ValidationException extends HttpException {
-  constructor(message: string | string[] = ERROR_MESSAGES.VALIDATION_ERROR, error?: string) {
+  constructor(
+    message: string | string[] = ERROR_MESSAGES.VALIDATION_ERROR,
+    error?: string,
+  ) {
     super(
       {
         statusCode: HTTP_STATUS.UNPROCESSABLE_ENTITY,

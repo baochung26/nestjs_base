@@ -51,6 +51,7 @@ MAIL_FROM_NAME=NestJS App            # Default from name
 ### Other SMTP Providers
 
 #### SendGrid
+
 ```env
 MAIL_HOST=smtp.sendgrid.net
 MAIL_PORT=587
@@ -59,6 +60,7 @@ MAIL_PASSWORD=your-sendgrid-api-key
 ```
 
 #### Mailgun
+
 ```env
 MAIL_HOST=smtp.mailgun.org
 MAIL_PORT=587
@@ -67,6 +69,7 @@ MAIL_PASSWORD=your-mailgun-password
 ```
 
 #### AWS SES
+
 ```env
 MAIL_HOST=email-smtp.us-east-1.amazonaws.com
 MAIL_PORT=587
@@ -217,10 +220,17 @@ Templates được lưu dưới dạng file `.html` trong thư mục `templates/
 
 ```typescript
 // Welcome - dùng templates/welcome.html
-await this.mailService.sendWelcomeEmail('user@example.com', 'John Doe', 'https://...');
+await this.mailService.sendWelcomeEmail(
+  'user@example.com',
+  'John Doe',
+  'https://...',
+);
 
 // Password reset - dùng templates/password-reset.html
-await this.mailService.sendPasswordResetEmail('user@example.com', 'https://...');
+await this.mailService.sendPasswordResetEmail(
+  'user@example.com',
+  'https://...',
+);
 
 // Verification - dùng templates/verification.html
 await this.mailService.sendVerificationEmail('user@example.com', 'https://...');
@@ -269,12 +279,12 @@ await this.mailService.sendTemplatedEmail(
 
 ### Các template và context
 
-| Template          | Method                   | Context                                              |
-|-------------------|--------------------------|------------------------------------------------------|
-| welcome           | `renderWelcome()`        | `name`, `activationLink?`                            |
-| password-reset    | `renderPasswordReset()`  | `resetLink`                                          |
-| verification      | `renderVerification()`   | `verificationLink`                                   |
-| notification      | `renderNotification()`   | `title`, `message`, `link?`                          |
+| Template       | Method                  | Context                     |
+| -------------- | ----------------------- | --------------------------- |
+| welcome        | `renderWelcome()`       | `name`, `activationLink?`   |
+| password-reset | `renderPasswordReset()` | `resetLink`                 |
+| verification   | `renderVerification()`  | `verificationLink`          |
+| notification   | `renderNotification()`  | `title`, `message`, `link?` |
 
 ### Thêm template mới
 
@@ -399,6 +409,7 @@ await this.queueService.addEmailJob(data, {
 **Nguyên nhân:** Sai credentials hoặc SMTP settings.
 
 **Giải pháp:**
+
 1. Kiểm tra `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASSWORD`
 2. Với Gmail, đảm bảo đã enable 2-Step Verification và dùng App Password
 3. Kiểm tra firewall/network restrictions
@@ -408,6 +419,7 @@ await this.queueService.addEmailJob(data, {
 **Nguyên nhân:** Email bị spam filter hoặc sai address.
 
 **Giải pháp:**
+
 1. Kiểm tra spam folder
 2. Verify email address
 3. Sử dụng reputable SMTP provider
@@ -418,6 +430,7 @@ await this.queueService.addEmailJob(data, {
 **Nguyên nhân:** SMTP server chậm hoặc network issues.
 
 **Giải pháp:**
+
 1. Increase timeout settings
 2. Use queue để retry tự động
 3. Check network connectivity
@@ -427,6 +440,7 @@ await this.queueService.addEmailJob(data, {
 **Nguyên nhân:** File quá lớn hoặc path sai.
 
 **Giải pháp:**
+
 1. Kiểm tra file size limits
 2. Verify file paths
 3. Use Buffer thay vì path nếu cần
@@ -491,7 +505,9 @@ export class MailController {
   constructor(private mailService: MailService) {}
 
   @Post('send')
-  async sendEmail(@Body() data: { to: string; subject: string; message: string }) {
+  async sendEmail(
+    @Body() data: { to: string; subject: string; message: string },
+  ) {
     await this.mailService.sendMail({
       to: data.to,
       subject: data.subject,

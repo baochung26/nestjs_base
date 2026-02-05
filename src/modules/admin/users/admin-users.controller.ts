@@ -9,7 +9,16 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiExtraModels, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiExtraModels,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { AdminUsersService } from './admin-users.service';
 import { CreateUserDto } from '../../users/dtos/create-user.dto';
 import { UpdateUserDto } from '../../users/dtos/update-user.dto';
@@ -18,10 +27,21 @@ import { UsersListResponseDto } from '../../users/dtos/users-list-response.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
-import { ApiProtectedCommonResponses, ApiBadRequestResponse, ApiNotFoundResponse, ApiConflictResponse } from '../../../common/decorators/api-common-responses.decorator';
-import { ApiStandardResponse, ApiPaginatedResponse } from '../../../common/decorators/api-response.decorator';
+import {
+  ApiProtectedCommonResponses,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiConflictResponse,
+} from '../../../common/decorators/api-common-responses.decorator';
+import {
+  ApiStandardResponse,
+  ApiPaginatedResponse,
+} from '../../../common/decorators/api-response.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { PaginationQueryDto, SortOrder } from '../../../shared/pagination/pagination.dto';
+import {
+  PaginationQueryDto,
+  SortOrder,
+} from '../../../shared/pagination/pagination.dto';
 
 @ApiTags('admin')
 @ApiExtraModels(UserResponseDto, UsersListResponseDto)
@@ -33,16 +53,34 @@ export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all users (Admin)', description: 'Lấy danh sách tất cả users với phân trang và sắp xếp. Chỉ admin mới có quyền.' })
+  @ApiOperation({
+    summary: 'Get all users (Admin)',
+    description:
+      'Lấy danh sách tất cả users với phân trang và sắp xếp. Chỉ admin mới có quyền.',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
-  @ApiQuery({ name: 'sortBy', required: false, type: String, example: 'createdAt' })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrder, example: SortOrder.DESC })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    type: String,
+    example: 'createdAt',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: SortOrder,
+    example: SortOrder.DESC,
+  })
   @ApiPaginatedResponse(UserResponseDto, 'List of users retrieved successfully')
-  @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of users retrieved successfully',
+  })
   @ApiProtectedCommonResponses()
   getAllUsers(
-    @Query() query: PaginationQueryDto & { sortBy?: string; sortOrder?: SortOrder },
+    @Query()
+    query: PaginationQueryDto & { sortBy?: string; sortOrder?: SortOrder },
   ) {
     return this.adminUsersService.getAllUsers(
       query.page,
@@ -53,16 +91,41 @@ export class AdminUsersController {
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Search users (Admin)', description: 'Tìm kiếm users theo email, role, isActive với phân trang. Chỉ admin mới có quyền.' })
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Tìm kiếm theo email' })
-  @ApiQuery({ name: 'role', required: false, enum: UserRole, description: 'Lọc theo role' })
-  @ApiQuery({ name: 'isActive', required: false, type: String, description: 'Lọc theo trạng thái (true/false)' })
+  @ApiOperation({
+    summary: 'Search users (Admin)',
+    description:
+      'Tìm kiếm users theo email, role, isActive với phân trang. Chỉ admin mới có quyền.',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Tìm kiếm theo email',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: UserRole,
+    description: 'Lọc theo role',
+  })
+  @ApiQuery({
+    name: 'isActive',
+    required: false,
+    type: String,
+    description: 'Lọc theo trạng thái (true/false)',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrder })
-  @ApiPaginatedResponse(UserResponseDto, 'Search results retrieved successfully')
-  @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
+  @ApiPaginatedResponse(
+    UserResponseDto,
+    'Search results retrieved successfully',
+  )
+  @ApiResponse({
+    status: 200,
+    description: 'Search results retrieved successfully',
+  })
   @ApiProtectedCommonResponses()
   searchUsers(
     @Query()
@@ -91,8 +154,15 @@ export class AdminUsersController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get user by ID (Admin)', description: 'Lấy thông tin user theo ID. Chỉ admin mới có quyền.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiOperation({
+    summary: 'Get user by ID (Admin)',
+    description: 'Lấy thông tin user theo ID. Chỉ admin mới có quyền.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiStandardResponse(UserResponseDto, 'User retrieved successfully', 200)
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
@@ -101,7 +171,10 @@ export class AdminUsersController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create user (Admin)', description: 'Tạo user mới. Chỉ admin mới có quyền.' })
+  @ApiOperation({
+    summary: 'Create user (Admin)',
+    description: 'Tạo user mới. Chỉ admin mới có quyền.',
+  })
   @ApiBody({ type: CreateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User created successfully', 201)
   @ApiBadRequestResponse('Bad request — validation failed')
@@ -112,8 +185,15 @@ export class AdminUsersController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update user (Admin)', description: 'Cập nhật thông tin user. Chỉ admin mới có quyền.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiOperation({
+    summary: 'Update user (Admin)',
+    description: 'Cập nhật thông tin user. Chỉ admin mới có quyền.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiBody({ type: UpdateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User updated successfully', 200)
   @ApiBadRequestResponse('Bad request — validation failed')
@@ -124,21 +204,28 @@ export class AdminUsersController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete user (Admin)', description: 'Xóa user. Chỉ admin mới có quyền.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiOperation({
+    summary: 'Delete user (Admin)',
+    description: 'Xóa user. Chỉ admin mới có quyền.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
     description: 'User deleted successfully',
     schema: {
       allOf: [
         { $ref: '#/components/schemas/ApiResponseDto' },
         {
           properties: {
-            data: { type: 'object', nullable: true, example: null }
-          }
-        }
-      ]
-    }
+            data: { type: 'object', nullable: true, example: null },
+          },
+        },
+      ],
+    },
   })
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
@@ -147,8 +234,15 @@ export class AdminUsersController {
   }
 
   @Patch(':id/activate')
-  @ApiOperation({ summary: 'Activate user (Admin)', description: 'Kích hoạt user. Chỉ admin mới có quyền.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiOperation({
+    summary: 'Activate user (Admin)',
+    description: 'Kích hoạt user. Chỉ admin mới có quyền.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiStandardResponse(UserResponseDto, 'User activated successfully', 200)
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
@@ -157,8 +251,15 @@ export class AdminUsersController {
   }
 
   @Patch(':id/deactivate')
-  @ApiOperation({ summary: 'Deactivate user (Admin)', description: 'Vô hiệu hóa user. Chỉ admin mới có quyền.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiOperation({
+    summary: 'Deactivate user (Admin)',
+    description: 'Vô hiệu hóa user. Chỉ admin mới có quyền.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiStandardResponse(UserResponseDto, 'User deactivated successfully', 200)
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()

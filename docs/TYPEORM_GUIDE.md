@@ -13,6 +13,7 @@
 ## 🎯 Tổng quan
 
 Dự án sử dụng **TypeORM** - một ORM mạnh mẽ cho TypeScript và JavaScript. TypeORM hỗ trợ:
+
 - ✅ PostgreSQL database
 - ✅ Entity definitions với decorators
 - ✅ Repository pattern
@@ -38,7 +39,7 @@ TypeOrmModule.forRootAsync({
   migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
   synchronize: !isProduction, // false trong production
   logging: !isProduction,
-})
+});
 ```
 
 ### Environment Variables
@@ -55,6 +56,7 @@ DB_SSL=false  # true cho production với SSL
 ### Connection Pooling
 
 TypeORM tự động quản lý connection pool:
+
 - **Max connections:** 10
 - **Min connections:** 2
 - **Idle timeout:** 30 seconds
@@ -294,11 +296,13 @@ npm run migration:show
 ### 1. Sử dụng Migrations thay vì Synchronize
 
 ✅ **Production:**
+
 ```typescript
 synchronize: false, // Luôn false trong production
 ```
 
 ❌ **Development:**
+
 ```typescript
 synchronize: true, // Chỉ dùng trong development
 ```
@@ -306,6 +310,7 @@ synchronize: true, // Chỉ dùng trong development
 ### 2. Select chỉ fields cần thiết
 
 ✅ **Good:**
+
 ```typescript
 const user = await this.userRepository.findOne({
   where: { id },
@@ -314,6 +319,7 @@ const user = await this.userRepository.findOne({
 ```
 
 ❌ **Bad:**
+
 ```typescript
 const user = await this.userRepository.findOne({ where: { id } });
 // Lấy tất cả fields kể cả password
@@ -325,7 +331,7 @@ const user = await this.userRepository.findOne({ where: { id } });
 await this.userRepository.manager.transaction(async (manager) => {
   const user = manager.create(User, userData);
   await manager.save(user);
-  
+
   const profile = manager.create(Profile, profileData);
   await manager.save(profile);
 });
@@ -383,6 +389,7 @@ const users = await this.userRepository.find({
 **Lỗi:** `Connection refused` hoặc `Cannot connect to database`
 
 **Giải pháp:**
+
 1. Kiểm tra database đang chạy
 2. Kiểm tra environment variables
 3. Kiểm tra network/firewall
@@ -397,6 +404,7 @@ docker-compose exec postgres psql -U postgres -d nestjs_db
 **Lỗi:** `Migration already executed`
 
 **Giải pháp:**
+
 ```bash
 # Xem migrations đã chạy
 npm run migration:show
@@ -410,6 +418,7 @@ npm run migration:revert
 **Lỗi:** `Entity metadata not found`
 
 **Giải pháp:**
+
 1. Đảm bảo entity được import trong module
 2. Kiểm tra path trong `entities` array
 3. Rebuild project: `npm run build`
@@ -417,6 +426,7 @@ npm run migration:revert
 ### Performance Issues
 
 **Giải pháp:**
+
 1. Sử dụng indexes
 2. Select chỉ fields cần thiết
 3. Sử dụng pagination

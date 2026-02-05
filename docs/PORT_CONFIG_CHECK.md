@@ -2,10 +2,10 @@
 
 ## Quy ước đặt tên (tránh nhầm host port vs container/connection port)
 
-| Loại | Biến | Ý nghĩa | Dùng ở đâu |
-|------|------|---------|------------|
-| **Host port** (port trên máy host) | `APP_HOST_PORT`, `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, `PGADMIN_HOST_PORT` | Port bên trái trong mapping `HOST:CONTAINER` | Chỉ trong **docker-compose** (port mapping) |
-| **Container / connection port** | `PORT`, `DB_PORT`, `REDIS_PORT`, `APP_PORT` | Port app **lắng nghe** hoặc **kết nối tới** service | **App** (configuration.ts, env khi chạy local); **docker-compose** set cứng cho container |
+| Loại                               | Biến                                                                          | Ý nghĩa                                             | Dùng ở đâu                                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Host port** (port trên máy host) | `APP_HOST_PORT`, `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, `PGADMIN_HOST_PORT` | Port bên trái trong mapping `HOST:CONTAINER`        | Chỉ trong **docker-compose** (port mapping)                                               |
+| **Container / connection port**    | `PORT`, `DB_PORT`, `REDIS_PORT`, `APP_PORT`                                   | Port app **lắng nghe** hoặc **kết nối tới** service | **App** (configuration.ts, env khi chạy local); **docker-compose** set cứng cho container |
 
 - **Trong Docker**: App nhận `PORT=3000`, `DB_PORT=5432`, `REDIS_PORT=6379` từ docker-compose (port **trong** mạng container).
 - **Chạy local**: App đọc `.env` → `APP_PORT=3000` (listen), `DB_PORT=5432`, `REDIS_PORT=6380` (= `REDIS_HOST_PORT`, kết nối tới Redis qua host).
@@ -19,10 +19,10 @@
 ```yaml
 # Port mapping: *_HOST_PORT (host) : port cố định (container)
 ports:
-  - "${APP_HOST_PORT:-3001}:3000"      # app
-  - "${POSTGRES_HOST_PORT:-5432}:5432" # postgres
-  - "${REDIS_HOST_PORT:-6380}:6379"    # redis
-  - "${PGADMIN_HOST_PORT:-5050}:80"    # pgadmin
+  - '${APP_HOST_PORT:-3001}:3000' # app
+  - '${POSTGRES_HOST_PORT:-5432}:5432' # postgres
+  - '${REDIS_HOST_PORT:-6380}:6379' # redis
+  - '${PGADMIN_HOST_PORT:-5050}:80' # pgadmin
 
 # App container: port listen + kết nối (container-internal)
 environment:
@@ -73,9 +73,9 @@ REDIS_PORT=6380        # port kết nối Redis (local = REDIS_HOST_PORT)
 
 ## Tóm tắt
 
-| File | Biến host port | Biến connection/listen port |
-|------|----------------|------------------------------|
+| File               | Biến host port                                                                | Biến connection/listen port                                                |
+| ------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | **docker-compose** | `APP_HOST_PORT`, `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, `PGADMIN_HOST_PORT` | Trong container: `PORT=3000`, `DB_PORT=5432`, `REDIS_PORT=6379` (hardcode) |
-| **.env** | Cùng các `*_HOST_PORT` ở trên | `APP_PORT`, `DB_PORT`, `REDIS_PORT` (cho app chạy local) |
+| **.env**           | Cùng các `*_HOST_PORT` ở trên                                                 | `APP_PORT`, `DB_PORT`, `REDIS_PORT` (cho app chạy local)                   |
 
 - Không dùng chung một biến vừa cho host port vừa cho connection port → tránh nhầm giữa local và Docker.

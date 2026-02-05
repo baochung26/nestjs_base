@@ -69,7 +69,9 @@ export class SyncScheduler {
         await this.cacheService.set(cacheKey, user, 3600); // 1 hour
       }
 
-      this.logger.log(`Cache synced with database, ${activeUsers.length} users cached`);
+      this.logger.log(
+        `Cache synced with database, ${activeUsers.length} users cached`,
+      );
     } catch (error: any) {
       this.logger.error(
         { error: error.message },
@@ -127,7 +129,11 @@ export class SyncScheduler {
       // Check cache connection
       try {
         await this.cacheService.exists('health:check');
-        await this.cacheService.set('health:check', { timestamp: new Date() }, 60);
+        await this.cacheService.set(
+          'health:check',
+          { timestamp: new Date() },
+          60,
+        );
         healthStatus.cache = 'ok';
       } catch {
         healthStatus.cache = 'error';

@@ -21,7 +21,10 @@ export class CacheService {
       }
       return value;
     } catch (error) {
-      this.logger.error({ key, error: error.message }, 'Error getting from cache');
+      this.logger.error(
+        { key, error: error.message },
+        'Error getting from cache',
+      );
       return undefined;
     }
   }
@@ -46,7 +49,10 @@ export class CacheService {
       await this.cacheManager.del(key);
       this.logger.debug({ key }, 'Cache deleted');
     } catch (error) {
-      this.logger.error({ key, error: error.message }, 'Error deleting from cache');
+      this.logger.error(
+        { key, error: error.message },
+        'Error deleting from cache',
+      );
     }
   }
 
@@ -58,7 +64,10 @@ export class CacheService {
       await Promise.all(keys.map((key) => this.cacheManager.del(key)));
       this.logger.debug({ keys }, 'Multiple cache keys deleted');
     } catch (error) {
-      this.logger.error({ keys, error: error.message }, 'Error deleting multiple keys from cache');
+      this.logger.error(
+        { keys, error: error.message },
+        'Error deleting multiple keys from cache',
+      );
     }
   }
 

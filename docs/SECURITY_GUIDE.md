@@ -135,7 +135,7 @@ throttlers: [
     ttl: 600000, // 10 minutes
     limit: 1000, // 1000 requests per 10 minutes
   },
-]
+];
 ```
 
 ### Global Rate Limiting
@@ -275,7 +275,11 @@ export class PublicController {
 
 ```typescript
 import { Controller, Get, Post } from '@nestjs/common';
-import { ThrottlePreset, ThrottleCustom, SkipThrottle } from '../common/decorators/skip-throttle.decorator';
+import {
+  ThrottlePreset,
+  ThrottleCustom,
+  SkipThrottle,
+} from '../common/decorators/skip-throttle.decorator';
 
 @Controller('api')
 export class ApiController {
@@ -356,6 +360,7 @@ const isDevelopment = configService.get('app.env') !== 'production';
 **Nguyên nhân:** Vượt quá rate limit
 
 **Giải pháp:**
+
 1. Kiểm tra rate limit configuration
 2. Sử dụng `@SkipThrottle()` nếu cần
 3. Tăng rate limit nếu hợp lý
@@ -367,6 +372,7 @@ const isDevelopment = configService.get('app.env') !== 'production';
 **Nguyên nhân:** Origin không được phép
 
 **Giải pháp:**
+
 1. Thêm origin vào `CORS_ORIGINS` trong `.env`
 2. Kiểm tra CORS configuration trong `security.config.ts`
 
@@ -375,6 +381,7 @@ const isDevelopment = configService.get('app.env') !== 'production';
 **Nguyên nhân:** Content-Security-Policy quá strict
 
 **Giải pháp:**
+
 1. Điều chỉnh CSP directives trong `security.config.ts`
 2. Disable CSP trong development mode
 
@@ -383,6 +390,7 @@ const isDevelopment = configService.get('app.env') !== 'production';
 **Nguyên nhân:** ThrottlerGuard không được register
 
 **Giải pháp:**
+
 1. Kiểm tra `SecurityModule` đã được import vào `AppModule`
 2. Kiểm tra `APP_GUARD` provider trong `SecurityModule`
 

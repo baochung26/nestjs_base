@@ -26,9 +26,7 @@ export class DefaultQueueProcessor {
 export class EmailQueueProcessor {
   private readonly logger = new Logger(EmailQueueProcessor.name);
 
-  constructor(
-    private readonly mailService?: MailService,
-  ) {}
+  constructor(private readonly mailService?: MailService) {}
 
   @Process('send-email')
   async handleSendEmail(job: Job<EmailJobData>) {

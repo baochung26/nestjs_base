@@ -25,39 +25,44 @@ export class RefreshTokenService {
   async generateRefreshToken(userId: string, email: string): Promise<string> {
     const tokenId = uuidv4();
     const refreshToken = `${userId}:${tokenId}`;
-    
+
     const jwt = this.configService.get('jwt');
     const refreshTokenExpiresIn = jwt?.refreshTokenExpiresIn || '7d';
-    
+
     // Convert expiresIn string to seconds (e.g., '7d' -> 604800)
     const ttlSeconds = this.parseExpiresIn(refreshTokenExpiresIn);
-    
+
     const payload: RefreshTokenPayload = {
       userId,
       email,
       tokenId,
     };
-    
+
     const cacheKey = this.getCacheKey(refreshToken);
     await this.cacheService.set(cacheKey, payload, ttlSeconds * 1000); // CacheService expects milliseconds
-    
+
     this.logger.debug({ userId, tokenId }, 'Refresh token generated');
-    
+
     return refreshToken;
   }
 
   /**
    * Validate and retrieve refresh token payload
    */
-  async validateRefreshToken(refreshToken: string): Promise<RefreshTokenPayload | null> {
+  async validateRefreshToken(
+    refreshToken: string,
+  ): Promise<RefreshTokenPayload | null> {
     const cacheKey = this.getCacheKey(refreshToken);
     const payload = await this.cacheService.get<RefreshTokenPayload>(cacheKey);
-    
+
     if (!payload) {
-      this.logger.warn({ refreshToken: this.maskToken(refreshToken) }, 'Invalid or expired refresh token');
+      this.logger.warn(
+        { refreshToken: this.maskToken(refreshToken) },
+        'Invalid or expired refresh token',
+      );
       return null;
     }
-    
+
     return payload;
   }
 
@@ -67,7 +72,10 @@ export class RefreshTokenService {
   async revokeRefreshToken(refreshToken: string): Promise<void> {
     const cacheKey = this.getCacheKey(refreshToken);
     await this.cacheService.del(cacheKey);
-    this.logger.debug({ refreshToken: this.maskToken(refreshToken) }, 'Refresh token revoked');
+    this.logger.debug(
+      { refreshToken: this.maskToken(refreshToken) },
+      'Refresh token revoked',
+    );
   }
 
   /**
@@ -77,14 +85,20 @@ export class RefreshTokenService {
     // Note: This is a simplified implementation
     // In production, you might want to maintain a set of active tokens per user
     // For now, we'll rely on TTL expiration
-    this.logger.debug({ userId }, 'All refresh tokens will expire naturally (TTL)');
+    this.logger.debug(
+      { userId },
+      'All refresh tokens will expire naturally (TTL)',
+    );
   }
 
   /**
    * Get cache key for refresh token
    */
   private getCacheKey(refreshToken: string): string {
-    return this.cacheService.generateKey(this.REFRESH_TOKEN_PREFIX, refreshToken);
+    return this.cacheService.generateKey(
+      this.REFRESH_TOKEN_PREFIX,
+      refreshToken,
+    );
   }
 
   /**
@@ -97,17 +111,17 @@ export class RefreshTokenService {
       // Default to 7 days if format is invalid
       return 7 * 24 * 60 * 60;
     }
-    
+
     const value = parseInt(match[1], 10);
     const unit = match[2];
-    
+
     const multipliers: Record<string, number> = {
       s: 1,
       m: 60,
       h: 60 * 60,
       d: 24 * 60 * 60,
     };
-    
+
     return value * (multipliers[unit] || 1);
   }
 

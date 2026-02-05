@@ -6,11 +6,11 @@ Tài liệu mô tả luồng hoạt động của đăng nhập Google giữa **
 
 ## Tổng quan
 
-| Thành phần | URL (development) | Vai trò |
-|------------|--------------------|--------|
-| **Frontend (Next.js)** | `http://localhost:3000` | Hiển thị UI, nút "Login with Google", trang callback nhận token |
-| **Backend (NestJS)** | `http://localhost:3001` | Khởi tạo OAuth, nhận callback từ Google, tạo/find user, cấp JWT, redirect về frontend |
-| **Google OAuth** | `accounts.google.com` | Xác thực user, redirect về backend với authorization code |
+| Thành phần             | URL (development)       | Vai trò                                                                               |
+| ---------------------- | ----------------------- | ------------------------------------------------------------------------------------- |
+| **Frontend (Next.js)** | `http://localhost:3000` | Hiển thị UI, nút "Login with Google", trang callback nhận token                       |
+| **Backend (NestJS)**   | `http://localhost:3001` | Khởi tạo OAuth, nhận callback từ Google, tạo/find user, cấp JWT, redirect về frontend |
+| **Google OAuth**       | `accounts.google.com`   | Xác thực user, redirect về backend với authorization code                             |
 
 **Nguyên tắc:** Client ID & Secret chỉ nằm trên **backend**. Frontend không gọi trực tiếp Google OAuth; user được chuyển qua backend rồi backend redirect đến Google.
 
@@ -126,6 +126,7 @@ Tài liệu mô tả luồng hoạt động của đăng nhập Google giữa **
   3. Decode/parse `user` nếu cần (backend gửi dạng `encodeURIComponent(JSON.stringify(result))`).
   4. Redirect user vào trang chính (ví dụ `/dashboard`).
 - **Ví dụ code (Next.js App Router):**
+
   ```tsx
   // app/auth/callback/page.tsx
   'use client';
@@ -165,25 +166,25 @@ Tài liệu mô tả luồng hoạt động của đăng nhập Google giữa **
 
 ## URL và endpoint tóm tắt
 
-| Bước | Ai thực hiện | URL / Hành động |
-|------|--------------|------------------|
-| Bắt đầu OAuth | Next.js redirect user | `GET http://localhost:3001/api/v1/auth/google` |
-| Google xác thực | Trình duyệt | `https://accounts.google.com/...` (do backend redirect) |
-| Callback từ Google | Google redirect | `GET http://localhost:3001/api/v1/auth/google/callback?code=...` |
-| Redirect về frontend | NestJS redirect | `GET http://localhost:3000/auth/callback?access_token=...&refresh_token=...&user=...` |
-| Lưu token & vào app | Next.js | Đọc query → lưu token → redirect `/dashboard` (hoặc trang chính) |
+| Bước                 | Ai thực hiện          | URL / Hành động                                                                       |
+| -------------------- | --------------------- | ------------------------------------------------------------------------------------- |
+| Bắt đầu OAuth        | Next.js redirect user | `GET http://localhost:3001/api/v1/auth/google`                                        |
+| Google xác thực      | Trình duyệt           | `https://accounts.google.com/...` (do backend redirect)                               |
+| Callback từ Google   | Google redirect       | `GET http://localhost:3001/api/v1/auth/google/callback?code=...`                      |
+| Redirect về frontend | NestJS redirect       | `GET http://localhost:3000/auth/callback?access_token=...&refresh_token=...&user=...` |
+| Lưu token & vào app  | Next.js               | Đọc query → lưu token → redirect `/dashboard` (hoặc trang chính)                      |
 
 ---
 
 ## Phân trách trách nhiệm
 
-| Nội dung | Frontend (Next.js) | Backend (NestJS) |
-|---------|--------------------|------------------|
-| Client ID / Secret | Không giữ, không dùng | Giữ trong `.env`, dùng để nói chuyện với Google |
-| Bắt đầu OAuth | Chỉ redirect user đến backend `/api/v1/auth/google` | Nhận request, redirect đến Google |
-| Nhận callback từ Google | Không | Nhận tại `/api/v1/auth/google/callback`, đổi code lấy profile |
-| Tạo/find user & JWT | Không | AuthService.googleLogin(), trả JWT qua redirect |
-| Lưu token, bảo vệ route | Có (lưu token, gửi kèm request sau này) | Cung cấp API bảo vệ bằng JWT (Bearer) |
+| Nội dung                | Frontend (Next.js)                                  | Backend (NestJS)                                              |
+| ----------------------- | --------------------------------------------------- | ------------------------------------------------------------- |
+| Client ID / Secret      | Không giữ, không dùng                               | Giữ trong `.env`, dùng để nói chuyện với Google               |
+| Bắt đầu OAuth           | Chỉ redirect user đến backend `/api/v1/auth/google` | Nhận request, redirect đến Google                             |
+| Nhận callback từ Google | Không                                               | Nhận tại `/api/v1/auth/google/callback`, đổi code lấy profile |
+| Tạo/find user & JWT     | Không                                               | AuthService.googleLogin(), trả JWT qua redirect               |
+| Lưu token, bảo vệ route | Có (lưu token, gửi kèm request sau này)             | Cung cấp API bảo vệ bằng JWT (Bearer)                         |
 
 ---
 

@@ -12,12 +12,23 @@ export class HealthResponseDto {
   @ApiProperty({ example: 'ok' })
   status: string;
 
-  @ApiProperty({ type: 'object', additionalProperties: { $ref: '#/components/schemas/HealthIndicatorDto' } })
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { $ref: '#/components/schemas/HealthIndicatorDto' },
+  })
   info: Record<string, HealthIndicatorDto>;
 
-  @ApiProperty({ type: 'object', additionalProperties: { $ref: '#/components/schemas/HealthIndicatorDto' }, required: false })
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { $ref: '#/components/schemas/HealthIndicatorDto' },
+    required: false,
+  })
   error?: Record<string, HealthIndicatorDto>;
 
-  @ApiProperty({ type: 'object', additionalProperties: { $ref: '#/components/schemas/HealthIndicatorDto' }, required: false })
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { $ref: '#/components/schemas/HealthIndicatorDto' },
+    required: false,
+  })
   details?: Record<string, HealthIndicatorDto>;
 }

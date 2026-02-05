@@ -1,8 +1,4 @@
-import {
-  PipeTransform,
-  Injectable,
-  ArgumentMetadata,
-} from '@nestjs/common';
+import { PipeTransform, Injectable } from '@nestjs/common';
 
 /**
  * TrimPipe để trim whitespace từ strings
@@ -16,7 +12,7 @@ export class TrimPipe implements PipeTransform {
     this.fieldsToTrim = fieldsToTrim || [];
   }
 
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any) {
     if (typeof value !== 'object' || value === null) {
       return value;
     }

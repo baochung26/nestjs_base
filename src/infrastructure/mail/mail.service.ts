@@ -81,9 +81,9 @@ export class MailService {
     try {
       const info = await this.transporter.sendMail(mailOptions);
       this.logger.log(
-        `Email sent successfully: messageId=${info.messageId}, to=${Array.isArray(
-          options.to,
-        ) ? options.to.join(',') : options.to}, subject=${options.subject}`,
+        `Email sent successfully: messageId=${info.messageId}, to=${
+          Array.isArray(options.to) ? options.to.join(',') : options.to
+        }, subject=${options.subject}`,
       );
     } catch (error: any) {
       this.logger.error(
@@ -119,7 +119,10 @@ export class MailService {
   }
 
   private getPlainTextFromHtml(html: string): string {
-    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return html
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   /**
@@ -140,7 +143,9 @@ export class MailService {
     );
 
     if (failed > 0) {
-      throw new Error(`Failed to send ${failed} out of ${options.length} emails`);
+      throw new Error(
+        `Failed to send ${failed} out of ${options.length} emails`,
+      );
     }
   }
 
@@ -153,7 +158,10 @@ export class MailService {
     activationLink?: string,
   ): Promise<void> {
     const subject = 'Welcome to our platform!';
-    const html = this.mailTemplateService.renderWelcome({ name, activationLink });
+    const html = this.mailTemplateService.renderWelcome({
+      name,
+      activationLink,
+    });
 
     await this.sendMail({
       to,
@@ -181,9 +189,14 @@ export class MailService {
   /**
    * Send verification email (uses template from templates/verification.html)
    */
-  async sendVerificationEmail(to: string, verificationLink: string): Promise<void> {
+  async sendVerificationEmail(
+    to: string,
+    verificationLink: string,
+  ): Promise<void> {
     const subject = 'Verify your email address';
-    const html = this.mailTemplateService.renderVerification({ verificationLink });
+    const html = this.mailTemplateService.renderVerification({
+      verificationLink,
+    });
 
     await this.sendMail({
       to,

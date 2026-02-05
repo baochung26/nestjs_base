@@ -1,6 +1,7 @@
 # Hướng dẫn Setup Google OAuth
 
 Tài liệu này giả định:
+
 - **Frontend** chạy tại `http://localhost:3000`
 - **Backend** (NestJS API) chạy tại `http://localhost:3001`
 
@@ -39,6 +40,7 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 **Lưu ý:**
+
 - Thay `your-google-client-id` và `your-google-client-secret` bằng giá trị thực từ Google Cloud Console
 - `GOOGLE_CALLBACK_URL`: URL **backend** (port 3001) — Google redirect về đây sau khi user đăng nhập. Phải khớp với **Authorized redirect URIs** trong Google Console.
 - `FRONTEND_URL`: URL **frontend** (port 3000) — backend redirect về đây với token sau khi xử lý callback.
@@ -87,16 +89,16 @@ useEffect(() => {
   const accessToken = urlParams.get('access_token');
   const refreshToken = urlParams.get('refresh_token');
   const user = urlParams.get('user');
-  
+
   if (accessToken) {
     // Lưu token vào localStorage hoặc state management
     localStorage.setItem('access_token', accessToken);
     if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
-    
+
     // Parse user data
     const userData = JSON.parse(decodeURIComponent(user));
     console.log('User logged in:', userData);
-    
+
     // Redirect to dashboard
     window.location.href = '/dashboard';
   }
@@ -120,14 +122,14 @@ export default {
       // Handle callback (query: access_token, refresh_token, user)
       const urlParams = new URLSearchParams(window.location.search);
       const accessToken = urlParams.get('access_token');
-      
+
       if (accessToken) {
         localStorage.setItem('access_token', accessToken);
         this.$router.push('/dashboard');
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 ```
 
@@ -137,10 +139,10 @@ export default {
 
 ## API Endpoints (Backend — localhost:3001)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/auth/google` | Bắt đầu Google OAuth flow (redirect đến Google) |
-| GET | `/api/v1/auth/google/callback` | Callback từ Google (backend xử lý rồi redirect về frontend) |
+| Method | Endpoint                       | Description                                                 |
+| ------ | ------------------------------ | ----------------------------------------------------------- |
+| GET    | `/api/v1/auth/google`          | Bắt đầu Google OAuth flow (redirect đến Google)             |
+| GET    | `/api/v1/auth/google/callback` | Callback từ Google (backend xử lý rồi redirect về frontend) |
 
 ## Flow Diagram
 
@@ -187,10 +189,12 @@ Google trả về lỗi này khi **Client ID** hoặc **Client Secret** không h
    - **Client secret**: click **Show** rồi copy — thường chỉ hiện khi tạo mới; nếu đã mất thì tạo **Client secret mới** (nút reset/regenerate trong cùng trang)
 
 3. **Cập nhật `.env` đúng format**
+
    ```env
    GOOGLE_CLIENT_ID=123456789-xxxx.apps.googleusercontent.com
    GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxxxxxxxxx
    ```
+
    - Không bỏ trong dấu ngoặc kép trừ khi giá trị có khoảng trắng (không nên có)
    - Không có khoảng trắng trước/sau dấu `=`
    - Không xuống dòng giữa chừng trong một giá trị

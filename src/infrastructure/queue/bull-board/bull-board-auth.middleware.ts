@@ -34,9 +34,9 @@ export function createBullBoardAuthMiddleware(options: BullBoardAuthOptions) {
     const key = extractKey(req);
 
     if (!key || !secureCompare(key, secretKey)) {
-      res.status(401).send(
-        renderBullBoardUnauthorizedHtml('Invalid or missing key'),
-      );
+      res
+        .status(401)
+        .send(renderBullBoardUnauthorizedHtml('Invalid or missing key'));
       return;
     }
 
@@ -47,9 +47,9 @@ export function createBullBoardAuthMiddleware(options: BullBoardAuthOptions) {
 /**
  * Factory sử dụng ConfigService - dùng trong NestJS context
  */
-export function createBullBoardAuthMiddlewareFromConfig(
-  configService: { get: (key: string, defaultValue?: string) => string | undefined },
-) {
+export function createBullBoardAuthMiddlewareFromConfig(configService: {
+  get: (key: string, defaultValue?: string) => string | undefined;
+}) {
   const secretKey = configService.get('bullBoard.secretKey', '') ?? '';
 
   return createBullBoardAuthMiddleware({ secretKey });

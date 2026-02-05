@@ -10,7 +10,7 @@ import { redisConfig } from '../../config/configuration';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
+      useFactory: () => {
         return {
           throttlers: [
             {

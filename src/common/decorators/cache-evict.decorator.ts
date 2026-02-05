@@ -20,4 +20,3 @@ export const CacheEvict = (key?: string | string[]) => {
   const value: CacheEvictValue = key ?? true;
   return SetMetadata(CACHE_EVICT_KEY, value);
 };
-

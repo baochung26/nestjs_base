@@ -8,7 +8,7 @@ export class AdminSettingsService {
   async getSettings() {
     const dbConfig = this.configService.get('database');
     const jwt = this.configService.get('jwt');
-    
+
     return {
       appName: 'NestJS Demo',
       version: '1.0.0',

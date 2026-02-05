@@ -207,30 +207,30 @@ async validate(payload: any) {
 
 ## 4. Bảng tóm tắt
 
-| Giai đoạn | Thành phần | Việc chính |
-|-----------|------------|------------|
-| **Login** | LocalStrategy | Kiểm tra email/password, gán user lên request. |
-| **Trả JWT** | AuthService.generateAccessToken | Tạo payload `{ sub: id, email, role }`, ký bằng JwtService + secret → access_token. |
-| **Gửi request** | Client | Gửi header `Authorization: Bearer <access_token>`. |
-| **Bảo vệ route** | JwtAuthGuard | Kích hoạt strategy `'jwt'` (JwtStrategy). |
-| **Verify JWT** | JwtStrategy (passport-jwt) | Lấy token từ header, verify chữ ký và exp, giải mã payload. |
-| **Gán user** | JwtStrategy.validate | Tìm user theo `payload.sub`, kiểm tra tồn tại và isActive, return user → `request.user`. |
-| **Dùng user** | @CurrentUser() | Lấy `request.user` trong controller. |
+| Giai đoạn        | Thành phần                      | Việc chính                                                                               |
+| ---------------- | ------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Login**        | LocalStrategy                   | Kiểm tra email/password, gán user lên request.                                           |
+| **Trả JWT**      | AuthService.generateAccessToken | Tạo payload `{ sub: id, email, role }`, ký bằng JwtService + secret → access_token.      |
+| **Gửi request**  | Client                          | Gửi header `Authorization: Bearer <access_token>`.                                       |
+| **Bảo vệ route** | JwtAuthGuard                    | Kích hoạt strategy `'jwt'` (JwtStrategy).                                                |
+| **Verify JWT**   | JwtStrategy (passport-jwt)      | Lấy token từ header, verify chữ ký và exp, giải mã payload.                              |
+| **Gán user**     | JwtStrategy.validate            | Tìm user theo `payload.sub`, kiểm tra tồn tại và isActive, return user → `request.user`. |
+| **Dùng user**    | @CurrentUser()                  | Lấy `request.user` trong controller.                                                     |
 
 ---
 
 ## 5. Các file liên quan
 
-| File | Vai trò |
-|------|--------|
-| `src/modules/auth/auth.module.ts` | Đăng ký JwtModule, JwtStrategy. |
-| `src/config/configuration.ts` | Cấu hình jwt (secret, expiresIn). |
-| `src/modules/auth/strategies/local.strategy.ts` | Xác thực email/password khi login. |
-| `src/modules/auth/strategies/jwt.strategy.ts` | Verify JWT và gán user lên request. |
-| `src/modules/auth/services/auth.service.ts` | Login, generateAccessToken, generateTokens. |
-| `src/modules/auth/controllers/auth.controller.ts` | Endpoint login, profile, refresh, logout. |
-| `src/common/guards/jwt-auth.guard.ts` | Guard bảo vệ route cần JWT. |
-| `src/common/decorators/current-user.decorator.ts` | Lấy user từ request trong controller. |
+| File                                              | Vai trò                                     |
+| ------------------------------------------------- | ------------------------------------------- |
+| `src/modules/auth/auth.module.ts`                 | Đăng ký JwtModule, JwtStrategy.             |
+| `src/config/configuration.ts`                     | Cấu hình jwt (secret, expiresIn).           |
+| `src/modules/auth/strategies/local.strategy.ts`   | Xác thực email/password khi login.          |
+| `src/modules/auth/strategies/jwt.strategy.ts`     | Verify JWT và gán user lên request.         |
+| `src/modules/auth/services/auth.service.ts`       | Login, generateAccessToken, generateTokens. |
+| `src/modules/auth/controllers/auth.controller.ts` | Endpoint login, profile, refresh, logout.   |
+| `src/common/guards/jwt-auth.guard.ts`             | Guard bảo vệ route cần JWT.                 |
+| `src/common/decorators/current-user.decorator.ts` | Lấy user từ request trong controller.       |
 
 ---
 

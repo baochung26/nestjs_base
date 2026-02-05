@@ -13,11 +13,13 @@
 ## 📤 Request Format
 
 ### Headers
+
 ```typescript
 Content-Type: application/json
 ```
 
 ### Request Body
+
 ```typescript
 {
   "email": "user@example.com",
@@ -26,6 +28,7 @@ Content-Type: application/json
 ```
 
 ### Validation
+
 - `email`: Phải là email hợp lệ (IsEmail)
 - `password`: Phải là string (IsString)
 
@@ -121,10 +124,10 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -226,7 +229,7 @@ export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response: ApiResponse<LoginResponse> = await apiClient.post(
       '/api/v1/auth/login',
-      credentials
+      credentials,
     );
 
     if (response.success && response.data) {
@@ -314,7 +317,7 @@ export default function LoginPage() {
 
     try {
       const user = await authService.login({ email, password });
-      
+
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err: any) {
@@ -322,8 +325,8 @@ export default function LoginPage() {
       if (err.statusCode === 401) {
         setError('Email hoặc mật khẩu không đúng');
       } else if (err.statusCode === 400) {
-        const errorMsg = Array.isArray(err.error) 
-          ? err.error.join(', ') 
+        const errorMsg = Array.isArray(err.error)
+          ? err.error.join(', ')
           : err.error || 'Validation failed';
         setError(errorMsg);
       } else {
@@ -338,7 +341,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <h2 className="text-2xl font-bold text-center">Đăng nhập</h2>
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
@@ -415,8 +418,8 @@ export default function LoginPage() {
       if (err.statusCode === 401) {
         setError('Email hoặc mật khẩu không đúng');
       } else if (err.statusCode === 400) {
-        const errorMsg = Array.isArray(err.error) 
-          ? err.error.join(', ') 
+        const errorMsg = Array.isArray(err.error)
+          ? err.error.join(', ')
           : err.error || 'Validation failed';
         setError(errorMsg);
       } else {
@@ -447,8 +450,8 @@ export function middleware(request: NextRequest) {
 
   // Protected routes
   const protectedRoutes = ['/dashboard', '/profile', '/admin'];
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route),
   );
 
   if (isProtectedRoute && !token) {
@@ -530,8 +533,9 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 ## 📚 Các Endpoint khác
 
 ### Register
+
 ```typescript
-POST /api/v1/auth/register
+POST / api / v1 / auth / register;
 Body: {
   email: string;
   password: string;
@@ -541,18 +545,20 @@ Body: {
 ```
 
 ### Get Profile
+
 ```typescript
-GET /api/v1/auth/profile
+GET / api / v1 / auth / profile;
 Headers: {
-  Authorization: "Bearer <access_token>"
+  Authorization: 'Bearer <access_token>';
 }
 ```
 
 ### Get Users
+
 ```typescript
-GET /api/v1/users
+GET / api / v1 / users;
 Headers: {
-  Authorization: "Bearer <access_token>"
+  Authorization: 'Bearer <access_token>';
 }
 ```
 

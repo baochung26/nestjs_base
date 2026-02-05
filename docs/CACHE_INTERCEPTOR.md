@@ -88,10 +88,10 @@ Vì **CacheModule** là `@Global()` và export `CacheInterceptor`, bạn **khôn
 
 Bật cache cho route.
 
-| Tham số | Kiểu    | Mặc định | Mô tả |
-|--------|---------|----------|--------|
-| `ttl`  | `number`| `3600`   | Thời gian sống cache (giây). |
-| `key`  | `string`| (tự sinh) | Cache key tùy chỉnh. Nếu không truyền, key sinh từ request. |
+| Tham số | Kiểu     | Mặc định  | Mô tả                                                       |
+| ------- | -------- | --------- | ----------------------------------------------------------- |
+| `ttl`   | `number` | `3600`    | Thời gian sống cache (giây).                                |
+| `key`   | `string` | (tự sinh) | Cache key tùy chỉnh. Nếu không truyền, key sinh từ request. |
 
 **Ví dụ:**
 
@@ -132,7 +132,7 @@ import { Cache, SkipCache } from '../../../common/decorators/cache.decorator';
 @UseInterceptors(CacheInterceptor)
 export class ProductsController {
   @Get()
-  @Cache(1800)  // Cache 30 phút, key tự sinh
+  @Cache(1800) // Cache 30 phút, key tự sinh
   list() {
     return this.productsService.findAll();
   }
@@ -144,7 +144,7 @@ export class ProductsController {
   }
 
   @Get('fresh')
-  @SkipCache()  // Luôn gọi handler, không cache
+  @SkipCache() // Luôn gọi handler, không cache
   getFresh() {
     return this.productsService.getFresh();
   }
@@ -203,7 +203,7 @@ getStatistics() { ... }
 Interceptor sinh key từ request:
 
 ```typescript
-`cache:${method}:${url}:${queryString}:${paramsString}:${userId}`
+`cache:${method}:${url}:${queryString}:${paramsString}:${userId}`;
 ```
 
 - **method:** GET, POST, ...

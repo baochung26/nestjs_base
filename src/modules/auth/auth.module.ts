@@ -25,7 +25,11 @@ import { GoogleStrategy } from './strategies/google.strategy';
         return {
           secret: jwt?.secret || process.env.JWT_SECRET || 'your-secret-key',
           signOptions: {
-            expiresIn: jwt?.accessTokenExpiresIn || jwt?.expiresIn || process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m',
+            expiresIn:
+              jwt?.accessTokenExpiresIn ||
+              jwt?.expiresIn ||
+              process.env.JWT_ACCESS_TOKEN_EXPIRES_IN ||
+              '15m',
           },
         };
       },
@@ -33,7 +37,13 @@ import { GoogleStrategy } from './strategies/google.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, RefreshTokenService, JwtStrategy, LocalStrategy, GoogleStrategy],
+  providers: [
+    AuthService,
+    RefreshTokenService,
+    JwtStrategy,
+    LocalStrategy,
+    GoogleStrategy,
+  ],
   exports: [AuthService, RefreshTokenService],
 })
 export class AuthModule {}

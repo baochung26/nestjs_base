@@ -19,6 +19,7 @@
 ## 🎯 Tổng quan
 
 API này sử dụng:
+
 - **Base Path:** `/api/v1`
 - **Versioning:** URI-based (`/api/v1`)
 - **Content-Type:** `application/json`
@@ -118,12 +119,12 @@ API sử dụng **2 loại token**:
 
 ### Common Errors
 
-| Status Code | Message | Description |
-|------------|---------|-------------|
-| 401 | Unauthorized | Missing or invalid JWT token |
-| 403 | Forbidden | User doesn't have required role |
-| 404 | Not Found | Resource not found |
-| 409 | Conflict | Resource already exists (e.g., duplicate email) |
+| Status Code | Message      | Description                                     |
+| ----------- | ------------ | ----------------------------------------------- |
+| 401         | Unauthorized | Missing or invalid JWT token                    |
+| 403         | Forbidden    | User doesn't have required role                 |
+| 404         | Not Found    | Resource not found                              |
+| 409         | Conflict     | Resource already exists (e.g., duplicate email) |
 
 ---
 
@@ -224,6 +225,7 @@ Lấy thông tin chi tiết về các endpoints có sẵn.
 ```
 
 **Validation:**
+
 - `email`: Required, must be valid email
 - `password`: Required, minimum 6 characters
 - `firstName`: Required, string
@@ -247,11 +249,13 @@ Lấy thông tin chi tiết về các endpoints có sẵn.
 ```
 
 **Lưu ý:**
+
 - `access_token`: JWT token, hết hạn sau **15 phút**
 - `refresh_token`: Token để refresh access token, hết hạn sau **7 ngày**
 - Lưu trữ `refresh_token` ở client một cách an toàn (không gửi trong mỗi request)
 
 **Error Responses:**
+
 - `400`: Validation failed
 - `409`: Email already exists
 
@@ -277,6 +281,7 @@ Lấy thông tin chi tiết về các endpoints có sẵn.
 ```
 
 **Validation:**
+
 - `email`: Required, must be valid email
 - `password`: Required, string
 
@@ -298,11 +303,13 @@ Lấy thông tin chi tiết về các endpoints có sẵn.
 ```
 
 **Lưu ý:**
+
 - `access_token`: JWT token, hết hạn sau **15 phút**
 - `refresh_token`: Token để refresh access token, hết hạn sau **7 ngày**
 - Lưu trữ `refresh_token` ở client một cách an toàn (không gửi trong mỗi request)
 
 **Error Responses:**
+
 - `400`: Validation failed
 - `401`: Invalid credentials
 
@@ -319,6 +326,7 @@ Bắt đầu Google OAuth flow. Redirects to Google login page.
 **Response:** Redirect to Google OAuth
 
 **Usage:**
+
 ```
 GET /api/v1/auth/google
 → Redirects to Google
@@ -339,11 +347,13 @@ Callback endpoint từ Google OAuth. Tự động redirect về frontend với t
 **Response:** Redirect to frontend with token
 
 **Redirect URL Format:**
+
 ```
 {FRONTEND_URL}/auth/callback?access_token={access_token}&refresh_token={refresh_token}&user={encoded_user_data}
 ```
 
 **Lưu ý:**
+
 - `access_token`: JWT token, hết hạn sau **15 phút**
 - `refresh_token`: Token để refresh access token, hết hạn sau **7 ngày**
 
@@ -368,6 +378,7 @@ Lấy access token mới từ refresh token khi access token đã hết hạn.
 ```
 
 **Validation:**
+
 - `refreshToken`: Required, string (format: `user-id:token-id`)
 
 **Response (200):**
@@ -380,11 +391,13 @@ Lấy access token mới từ refresh token khi access token đã hết hạn.
 ```
 
 **Lưu ý:**
+
 - Refresh token cũ sẽ bị **revoke** (token rotation)
 - Refresh token mới sẽ được trả về và có thời gian sống **7 ngày** từ thời điểm refresh
 - Nếu refresh token không hợp lệ hoặc đã hết hạn, sẽ trả về lỗi 401
 
 **Error Responses:**
+
 - `400`: Validation failed
 - `401`: Invalid or expired refresh token
 
@@ -396,9 +409,9 @@ if (response.status === 401) {
   const refreshResponse = await fetch('/api/v1/auth/refresh', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken: storedRefreshToken })
+    body: JSON.stringify({ refreshToken: storedRefreshToken }),
   });
-  
+
   const { access_token, refresh_token } = await refreshResponse.json();
   // Lưu tokens mới và retry request
 }
@@ -425,6 +438,7 @@ if (response.status === 401) {
 ```
 
 **Validation:**
+
 - `refreshToken`: Required, string (format: `user-id:token-id`)
 
 **Response (200):**
@@ -436,11 +450,13 @@ if (response.status === 401) {
 ```
 
 **Lưu ý:**
+
 - Refresh token sẽ bị **revoke** và không thể sử dụng lại
 - Access token vẫn còn hiệu lực cho đến khi hết hạn (15 phút), nhưng không thể refresh được nữa
 - Client nên xóa cả access token và refresh token khỏi storage sau khi logout
 
 **Error Responses:**
+
 - `400`: Validation failed
 - `401`: Invalid refresh token (có thể đã bị revoke hoặc không tồn tại)
 
@@ -450,7 +466,7 @@ if (response.status === 401) {
 await fetch('/api/v1/auth/logout', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ refreshToken: storedRefreshToken })
+  body: JSON.stringify({ refreshToken: storedRefreshToken }),
 });
 
 // Xóa tokens khỏi client storage
@@ -484,6 +500,7 @@ Lấy thông tin profile của user hiện tại.
 ```
 
 **Error Responses:**
+
 - `401`: Unauthorized
 
 ---
@@ -555,6 +572,7 @@ Xem thông tin profile của chính mình (user hiện tại từ JWT). Response
 ```
 
 **Error Responses:**
+
 - `401`: Unauthorized
 
 ---
@@ -578,6 +596,7 @@ User tự cập nhật thông tin của chính mình. Chỉ cho phép sửa: `fi
 ```
 
 **Validation:**
+
 - `firstName`: Optional, string
 - `lastName`: Optional, string
 - `password`: Optional, tối thiểu 6 ký tự
@@ -603,6 +622,7 @@ User tự cập nhật thông tin của chính mình. Chỉ cho phép sửa: `fi
 ```
 
 **Error Responses:**
+
 - `400`: Validation failed (ví dụ: password quá ngắn)
 - `401`: Unauthorized
 
@@ -617,6 +637,7 @@ Lấy thông tin user theo ID.
 **Authentication:** Required (JWT)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Response (200):**
@@ -640,6 +661,7 @@ Lấy thông tin user theo ID.
 ```
 
 **Error Responses:**
+
 - `404`: User not found
 
 ---
@@ -665,6 +687,7 @@ Tạo user mới.
 ```
 
 **Validation:**
+
 - `email`: Required, must be valid email
 - `password`: Required, minimum 6 characters
 - `firstName`: Required, string
@@ -692,6 +715,7 @@ Tạo user mới.
 ```
 
 **Error Responses:**
+
 - `400`: Validation failed
 - `409`: Email already exists
 
@@ -706,6 +730,7 @@ Cập nhật thông tin user.
 **Authentication:** Required (JWT)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Request Body:** (Tất cả fields đều optional)
@@ -742,6 +767,7 @@ Cập nhật thông tin user.
 ```
 
 **Error Responses:**
+
 - `400`: Validation failed
 - `404`: User not found
 - `409`: Email already exists (if updating email)
@@ -757,6 +783,7 @@ Xóa user.
 **Authentication:** Required (JWT)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Response (200):**
@@ -770,6 +797,7 @@ Xóa user.
 ```
 
 **Error Responses:**
+
 - `404`: User not found
 
 ---
@@ -777,6 +805,7 @@ Xóa user.
 ## Admin
 
 Tất cả endpoints trong section này yêu cầu:
+
 - **JWT Authentication**
 - **Admin Role** (`role: "admin"`)
 
@@ -818,6 +847,7 @@ Lấy thống kê tổng quan cho admin dashboard.
 ```
 
 **Error Responses:**
+
 - `401`: Unauthorized
 - `403`: Forbidden (not admin)
 
@@ -832,6 +862,7 @@ Lấy danh sách tất cả users (admin view) với pagination. **Hiển thị 
 **Authentication:** Required (JWT + Admin Role)
 
 **Query Parameters:**
+
 - `page` (number, optional): Số trang (default: `1`, min: `1`)
 - `limit` (number, optional): Số lượng users mỗi trang (default: `10`, min: `1`, max: `100`)
 - `sortBy` (string, optional): Field để sort (default: `createdAt`)
@@ -840,6 +871,7 @@ Lấy danh sách tất cả users (admin view) với pagination. **Hiển thị 
   - Allowed values: `ASC`, `DESC`
 
 **Examples:**
+
 ```
 GET /api/v1/admin/users                              # Page 1, 10 users, sorted by createdAt DESC (default)
 GET /api/v1/admin/users?page=2                        # Page 2, 10 users per page
@@ -889,6 +921,7 @@ GET /api/v1/admin/users?sortBy=createdAt&sortOrder=DESC # Sort by createdAt desc
 ```
 
 **Response Fields:**
+
 - `data`: Array of users (bao gồm cả users có `isActive = false`)
 - `meta.page`: Trang hiện tại
 - `meta.limit`: Số lượng users mỗi trang
@@ -906,6 +939,7 @@ Tìm kiếm users với các filters và pagination. **Hiển thị cả users c
 **Authentication:** Required (JWT + Admin Role)
 
 **Query Parameters:**
+
 - `search` (string, optional): Từ khóa tìm kiếm (tìm trong `email`, `firstName`, `lastName`)
 - `role` (string, optional): Lọc theo role (`user` hoặc `admin`)
 - `isActive` (string, optional): Lọc theo trạng thái active (`true` hoặc `false`)
@@ -917,6 +951,7 @@ Tìm kiếm users với các filters và pagination. **Hiển thị cả users c
   - Allowed values: `ASC`, `DESC`
 
 **Examples:**
+
 ```
 # Search by keyword
 GET /api/v1/admin/users/search?search=john
@@ -972,6 +1007,7 @@ GET /api/v1/admin/users/search?search=john&role=user&isActive=true&page=1&limit=
 ```
 
 **Search Behavior:**
+
 - Search là **case-insensitive** (không phân biệt hoa thường)
 - Tìm kiếm trong các trường: `email`, `firstName`, `lastName`
 - Sử dụng pattern matching (LIKE) - tìm kiếm một phần của chuỗi
@@ -979,11 +1015,13 @@ GET /api/v1/admin/users/search?search=john&role=user&isActive=true&page=1&limit=
 - Có thể kết hợp với pagination và sorting
 
 **Examples:**
+
 - `search=john` → Tìm users có email, firstName hoặc lastName chứa "john"
 - `search=example.com` → Tìm users có email chứa "example.com"
 - `search=doe` → Tìm users có lastName là "Doe" hoặc chứa "doe"
 
 **Error Responses:**
+
 - `401`: Unauthorized
 - `403`: Forbidden (not admin)
 
@@ -998,6 +1036,7 @@ Lấy thông tin chi tiết user (admin view).
 **Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Response (200):**
@@ -1021,6 +1060,7 @@ Lấy thông tin chi tiết user (admin view).
 ```
 
 **Error Responses:**
+
 - `404`: User not found
 
 ---
@@ -1076,6 +1116,7 @@ Cập nhật user (admin only).
 **Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Request Body:** (Tất cả fields đều optional)
@@ -1122,6 +1163,7 @@ Xóa user (admin only).
 **Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Response (200):**
@@ -1145,6 +1187,7 @@ Kích hoạt user (set `isActive: true`).
 **Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Response (200):**
@@ -1172,6 +1215,7 @@ Vô hiệu hóa user (set `isActive: false`).
 **Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
+
 - `id` (string): User ID (UUID)
 
 **Response (200):**
@@ -1264,6 +1308,7 @@ Cập nhật cấu hình hệ thống.
 ## Queue
 
 Tất cả endpoints trong section này yêu cầu:
+
 - **JWT Authentication**
 - **Admin Role**
 
@@ -1312,6 +1357,7 @@ Lấy thống kê queue cụ thể.
 **Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
+
 - `queueName` (string): Queue name (e.g., `"email"`, `"notification"`)
 
 **Response (200):**
@@ -1356,6 +1402,7 @@ Thêm email job vào queue.
 ```
 
 **Validation:**
+
 - `to`: Required, valid email
 - `subject`: Required, string
 - `template`: Optional, string
@@ -1399,6 +1446,7 @@ Thêm notification job vào queue.
 ```
 
 **Validation:**
+
 - `userId`: Required, string (UUID)
 - `type`: Required, string
 - `message`: Required, string
@@ -1429,6 +1477,7 @@ Dọn dẹp completed hoặc failed jobs trong queue.
 **Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
+
 - `queueName` (string): Queue name
 
 **Request Body:**
@@ -1441,6 +1490,7 @@ Dọn dẹp completed hoặc failed jobs trong queue.
 ```
 
 **Validation:**
+
 - `type`: Optional, enum: `"completed"` | `"failed"` (default: `"completed"`)
 - `grace`: Optional, number (milliseconds, default: 1000)
 
@@ -1469,10 +1519,12 @@ Upload một file.
 **Content-Type:** `multipart/form-data`
 
 **Form Data:**
+
 - `file` (File): File to upload (required)
 - `subfolder` (Query Parameter, optional): Subfolder path
 
 **Query Parameters:**
+
 - `subfolder` (string, optional): Subfolder to store file
 
 **Response (201):**
@@ -1497,6 +1549,7 @@ Upload một file.
 ```
 
 **Error Responses:**
+
 - `400`: No file uploaded
 - `400`: Invalid file type
 - `400`: File too large
@@ -1514,10 +1567,12 @@ Upload nhiều files (tối đa 10 files).
 **Content-Type:** `multipart/form-data`
 
 **Form Data:**
+
 - `files` (File[]): Files to upload (required, max 10)
 - `subfolder` (Query Parameter, optional): Subfolder path
 
 **Query Parameters:**
+
 - `subfolder` (string, optional): Subfolder to store files
 
 **Response (201):**
@@ -1558,6 +1613,7 @@ Lấy file (public access, không cần authentication).
 **Response:** File content with appropriate Content-Type header
 
 **Example:**
+
 ```
 GET /api/v1/storage/files/photo.jpg
 → Returns image file
@@ -1605,6 +1661,7 @@ Liệt kê tất cả files.
 **Authentication:** Required (JWT + User/Admin Role)
 
 **Query Parameters:**
+
 - `subfolder` (string, optional): Filter by subfolder
 
 **Response (200):**
@@ -1663,6 +1720,7 @@ Lấy thống kê storage.
 **Authentication:** Required (JWT + Admin Role)
 
 **Query Parameters:**
+
 - `subfolder` (string, optional): Filter by subfolder
 
 **Response (200):**
@@ -1898,11 +1956,13 @@ Kiểm tra health của disk storage.
 ### Token Storage
 
 **Access Token:**
+
 - Có thể lưu trong **memory** (JavaScript variable) hoặc **sessionStorage**
 - Không nên lưu trong **localStorage** (dễ bị XSS attack)
 - Tự động xóa khi browser tab đóng (nếu dùng sessionStorage)
 
 **Refresh Token:**
+
 - Nên lưu trong **httpOnly cookie** (server-side) hoặc **secure storage** (mobile app)
 - Nếu phải lưu ở client (SPA), dùng **localStorage** với encryption
 - Luôn gửi qua HTTPS
@@ -1910,6 +1970,7 @@ Kiểm tra health của disk storage.
 ### Token Rotation
 
 API tự động **rotate refresh token** mỗi lần refresh:
+
 - Refresh token cũ bị revoke ngay lập tức
 - Refresh token mới được tạo với thời gian sống mới (7 ngày)
 - Giúp giảm thiểu rủi ro nếu refresh token bị lộ
@@ -1917,6 +1978,7 @@ API tự động **rotate refresh token** mỗi lần refresh:
 ### Error Handling
 
 Khi access token hết hạn (401):
+
 1. Dùng refresh token để lấy access token mới
 2. Nếu refresh token cũng hết hạn → Yêu cầu user đăng nhập lại
 3. Nếu refresh token không hợp lệ → Yêu cầu user đăng nhập lại
@@ -1929,39 +1991,39 @@ async function apiCall(url, options = {}) {
     ...options,
     headers: {
       ...options.headers,
-      'Authorization': `Bearer ${accessToken}`
-    }
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
-  
+
   // Access token expired
   if (response.status === 401) {
     // Try to refresh
     const refreshResponse = await fetch('/api/v1/auth/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: refreshToken })
+      body: JSON.stringify({ refreshToken: refreshToken }),
     });
-    
+
     if (refreshResponse.ok) {
       const { access_token, refresh_token } = await refreshResponse.json();
       // Update tokens
       accessToken = access_token;
       refreshToken = refresh_token;
-      
+
       // Retry original request
       response = await fetch(url, {
         ...options,
         headers: {
           ...options.headers,
-          'Authorization': `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
     } else {
       // Refresh failed, redirect to login
       window.location.href = '/login';
     }
   }
-  
+
   return response;
 }
 ```
@@ -2013,12 +2075,14 @@ JWT_EXPIRES_IN=15m
 ```
 
 **Format cho expiresIn:**
+
 - `s` = seconds (e.g., `30s`)
 - `m` = minutes (e.g., `15m`)
 - `h` = hours (e.g., `1h`)
 - `d` = days (e.g., `7d`)
 
 **Recommendations:**
+
 - Access token: `15m` - `1h` (ngắn để giảm rủi ro)
 - Refresh token: `7d` - `30d` (dài để UX tốt hơn)
 
@@ -2037,4 +2101,5 @@ JWT_EXPIRES_IN=15m
 **Last Updated:** 2026-01-28
 
 **Changelog:**
+
 - 2026-01-28: Added refresh token support (access token + refresh token flow)

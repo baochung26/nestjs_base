@@ -39,12 +39,14 @@ export const validationSchema = Joi.object({
 Các environment variables **BẮT BUỘC** phải có trong `.env`:
 
 ### Database
+
 - `DB_HOST` - Database host
 - `DB_USER` - Database username
 - `DB_PASSWORD` - Database password
 - `DB_NAME` - Database name
 
 ### JWT
+
 - `JWT_SECRET` - JWT secret key (minimum 32 characters)
 
 ### Example `.env` với required variables:
@@ -65,18 +67,21 @@ JWT_SECRET=your-super-secret-key-minimum-32-characters-long
 Các environment variables có **default values**:
 
 ### App Configuration
+
 ```env
 NODE_ENV=development          # Default: development
 APP_PORT=3000                 # Default: 3000
 ```
 
 ### Database
+
 ```env
 DB_PORT=5432                  # Default: 5432
 DB_SSL=false                  # Default: false
 ```
 
 ### Redis
+
 ```env
 REDIS_HOST=localhost          # Default: localhost
 REDIS_PORT=6379               # Default: 6379
@@ -85,11 +90,13 @@ REDIS_DB=0                    # Default: 0
 ```
 
 ### JWT
+
 ```env
 JWT_EXPIRES_IN=7d             # Default: 7d
 ```
 
 ### Google OAuth (Optional)
+
 ```env
 GOOGLE_CLIENT_ID=            # Default: '' (empty)
 GOOGLE_CLIENT_SECRET=         # Default: '' (empty)
@@ -98,6 +105,7 @@ FRONTEND_URL=http://localhost:3001  # Default: http://localhost:3001
 ```
 
 ### Mail (Optional)
+
 ```env
 MAIL_HOST=smtp.gmail.com     # Default: smtp.gmail.com
 MAIL_PORT=587                # Default: 587
@@ -109,6 +117,7 @@ MAIL_FROM_NAME=NestJS App    # Default: NestJS App
 ```
 
 ### Storage (Optional)
+
 ```env
 STORAGE_TYPE=local           # Default: local
 STORAGE_LOCAL_DESTINATION=./uploads  # Default: ./uploads
@@ -117,6 +126,7 @@ STORAGE_ALLOWED_MIME_TYPES=image/jpeg,image/png,image/gif,application/pdf,text/p
 ```
 
 ### CORS (Optional)
+
 ```env
 CORS_ORIGINS=http://localhost:3000,http://localhost:3001
 ```
@@ -241,6 +251,7 @@ npm run start:dev
 **Nguyên nhân:** Missing required variable hoặc invalid value.
 
 **Giải pháp:**
+
 1. Kiểm tra error message
 2. Thêm/sửa variable trong `.env`
 3. Restart application
@@ -250,6 +261,7 @@ npm run start:dev
 **Nguyên nhân:** Có thể có logic error trong code.
 
 **Giải pháp:**
+
 1. Kiểm tra logs
 2. Verify values trong `.env` đúng với expected format
 3. Check application code
@@ -259,6 +271,7 @@ npm run start:dev
 **Nguyên nhân:** Có thể có giá trị empty string trong `.env`.
 
 **Giải pháp:**
+
 1. Xóa variable khỏi `.env` để sử dụng default
 2. Hoặc set giá trị cụ thể
 
@@ -267,6 +280,7 @@ npm run start:dev
 **Nguyên nhân:** `ConfigModule` chưa được cấu hình với validation.
 
 **Giải pháp:**
+
 1. Kiểm tra `app.module.ts` có import `validationSchema` và `validationOptions`
 2. Đảm bảo `joi` đã được cài đặt
 

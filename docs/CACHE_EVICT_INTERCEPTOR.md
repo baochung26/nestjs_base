@@ -1,4 +1,5 @@
 #!/usr/bin/env markdown
+
 # Hướng dẫn Sử dụng CacheEvictInterceptor
 
 ## 📋 Mục lục
@@ -140,4 +141,3 @@ Nếu endpoint GET dùng **custom key** (ví dụ `@Cache(300, 'users:list')`), 
 
 - CacheInterceptor: [CACHE_INTERCEPTOR.md](./CACHE_INTERCEPTOR.md)
 - CacheModule & CacheService: [CACHE_GUIDE.md](./CACHE_GUIDE.md)
-

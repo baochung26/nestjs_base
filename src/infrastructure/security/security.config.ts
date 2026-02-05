@@ -8,14 +8,16 @@ export const getHelmetConfig = (configService: ConfigService) => {
   const isDevelopment = configService.get('app.env') !== 'production';
 
   return helmet({
-    contentSecurityPolicy: isDevelopment ? false : {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-      },
-    },
+    contentSecurityPolicy: isDevelopment
+      ? false
+      : {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+          },
+        },
     crossOriginEmbedderPolicy: !isDevelopment,
     crossOriginOpenerPolicy: !isDevelopment,
     crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -40,13 +42,18 @@ export const getHelmetConfig = (configService: ConfigService) => {
  * Cấu hình CORS
  */
 export const getCorsConfig = (configService: ConfigService) => {
-  const appConfig = configService.get('app');
+  const isDevelopment = configService.get('app.env') !== 'production';
   const allowedOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',')
-    : ['http://localhost:3000', 'http://localhost:3001'];
+    : isDevelopment
+      ? ['http://localhost:3000', 'http://localhost:3001']
+      : [];
 
   return {
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) {
         return callback(null, true);

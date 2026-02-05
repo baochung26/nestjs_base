@@ -1,8 +1,4 @@
-import {
-  PipeTransform,
-  Injectable,
-  ArgumentMetadata,
-} from '@nestjs/common';
+import { PipeTransform, Injectable } from '@nestjs/common';
 import { PAGINATION } from '../constants';
 
 /**
@@ -11,7 +7,7 @@ import { PAGINATION } from '../constants';
  */
 @Injectable()
 export class PaginationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any) {
     const page = value?.page
       ? parseInt(value.page, 10)
       : PAGINATION.DEFAULT_PAGE;
@@ -21,7 +17,7 @@ export class PaginationPipe implements PipeTransform {
 
     // Validate page
     const validPage = page > 0 ? page : PAGINATION.DEFAULT_PAGE;
-    
+
     // Validate limit (min và max)
     let validLimit = limit;
     if (limit < PAGINATION.MIN_LIMIT) {

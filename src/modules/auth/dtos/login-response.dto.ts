@@ -17,12 +17,14 @@ export class LoginResponseDto {
   role: string;
 
   @ApiProperty({
-    description: 'JWT access token (thời hạn ~15 phút). Gửi trong header: Authorization: Bearer <token>',
+    description:
+      'JWT access token (thời hạn ~15 phút). Gửi trong header: Authorization: Bearer <token>',
   })
   access_token: string;
 
   @ApiProperty({
-    description: 'Refresh token (thời hạn ~7 ngày). Dùng gọi POST /auth/refresh để lấy access_token mới.',
+    description:
+      'Refresh token (thời hạn ~7 ngày). Dùng gọi POST /auth/refresh để lấy access_token mới.',
   })
   refresh_token: string;
 }

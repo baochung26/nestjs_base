@@ -2,7 +2,11 @@ import { IsOptional, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { ApiResponseDto } from '../response/api-response.dto';
-import { PAGINATION, HTTP_STATUS, SUCCESS_MESSAGES } from '../../common/constants';
+import {
+  PAGINATION,
+  HTTP_STATUS,
+  SUCCESS_MESSAGES,
+} from '../../common/constants';
 
 /**
  * Pagination Metadata
@@ -65,7 +69,10 @@ export class PaginationQueryDto {
   limit?: number = PAGINATION.DEFAULT_LIMIT;
 
   get skip(): number {
-    return ((this.page || PAGINATION.DEFAULT_PAGE) - 1) * (this.limit || PAGINATION.DEFAULT_LIMIT);
+    return (
+      ((this.page || PAGINATION.DEFAULT_PAGE) - 1) *
+      (this.limit || PAGINATION.DEFAULT_LIMIT)
+    );
   }
 
   get take(): number {

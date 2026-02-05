@@ -40,9 +40,10 @@ STORAGE_ALLOWED_MIME_TYPES=image/jpeg,image/png,image/gif,application/pdf,text/p
 ### Storage Configuration
 
 Cấu hình mặc định:
+
 - **Destination:** `./uploads`
 - **Max File Size:** 10MB
-- **Allowed MIME Types:** 
+- **Allowed MIME Types:**
   - `image/jpeg`, `image/png`, `image/gif`
   - `application/pdf`
   - `text/plain`
@@ -92,10 +93,16 @@ async uploadFiles(files: Express.Multer.File[]) {
 
 ```typescript
 // Get file buffer
-const fileBuffer = await this.storageService.getFile('filename.pdf', 'documents');
+const fileBuffer = await this.storageService.getFile(
+  'filename.pdf',
+  'documents',
+);
 
 // Get file info
-const fileInfo = await this.storageService.getFileInfo('filename.pdf', 'documents');
+const fileInfo = await this.storageService.getFileInfo(
+  'filename.pdf',
+  'documents',
+);
 ```
 
 ### Delete File
@@ -121,7 +128,10 @@ const rootFiles = await this.storageService.listFiles();
 ### Check File Exists
 
 ```typescript
-const exists = await this.storageService.fileExists('filename.pdf', 'documents');
+const exists = await this.storageService.fileExists(
+  'filename.pdf',
+  'documents',
+);
 ```
 
 ### Get Storage Statistics
@@ -145,6 +155,7 @@ subfolder: documents (optional query param)
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -176,6 +187,7 @@ subfolder: images (optional query param)
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -213,6 +225,7 @@ Authorization: Bearer YOUR_TOKEN
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -237,6 +250,7 @@ Authorization: Bearer YOUR_TOKEN
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -266,6 +280,7 @@ Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -284,6 +299,7 @@ Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -301,7 +317,12 @@ Authorization: Bearer YOUR_ADMIN_TOKEN
 ### Using Multer Interceptor
 
 ```typescript
-import { Controller, Post, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from '../infrastructure/storage/storage.service';
 
@@ -456,6 +477,7 @@ await this.storageService.uploadFile(file, {
 **Nguyên nhân:** File quá lớn hoặc MIME type không được phép.
 
 **Giải pháp:**
+
 1. Kiểm tra file size
 2. Kiểm tra MIME type trong allowed list
 3. Tăng `STORAGE_MAX_FILE_SIZE` nếu cần
@@ -465,6 +487,7 @@ await this.storageService.uploadFile(file, {
 **Nguyên nhân:** Không có quyền write vào storage directory.
 
 **Giải pháp:**
+
 ```bash
 # Set permissions
 chmod 755 ./uploads
@@ -476,6 +499,7 @@ chown -R $USER:$USER ./uploads
 **Nguyên nhân:** File đã bị xóa hoặc path sai.
 
 **Giải pháp:**
+
 1. Kiểm tra file có tồn tại: `await storageService.fileExists(filename)`
 2. Verify subfolder path
 3. Check file permissions
@@ -485,6 +509,7 @@ chown -R $USER:$USER ./uploads
 **Nguyên nhân:** Disk space hết.
 
 **Giải pháp:**
+
 1. Clean up old files
 2. Increase disk space
 3. Implement file rotation
@@ -494,7 +519,16 @@ chown -R $USER:$USER ./uploads
 ### Complete Controller với File Upload
 
 ```typescript
-import { Controller, Post, Get, Delete, Param, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  UseInterceptors,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from '../infrastructure/storage/storage.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -524,7 +558,9 @@ export class DocumentsController {
 
   @Get('list')
   async listDocuments(@CurrentUser() user: User) {
-    const files = await this.storageService.listFiles(`users/${user.id}/documents`);
+    const files = await this.storageService.listFiles(
+      `users/${user.id}/documents`,
+    );
     return { files };
   }
 
@@ -533,7 +569,10 @@ export class DocumentsController {
     @Param('filename') filename: string,
     @CurrentUser() user: User,
   ) {
-    await this.storageService.deleteFile(filename, `users/${user.id}/documents`);
+    await this.storageService.deleteFile(
+      filename,
+      `users/${user.id}/documents`,
+    );
     return { message: 'Document deleted successfully' };
   }
 }

@@ -1,10 +1,19 @@
 import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AdminSettingsService } from './admin-settings.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
-import { ApiProtectedCommonResponses, ApiBadRequestResponse } from '../../../common/decorators/api-common-responses.decorator';
+import {
+  ApiProtectedCommonResponses,
+  ApiBadRequestResponse,
+} from '../../../common/decorators/api-common-responses.decorator';
 import { UserRole } from '../../users/entities/user.entity';
 
 @ApiTags('admin')
@@ -70,7 +79,10 @@ export class AdminSettingsController {
             data: {
               type: 'object',
               properties: {
-                message: { type: 'string', example: 'Settings updated successfully' },
+                message: {
+                  type: 'string',
+                  example: 'Settings updated successfully',
+                },
               },
             },
           },

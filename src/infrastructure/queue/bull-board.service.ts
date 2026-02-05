@@ -17,7 +17,8 @@ export class BullBoardService {
     @InjectQueue('notification') private readonly notificationQueue: Queue,
     private readonly configService: ConfigService,
   ) {
-    const basePath = this.configService.get('bullBoard.path') ?? BULL_BOARD_DEFAULT_PATH;
+    const basePath =
+      this.configService.get('bullBoard.path') ?? BULL_BOARD_DEFAULT_PATH;
 
     this.serverAdapter = new ExpressAdapter();
     this.serverAdapter.setBasePath(basePath);

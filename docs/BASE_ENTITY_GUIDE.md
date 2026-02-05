@@ -195,7 +195,7 @@ export class User extends BaseEntity {
 
   @Column({ default: true })
   isActive: boolean;
-  
+
   // Inherited from BaseEntity:
   // - id: string
   // - createdAt: Date
@@ -221,7 +221,7 @@ export class Post extends BaseEntity {
 
   @ManyToOne(() => User)
   author: User;
-  
+
   // Inherited from BaseEntity:
   // - id: string
   // - createdAt: Date
@@ -240,7 +240,7 @@ export class Comment extends BaseEntity {
 
   @ManyToOne(() => Post)
   post: Post;
-  
+
   // Inherited from BaseEntity:
   // - id: string
   // - createdAt: Date
@@ -294,6 +294,7 @@ export class User extends BaseEntity {
 ### Bước 3: Remove Common Fields
 
 Xóa các decorators và fields đã có trong Base Entity:
+
 - `@PrimaryGeneratedColumn('uuid')` và `id: string`
 - `@CreateDateColumn()` và `createdAt: Date`
 - `@UpdateDateColumn()` và `updatedAt: Date`

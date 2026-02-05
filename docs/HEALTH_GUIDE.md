@@ -99,6 +99,7 @@ Kiểm tra tất cả health checks (database, Redis, memory, disk).
 ```
 
 **Status Codes:**
+
 - `200` - All checks passed
 - `503` - One or more checks failed
 
@@ -224,7 +225,7 @@ Sử dụng `TypeOrmHealthIndicator` để kiểm tra:
 **Configuration:**
 
 ```typescript
-() => this.db.pingCheck('database', { connection: this.connection })
+() => this.db.pingCheck('database', { connection: this.connection });
 ```
 
 ### Redis Health Check
@@ -272,10 +273,11 @@ Sử dụng `DiskHealthIndicator` để kiểm tra:
 **Configuration:**
 
 ```typescript
-() => this.disk.checkStorage('storage', {
-  path: '/',
-  thresholdPercent: 0.9, // 90% disk usage
-})
+() =>
+  this.disk.checkStorage('storage', {
+    path: '/',
+    thresholdPercent: 0.9, // 90% disk usage
+  });
 ```
 
 ## 🛠️ Custom Health Indicators
@@ -287,7 +289,11 @@ Ví dụ: Tạo health indicator cho external API:
 ```typescript
 // src/infrastructure/health/indicators/api.health-indicator.ts
 import { Injectable } from '@nestjs/common';
-import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from '@nestjs/terminus';
+import {
+  HealthIndicator,
+  HealthIndicatorResult,
+  HealthCheckError,
+} from '@nestjs/terminus';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
@@ -300,7 +306,7 @@ export class ApiHealthIndicator extends HealthIndicator {
   async isHealthy(key: string, url: string): Promise<HealthIndicatorResult> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(url, { timeout: 5000 })
+        this.httpService.get(url, { timeout: 5000 }),
       );
 
       if (response.status === 200) {
@@ -342,7 +348,8 @@ export class HealthController {
   @HealthCheck()
   checkExternalApi() {
     return this.health.check([
-      () => this.api.isHealthy('external-api', 'https://api.example.com/health'),
+      () =>
+        this.api.isHealthy('external-api', 'https://api.example.com/health'),
     ]);
   }
 }
@@ -419,11 +426,13 @@ fi
 ### Database Health Check Fails
 
 **Nguyên nhân:**
+
 - Database connection không available
 - Database credentials sai
 - Network issues
 
 **Giải pháp:**
+
 1. Kiểm tra database connection trong `.env`
 2. Kiểm tra database service đang chạy
 3. Test connection manually:
@@ -434,11 +443,13 @@ fi
 ### Redis Health Check Fails
 
 **Nguyên nhân:**
+
 - Redis service không chạy
 - Redis connection configuration sai
 - Network issues
 
 **Giải pháp:**
+
 1. Kiểm tra Redis service:
    ```bash
    docker ps | grep redis
@@ -452,10 +463,12 @@ fi
 ### Memory Health Check Fails
 
 **Nguyên nhân:**
+
 - Memory usage vượt quá threshold
 - Memory leak trong application
 
 **Giải pháp:**
+
 1. Tăng memory threshold trong `health.controller.ts`
 2. Kiểm tra memory usage:
    ```bash
@@ -466,10 +479,12 @@ fi
 ### Disk Health Check Fails
 
 **Nguyên nhân:**
+
 - Disk usage vượt quá threshold (90%)
 - Disk space đầy
 
 **Giải pháp:**
+
 1. Kiểm tra disk usage:
    ```bash
    df -h
@@ -522,7 +537,7 @@ services:
   app:
     build: .
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3

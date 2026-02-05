@@ -14,13 +14,13 @@ import { redisStore } from 'cache-manager-redis-yet';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const redis = configService.get('redis');
-        const isDevelopment = configService.get('app.env') !== 'production';
 
         return {
           store: await redisStore({
             socket: {
               host: redis?.host || process.env.REDIS_HOST || 'localhost',
-              port: redis?.port || parseInt(process.env.REDIS_PORT || '6379', 10),
+              port:
+                redis?.port || parseInt(process.env.REDIS_PORT || '6379', 10),
             },
             password: redis?.password || process.env.REDIS_PASSWORD || '',
             database: redis?.db || parseInt(process.env.REDIS_DB || '0', 10),

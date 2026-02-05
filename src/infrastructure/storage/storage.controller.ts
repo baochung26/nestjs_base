@@ -71,19 +71,20 @@ export class StorageController {
   }
 
   @Get('files/*')
-  async getFile(
-    @Param('0') path: string,
-    @Res() res: Response,
-  ) {
+  async getFile(@Param('0') path: string, @Res() res: Response) {
     const parts = path.split('/');
     const filename = parts[parts.length - 1];
-    const subfolder = parts.length > 1 ? parts.slice(0, -1).join('/') : undefined;
+    const subfolder =
+      parts.length > 1 ? parts.slice(0, -1).join('/') : undefined;
 
     const file = await this.storageService.getFile(filename, subfolder);
     const fileInfo = await this.storageService.getFileInfo(filename, subfolder);
 
     res.setHeader('Content-Type', fileInfo.mimetype);
-    res.setHeader('Content-Disposition', `inline; filename="${fileInfo.originalName}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${fileInfo.originalName}"`,
+    );
     res.send(file);
   }
 
@@ -93,7 +94,8 @@ export class StorageController {
   async getFileInfo(@Param('0') path: string) {
     const parts = path.split('/');
     const filename = parts[parts.length - 1];
-    const subfolder = parts.length > 1 ? parts.slice(0, -1).join('/') : undefined;
+    const subfolder =
+      parts.length > 1 ? parts.slice(0, -1).join('/') : undefined;
 
     const fileInfo = await this.storageService.getFileInfo(filename, subfolder);
     return fileInfo;
@@ -116,7 +118,8 @@ export class StorageController {
   async deleteFile(@Param('0') path: string) {
     const parts = path.split('/');
     const filename = parts[parts.length - 1];
-    const subfolder = parts.length > 1 ? parts.slice(0, -1).join('/') : undefined;
+    const subfolder =
+      parts.length > 1 ? parts.slice(0, -1).join('/') : undefined;
 
     await this.storageService.deleteFile(filename, subfolder);
     return {

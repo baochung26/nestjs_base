@@ -1,5 +1,10 @@
 import { Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
@@ -21,7 +26,8 @@ export class AdminDashboardController {
   @Get()
   @ApiOperation({
     summary: 'Get dashboard statistics (Admin)',
-    description: 'Lấy thống kê tổng quan cho admin dashboard. Chỉ admin mới có quyền.',
+    description:
+      'Lấy thống kê tổng quan cho admin dashboard. Chỉ admin mới có quyền.',
   })
   @ApiResponse({
     status: 200,

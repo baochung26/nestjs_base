@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { QueueService } from './queue.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

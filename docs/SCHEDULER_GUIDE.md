@@ -26,12 +26,7 @@ Scheduler được cấu hình trong `src/infrastructure/scheduler/scheduler.mod
 
 ```typescript
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    QueueModule,
-    CacheModule,
-    UsersModule,
-  ],
+  imports: [ScheduleModule.forRoot(), QueueModule, CacheModule, UsersModule],
   providers: [CleanupScheduler, RetryScheduler, SyncScheduler],
 })
 export class SchedulerModule {}
@@ -46,6 +41,7 @@ Không cần cấu hình thêm, scheduler sử dụng các module đã có sẵn
 ### 1. Cleanup Tasks (`CleanupScheduler`)
 
 #### Cleanup Completed Queue Jobs
+
 - **Schedule:** Mỗi giờ (`@Cron(CronExpression.EVERY_HOUR)`)
 - **Mô tả:** Xóa các completed jobs cũ hơn 1 giờ từ tất cả queues
 - **Queues:** default, email, notification
@@ -58,6 +54,7 @@ async cleanupCompletedJobs() {
 ```
 
 #### Cleanup Failed Queue Jobs
+
 - **Schedule:** Hàng ngày lúc 2:00 AM (`@Cron('0 2 * * *')`)
 - **Mô tả:** Xóa các failed jobs cũ hơn 24 giờ
 - **Queues:** default, email, notification
@@ -70,6 +67,7 @@ async cleanupFailedJobs() {
 ```
 
 #### Cleanup Cache
+
 - **Schedule:** Hàng ngày lúc 3:00 AM (`@Cron('0 3 * * *')`)
 - **Mô tả:** Cache tự động expire dựa trên TTL
 
@@ -81,6 +79,7 @@ async cleanupCache() {
 ```
 
 #### Cleanup Inactive Users
+
 - **Schedule:** Hàng tháng ngày 1 lúc 4:00 AM (`@Cron('0 4 1 * *')`)
 - **Mô tả:** Xóa inactive users không hoạt động hơn 6 tháng
 
@@ -92,6 +91,7 @@ async cleanupInactiveUsers() {
 ```
 
 #### Cleanup Old Files
+
 - **Schedule:** Chủ nhật hàng tuần lúc 5:00 AM (`@Cron('0 5 * * 0')`)
 - **Mô tả:** Dọn dẹp các file cũ (logs, uploads, etc.)
 
@@ -105,6 +105,7 @@ async cleanupOldFiles() {
 ### 2. Retry Tasks (`RetryScheduler`)
 
 #### Retry Failed Email Jobs
+
 - **Schedule:** Mỗi 30 phút (`@Cron('*/30 * * * *')`)
 - **Mô tả:** Retry failed email jobs với max 3 attempts và max age 24 hours
 
@@ -116,6 +117,7 @@ async retryFailedEmailJobs() {
 ```
 
 #### Retry Failed Notification Jobs
+
 - **Schedule:** Mỗi 15 phút (`@Cron('*/15 * * * *')`)
 - **Mô tả:** Retry failed notification jobs với max 3 attempts và max age 12 hours
 
@@ -127,6 +129,7 @@ async retryFailedNotificationJobs() {
 ```
 
 #### Retry Failed Default Queue Jobs
+
 - **Schedule:** Mỗi giờ (`@Cron(CronExpression.EVERY_HOUR)`)
 - **Mô tả:** Retry failed default queue jobs với max 5 attempts và max age 48 hours
 
@@ -140,6 +143,7 @@ async retryFailedDefaultJobs() {
 ### 3. Sync Tasks (`SyncScheduler`)
 
 #### Sync User Statistics
+
 - **Schedule:** Mỗi 5 phút (`@Cron('*/5 * * * *')`)
 - **Mô tả:** Đồng bộ thống kê users (total, active, inactive) và cache
 
@@ -151,6 +155,7 @@ async syncUserStatistics() {
 ```
 
 #### Sync Cache with Database
+
 - **Schedule:** Hàng ngày lúc midnight (`@Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)`)
 - **Mô tả:** Warm up cache với frequently accessed data
 
@@ -162,6 +167,7 @@ async syncCacheWithDatabase() {
 ```
 
 #### Sync External Services
+
 - **Schedule:** Mỗi giờ (`@Cron(CronExpression.EVERY_HOUR)`)
 - **Mô tả:** Đồng bộ với external services (APIs, payment gateways, etc.)
 
@@ -173,6 +179,7 @@ async syncExternalServices() {
 ```
 
 #### Health Check Sync
+
 - **Schedule:** Mỗi phút (`@Cron(CronExpression.EVERY_MINUTE)`)
 - **Mô tả:** Kiểm tra health status của database và cache
 
@@ -184,6 +191,7 @@ async healthCheckSync() {
 ```
 
 #### Data Backup Sync
+
 - **Schedule:** Hàng ngày lúc 1:00 AM (`@Cron('0 1 * * *')`)
 - **Mô tả:** Backup dữ liệu (database, files, etc.)
 
@@ -251,15 +259,15 @@ export class SchedulerModule {}
 NestJS cung cấp các constants tiện lợi:
 
 ```typescript
-CronExpression.EVERY_SECOND      // * * * * * *
-CronExpression.EVERY_5_SECONDS   // */5 * * * * *
-CronExpression.EVERY_MINUTE       // * * * * *
-CronExpression.EVERY_5_MINUTES    // */5 * * * *
-CronExpression.EVERY_HOUR         // 0 * * * *
-CronExpression.EVERY_DAY_AT_1AM   // 0 1 * * *
-CronExpression.EVERY_DAY_AT_MIDNIGHT // 0 0 * * *
-CronExpression.EVERY_WEEK         // 0 0 * * 0
-CronExpression.EVERY_MONTH        // 0 0 1 * *
+CronExpression.EVERY_SECOND; // * * * * * *
+CronExpression.EVERY_5_SECONDS; // */5 * * * * *
+CronExpression.EVERY_MINUTE; // * * * * *
+CronExpression.EVERY_5_MINUTES; // */5 * * * *
+CronExpression.EVERY_HOUR; // 0 * * * *
+CronExpression.EVERY_DAY_AT_1AM; // 0 1 * * *
+CronExpression.EVERY_DAY_AT_MIDNIGHT; // 0 0 * * *
+CronExpression.EVERY_WEEK; // 0 0 * * 0
+CronExpression.EVERY_MONTH; // 0 0 1 * *
 ```
 
 ### Custom Cron Expressions
@@ -285,15 +293,15 @@ Format: `second minute hour day month day-of-week`
 
 ### Cron Expression Examples
 
-| Expression | Description |
-|------------|-------------|
-| `*/5 * * * *` | Mỗi 5 phút |
-| `0 */2 * * *` | Mỗi 2 giờ |
-| `0 0 * * *` | Mỗi ngày lúc midnight |
-| `0 0 * * 0` | Mỗi chủ nhật |
-| `0 0 1 * *` | Ngày 1 hàng tháng |
+| Expression       | Description                |
+| ---------------- | -------------------------- |
+| `*/5 * * * *`    | Mỗi 5 phút                 |
+| `0 */2 * * *`    | Mỗi 2 giờ                  |
+| `0 0 * * *`      | Mỗi ngày lúc midnight      |
+| `0 0 * * 0`      | Mỗi chủ nhật               |
+| `0 0 1 * *`      | Ngày 1 hàng tháng          |
 | `0 9-17 * * 1-5` | 9 AM - 5 PM, thứ 2 - thứ 6 |
-| `0 0,12 * * *` | Lúc midnight và noon |
+| `0 0,12 * * *`   | Lúc midnight và noon       |
 
 ## 💡 Best Practices
 
@@ -389,6 +397,7 @@ async longRunningTask() {
 **Nguyên nhân:** SchedulerModule chưa được import hoặc task chưa được đăng ký.
 
 **Giải pháp:**
+
 1. Đảm bảo `SchedulerModule` đã được import trong `AppModule`
 2. Đảm bảo scheduler service đã được thêm vào `providers` trong `SchedulerModule`
 3. Kiểm tra cron expression có đúng không
@@ -398,6 +407,7 @@ async longRunningTask() {
 **Nguyên nhân:** Multiple instances của app đang chạy.
 
 **Giải pháp:**
+
 - Sử dụng distributed lock (Redis, database)
 - Chỉ chạy scheduler trên một instance
 
@@ -406,6 +416,7 @@ async longRunningTask() {
 **Nguyên nhân:** Task xử lý quá nhiều data.
 
 **Giải pháp:**
+
 - Chia nhỏ task thành batches
 - Sử dụng queue thay vì scheduler cho heavy tasks
 - Thiết lập timeout
@@ -415,6 +426,7 @@ async longRunningTask() {
 **Nguyên nhân:** Task sử dụng quá nhiều memory.
 
 **Giải pháp:**
+
 - Process data in batches
 - Clean up resources sau khi xử lý
 - Monitor memory usage

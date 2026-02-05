@@ -18,13 +18,13 @@
 
 Hệ thống sử dụng **Pino** (thông qua `nestjs-pino`) làm logger chính với các đặc điểm:
 
-| Đặc điểm | Mô tả |
-|----------|-------|
-| **Logger** | Pino (nestjs-pino) |
-| **Output** | Console/stdout (không ghi file) |
-| **Development** | pino-pretty (format đẹp, có màu) |
-| **Production** | JSON format (stdout) |
-| **Log Level** | Development: `debug`, Production: `info` |
+| Đặc điểm        | Mô tả                                    |
+| --------------- | ---------------------------------------- |
+| **Logger**      | Pino (nestjs-pino)                       |
+| **Output**      | Console/stdout (không ghi file)          |
+| **Development** | pino-pretty (format đẹp, có màu)         |
+| **Production**  | JSON format (stdout)                     |
+| **Log Level**   | Development: `debug`, Production: `info` |
 
 ---
 
@@ -89,14 +89,15 @@ Hệ thống sử dụng **Pino** (thông qua `nestjs-pino`) làm logger chính 
 
 **File:** `src/infrastructure/logger/logger.module.ts`
 
-| Cấu hình | Development | Production |
-|----------|-------------|------------|
-| **Level** | `debug` | `info` |
-| **Transport** | pino-pretty (console có màu) | undefined (JSON stdout) |
-| **Serializers** | req, res, err | req, res, err |
-| **Custom props** | correlationId | correlationId |
+| Cấu hình         | Development                  | Production              |
+| ---------------- | ---------------------------- | ----------------------- |
+| **Level**        | `debug`                      | `info`                  |
+| **Transport**    | pino-pretty (console có màu) | undefined (JSON stdout) |
+| **Serializers**  | req, res, err                | req, res, err           |
+| **Custom props** | correlationId                | correlationId           |
 
 **Log Level theo HTTP Status:**
+
 - `info`: statusCode < 400
 - `warn`: 400 ≤ statusCode < 500
 - `error`: statusCode ≥ 500 hoặc có exception
@@ -106,6 +107,7 @@ Hệ thống sử dụng **Pino** (thông qua `nestjs-pino`) làm logger chính 
 **File:** `src/common/interceptors/logging.interceptor.ts`
 
 Tự động log mỗi request:
+
 - **Incoming:** method, url, body (đã sanitize password/token), query, params, correlationId
 - **Outgoing (success):** method, url, statusCode, correlationId, duration (ms)
 - **Outgoing (error):** method, url, statusCode, duration, error.message, error.stack
@@ -150,7 +152,7 @@ export class UsersService {
 
   async create(data: CreateUserDto) {
     this.logger.debug({ email: data.email }, 'Creating new user');
-    
+
     try {
       const user = await this.repository.save(data);
       this.logger.log(`User created: ${user.id}`);
@@ -185,12 +187,12 @@ export class MyService {
 
 ### Log Levels
 
-| Level | Khi dùng |
-|-------|----------|
-| `logger.debug()` | Chi tiết debug, chỉ hiện trong development |
-| `logger.log()` / `logger.info()` | Thông tin bình thường |
-| `logger.warn()` | Cảnh báo (validation fail, retry, etc.) |
-| `logger.error()` | Lỗi cần xử lý |
+| Level                            | Khi dùng                                   |
+| -------------------------------- | ------------------------------------------ |
+| `logger.debug()`                 | Chi tiết debug, chỉ hiện trong development |
+| `logger.log()` / `logger.info()` | Thông tin bình thường                      |
+| `logger.warn()`                  | Cảnh báo (validation fail, retry, etc.)    |
+| `logger.error()`                 | Lỗi cần xử lý                              |
 
 ---
 
@@ -221,6 +223,7 @@ npm run start:prod
 ```
 
 Logs ra stdout dạng JSON. Có thể pipe vào file:
+
 ```bash
 node dist/main.js > app.log 2>&1
 # Hoặc dùng PM2, systemd, etc. để quản lý logs
@@ -235,6 +238,7 @@ node dist/main.js > app.log 2>&1
 Mỗi request có `x-correlation-id` trong response header. Dùng để trace request qua các logs.
 
 **Ví dụ:** Gọi API và lấy correlation ID từ response header:
+
 ```bash
 curl -v http://localhost:3001/api/v1/users
 # Xem header: x-correlation-id: abc-123-def
@@ -255,6 +259,7 @@ curl -v http://localhost:3001/api/v1/users
 ### Bước 3: Phân tích Error Log
 
 Khi có error, LoggingInterceptor log:
+
 ```
 Error POST /api/v1/auth/login 500
 {
@@ -271,12 +276,14 @@ Error POST /api/v1/auth/login 500
 ```
 
 **Chú ý:**
+
 - `error.message`: Nguyên nhân ngắn gọn
 - `error.stack`: Stack trace - xem dòng code gây lỗi
 
 ### Bước 4: AllExceptionsFilter (Development)
 
 Trong development, AllExceptionsFilter thêm:
+
 ```
 Exception caught: [Full exception object]
 ```
@@ -287,10 +294,13 @@ Xem toàn bộ exception object để hiểu context.
 
 ```typescript
 // Trong service/controller cần debug
-this.logger.debug({ 
-  userId: id, 
-  data: someVariable 
-}, 'Debug point - check value');
+this.logger.debug(
+  {
+    userId: id,
+    data: someVariable,
+  },
+  'Debug point - check value',
+);
 ```
 
 Chạy với `NODE_ENV=development` để thấy `debug` logs.
@@ -298,6 +308,7 @@ Chạy với `NODE_ENV=development` để thấy `debug` logs.
 ### Bước 6: Kiểm tra Response Body
 
 API trả về format chuẩn khi có lỗi:
+
 ```json
 {
   "success": false,
@@ -342,8 +353,8 @@ API trả về format chuẩn khi có lỗi:
 // Frontend/Client
 fetch('/api/v1/users', {
   headers: {
-    'X-Correlation-Id': 'my-custom-trace-123'  // Optional
-  }
+    'X-Correlation-Id': 'my-custom-trace-123', // Optional
+  },
 });
 ```
 
@@ -379,10 +390,13 @@ this.logger.log('User logged in');
 try {
   await this.externalService.call();
 } catch (error) {
-  this.logger.error({ 
-    error: error.message, 
-    stack: error.stack 
-  }, 'External service failed');
+  this.logger.error(
+    {
+      error: error.message,
+      stack: error.stack,
+    },
+    'External service failed',
+  );
   throw new InternalServerErrorException('Service unavailable');
 }
 ```
@@ -390,6 +404,7 @@ try {
 ### 5. Correlation ID trong log
 
 Khi log từ service, có thể nhận correlationId từ request:
+
 ```typescript
 // Trong controller
 const correlationId = req.id || req.headers['x-correlation-id'];
@@ -403,7 +418,8 @@ this.logger.log({ correlationId, ... }, 'Processing...');
 ### Không thấy logs
 
 **Nguyên nhân:** Log level quá cao  
-**Giải pháp:** 
+**Giải pháp:**
+
 - Development: Đảm bảo `NODE_ENV=development` (log level = debug)
 - Production: Chỉ thấy `info` trở lên, không thấy `debug`
 
@@ -415,6 +431,7 @@ this.logger.log({ correlationId, ... }, 'Processing...');
 ### Không tìm được log của 1 request
 
 **Giải pháp:** Dùng `x-correlation-id` từ response header để search:
+
 ```bash
 docker compose logs app 2>&1 | grep "<correlation-id>"
 ```
@@ -423,12 +440,16 @@ docker compose logs app 2>&1 | grep "<correlation-id>"
 
 **Nguyên nhân:** Một số Error không có `.stack`  
 **Giải pháp:** Log full exception:
+
 ```typescript
-this.logger.error({ 
-  err: error,
-  message: error?.message,
-  stack: error?.stack 
-}, 'Error occurred');
+this.logger.error(
+  {
+    err: error,
+    message: error?.message,
+    stack: error?.stack,
+  },
+  'Error occurred',
+);
 ```
 
 ### Logs không có màu (Docker)
@@ -440,6 +461,7 @@ this.logger.error({
 
 **Hiện tại:** Không có cấu hình ghi file  
 **Giải pháp:** Có thể:
+
 1. Pipe stdout khi chạy: `node dist/main.js >> app.log 2>&1`
 2. Dùng PM2 với cấu hình file log
 3. Thêm pino transport `pino/file` hoặc `pino-roll` (cần cấu hình thêm)
@@ -448,15 +470,15 @@ this.logger.error({
 
 ## 📁 Cấu trúc Files liên quan
 
-| File | Mô tả |
-|------|-------|
-| `src/infrastructure/logger/logger.module.ts` | Cấu hình Pino |
-| `src/common/interceptors/logging.interceptor.ts` | Log HTTP request/response |
-| `src/common/filters/all-exceptions.filter.ts` | Bắt và log unhandled exceptions |
-| `src/common/filters/http-exception.filter.ts` | Xử lý HttpException |
-| `src/common/middleware/correlation-id.middleware.ts` | Gắn correlation ID |
-| `src/common/utils/logger.util.ts` | InjectLogger helper |
-| `src/main.ts` | Đăng ký Logger, Interceptor, Filters |
+| File                                                 | Mô tả                                |
+| ---------------------------------------------------- | ------------------------------------ |
+| `src/infrastructure/logger/logger.module.ts`         | Cấu hình Pino                        |
+| `src/common/interceptors/logging.interceptor.ts`     | Log HTTP request/response            |
+| `src/common/filters/all-exceptions.filter.ts`        | Bắt và log unhandled exceptions      |
+| `src/common/filters/http-exception.filter.ts`        | Xử lý HttpException                  |
+| `src/common/middleware/correlation-id.middleware.ts` | Gắn correlation ID                   |
+| `src/common/utils/logger.util.ts`                    | InjectLogger helper                  |
+| `src/main.ts`                                        | Đăng ký Logger, Interceptor, Filters |
 
 ---
 

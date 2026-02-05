@@ -12,20 +12,41 @@ export const validationSchema = Joi.object({
     .description('Node environment'),
 
   // PORT: Set trong docker-compose cho container (3000). App local dùng APP_PORT.
-  PORT: Joi.number().port().optional().description('Container listen port (12-Factor App)'),
+  PORT: Joi.number()
+    .port()
+    .optional()
+    .description('Container listen port (12-Factor App)'),
 
   // Docker port mapping (chỉ dùng trong docker-compose, port trên host)
-  APP_HOST_PORT: Joi.number().port().optional().description('Host port for app (Docker mapping)'),
-  POSTGRES_HOST_PORT: Joi.number().port().optional().description('Host port for Postgres (Docker mapping)'),
-  REDIS_HOST_PORT: Joi.number().port().optional().description('Host port for Redis (Docker mapping)'),
-  PGADMIN_HOST_PORT: Joi.number().port().optional().description('Host port for pgAdmin (Docker mapping)'),
+  APP_HOST_PORT: Joi.number()
+    .port()
+    .optional()
+    .description('Host port for app (Docker mapping)'),
+  POSTGRES_HOST_PORT: Joi.number()
+    .port()
+    .optional()
+    .description('Host port for Postgres (Docker mapping)'),
+  REDIS_HOST_PORT: Joi.number()
+    .port()
+    .optional()
+    .description('Host port for Redis (Docker mapping)'),
+  PGADMIN_HOST_PORT: Joi.number()
+    .port()
+    .optional()
+    .description('Host port for pgAdmin (Docker mapping)'),
 
   // APP_PORT: port app lắng nghe khi chạy local. Trong Docker dùng PORT=3000.
-  APP_PORT: Joi.number().port().default(3000).description('App listen port (local dev)'),
+  APP_PORT: Joi.number()
+    .port()
+    .default(3000)
+    .description('App listen port (local dev)'),
 
   // Database Configuration (port app dùng để kết nối DB)
   DB_HOST: Joi.string().required().description('Database host'),
-  DB_PORT: Joi.number().port().default(5432).description('Database connection port'),
+  DB_PORT: Joi.number()
+    .port()
+    .default(5432)
+    .description('Database connection port'),
   DB_USER: Joi.string().required().description('Database username'),
   DB_PASSWORD: Joi.string().required().description('Database password'),
   DB_NAME: Joi.string().required().description('Database name'),
@@ -36,9 +57,20 @@ export const validationSchema = Joi.object({
 
   // Redis Configuration (port app dùng để kết nối Redis)
   REDIS_HOST: Joi.string().default('localhost').description('Redis host'),
-  REDIS_PORT: Joi.number().port().default(6379).description('Redis connection port'),
-  REDIS_PASSWORD: Joi.string().allow('').default('').description('Redis password'),
-  REDIS_DB: Joi.number().integer().min(0).max(15).default(0).description('Redis database number'),
+  REDIS_PORT: Joi.number()
+    .port()
+    .default(6379)
+    .description('Redis connection port'),
+  REDIS_PASSWORD: Joi.string()
+    .allow('')
+    .default('')
+    .description('Redis password'),
+  REDIS_DB: Joi.number()
+    .integer()
+    .min(0)
+    .max(15)
+    .default(0)
+    .description('Redis database number'),
 
   // JWT Configuration
   JWT_SECRET: Joi.string()
@@ -53,7 +85,9 @@ export const validationSchema = Joi.object({
     .description('Refresh token expiration time (e.g., 7d, 30d)'),
   JWT_EXPIRES_IN: Joi.string()
     .default('15m')
-    .description('JWT expiration time - backward compatibility (e.g., 7d, 24h, 60m)'),
+    .description(
+      'JWT expiration time - backward compatibility (e.g., 7d, 24h, 60m)',
+    ),
 
   // Google OAuth Configuration
   GOOGLE_CLIENT_ID: Joi.string()
@@ -81,10 +115,23 @@ export const validationSchema = Joi.object({
     .valid('true', 'false')
     .default('false')
     .description('Enable secure SMTP (true for 465, false for other ports)'),
-  MAIL_USER: Joi.string().email().allow('').default('').description('SMTP username/email'),
-  MAIL_PASSWORD: Joi.string().allow('').default('').description('SMTP password'),
-  MAIL_FROM: Joi.string().email().allow('').default('').description('Default from email address'),
-  MAIL_FROM_NAME: Joi.string().default('NestJS App').description('Default from name'),
+  MAIL_USER: Joi.string()
+    .email()
+    .allow('')
+    .default('')
+    .description('SMTP username/email'),
+  MAIL_PASSWORD: Joi.string()
+    .allow('')
+    .default('')
+    .description('SMTP password'),
+  MAIL_FROM: Joi.string()
+    .email()
+    .allow('')
+    .default('')
+    .description('Default from email address'),
+  MAIL_FROM_NAME: Joi.string()
+    .default('NestJS App')
+    .description('Default from name'),
 
   // Storage Configuration
   STORAGE_TYPE: Joi.string()
@@ -111,9 +158,19 @@ export const validationSchema = Joi.object({
     .description('Comma-separated list of allowed CORS origins'),
 
   // pgAdmin Configuration (optional)
-  PGADMIN_EMAIL: Joi.string().email().allow('').default('').description('pgAdmin email'),
-  PGADMIN_PASSWORD: Joi.string().allow('').default('').description('pgAdmin password'),
-  PGADMIN_PORT: Joi.number().port().optional().description('pgAdmin host port (deprecated, use PGADMIN_HOST_PORT)'),
+  PGADMIN_EMAIL: Joi.string()
+    .email()
+    .allow('')
+    .default('')
+    .description('pgAdmin email'),
+  PGADMIN_PASSWORD: Joi.string()
+    .allow('')
+    .default('')
+    .description('pgAdmin password'),
+  PGADMIN_PORT: Joi.number()
+    .port()
+    .optional()
+    .description('pgAdmin host port (deprecated, use PGADMIN_HOST_PORT)'),
 });
 
 /**

@@ -110,7 +110,7 @@ Runtime thực tế dùng **class** `ApiResponseDto` / `ApiErrorResponseDto` (tr
 
 ```typescript
 export interface JwtPayload {
-  sub: string;   // user id
+  sub: string; // user id
   email: string;
   role: string;
   iat?: number;
@@ -158,13 +158,13 @@ getProfile(@CurrentUser() user: RequestUser) {
 
 ## Types vs DTOs vs Entities
 
-| | Type/Interface | DTO (class) | Entity (class) |
-|---|----------------|------------|----------------|
-| **Vị trí** | `common/types`, inline | `**/dtos/`, `shared/response`, `shared/pagination` | `**/entities/` |
-| **Mục đích** | Chỉ type-check, mô tả shape | Request/response API, validation, Swagger | Map với DB, TypeORM |
-| **Runtime** | Bị xóa khi compile | Tồn tại (instance) | Tồn tại (instance) |
-| **Validation** | Không | `class-validator` | Không (hoặc tùy) |
-| **Ví dụ** | `JwtPayload`, `PaginatedResult<T>` | `CreateUserDto`, `ApiResponseDto`, `PaginationQueryDto` | `User` |
+|                | Type/Interface                     | DTO (class)                                             | Entity (class)      |
+| -------------- | ---------------------------------- | ------------------------------------------------------- | ------------------- |
+| **Vị trí**     | `common/types`, inline             | `**/dtos/`, `shared/response`, `shared/pagination`      | `**/entities/`      |
+| **Mục đích**   | Chỉ type-check, mô tả shape        | Request/response API, validation, Swagger               | Map với DB, TypeORM |
+| **Runtime**    | Bị xóa khi compile                 | Tồn tại (instance)                                      | Tồn tại (instance)  |
+| **Validation** | Không                              | `class-validator`                                       | Không (hoặc tùy)    |
+| **Ví dụ**      | `JwtPayload`, `PaginatedResult<T>` | `CreateUserDto`, `ApiResponseDto`, `PaginationQueryDto` | `User`              |
 
 - **Type/interface**: dùng cho tham số, biến, hàm, generic (ví dụ `Promise<PaginatedResult<User>>`).
 - **DTO**: dùng cho body/query/response, có `@IsString()`, `@ApiProperty()`, v.v.
@@ -185,7 +185,7 @@ export const USER_ROLES = {
   ADMIN: 'admin',
 } as const;
 
-export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
+export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 // 'user' | 'admin'
 ```
 
@@ -251,9 +251,9 @@ Có thể định nghĩa `NotificationJobData` và dùng `Job<NotificationJobDat
 ### 2. Dùng generic cho kết quả có cấu trúc cố định
 
 ```typescript
-PaginatedResult<User>
-ApiResponse<UserDto>
-Promise<PaginatedResult<Order>>
+PaginatedResult<User>;
+ApiResponse<UserDto>;
+Promise<PaginatedResult<Order>>;
 ```
 
 ### 3. Tránh `any` khi có thể
@@ -293,15 +293,15 @@ Import: `import { JwtPayload, RequestUser, PaginatedResult } from '@/common/type
 
 ## Tóm tắt
 
-| Nhu cầu | Dùng gì | Ví dụ |
-|--------|---------|--------|
-| Type cho payload JWT | Interface | `JwtPayload` |
-| User trên request | Interface | `RequestUser` |
-| Kết quả phân trang (logic) | Interface generic | `PaginatedResult<T>` |
-| Response API (logic/type guard) | Union type | `ApiResponse<T>` |
-| Body/query API + validation | DTO class | `CreateUserDto`, `PaginationQueryDto` |
-| Response API + Swagger | DTO class | `ApiResponseDto<T>`, `PaginatedResponseDto<T>` |
-| Role, status cố định | Const object + type | `USER_ROLES`, `UserRole` |
-| Job data queue | Interface | `EmailJobData`, `NotificationJobData` |
+| Nhu cầu                         | Dùng gì             | Ví dụ                                          |
+| ------------------------------- | ------------------- | ---------------------------------------------- |
+| Type cho payload JWT            | Interface           | `JwtPayload`                                   |
+| User trên request               | Interface           | `RequestUser`                                  |
+| Kết quả phân trang (logic)      | Interface generic   | `PaginatedResult<T>`                           |
+| Response API (logic/type guard) | Union type          | `ApiResponse<T>`                               |
+| Body/query API + validation     | DTO class           | `CreateUserDto`, `PaginationQueryDto`          |
+| Response API + Swagger          | DTO class           | `ApiResponseDto<T>`, `PaginatedResponseDto<T>` |
+| Role, status cố định            | Const object + type | `USER_ROLES`, `UserRole`                       |
+| Job data queue                  | Interface           | `EmailJobData`, `NotificationJobData`          |
 
 Kết hợp tốt **common types** với **DTOs** và **entities** giúp code rõ ràng, dễ bảo trì và an toàn kiểu hơn.

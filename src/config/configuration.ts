@@ -7,10 +7,10 @@ export default registerAs('app', () => ({
   // - Cloud platforms: PORT được set tự động (Heroku, Railway, etc.)
   // Default: 3000 (đơn giản nhất, không cần config)
   port: parseInt(
-    process.env.PORT ||        // Cloud platforms hoặc Docker (ưu tiên)
-    process.env.APP_PORT ||     // Local development
-    '3000',                     // Default: 3000 (đơn giản)
-    10
+    process.env.PORT || // Cloud platforms hoặc Docker (ưu tiên)
+      process.env.APP_PORT || // Local development
+      '3000', // Default: 3000 (đơn giản)
+    10,
   ),
   env: process.env.NODE_ENV || 'development',
   prefix: 'api',
@@ -39,7 +39,10 @@ export const jwtConfig = registerAs('jwt', () => ({
   accessTokenExpiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m', // Short-lived access token
   refreshTokenExpiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '7d', // Long-lived refresh token
   // Backward compatibility
-  expiresIn: process.env.JWT_EXPIRES_IN || process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '15m',
+  expiresIn:
+    process.env.JWT_EXPIRES_IN ||
+    process.env.JWT_ACCESS_TOKEN_EXPIRES_IN ||
+    '15m',
 }));
 
 export const googleOAuthConfig = registerAs('google', () => ({
@@ -77,6 +80,12 @@ export const storageConfig = registerAs('storage', () => ({
     maxFileSize: parseInt(process.env.STORAGE_MAX_FILE_SIZE || '10485760', 10), // 10MB default
     allowedMimeTypes: process.env.STORAGE_ALLOWED_MIME_TYPES
       ? process.env.STORAGE_ALLOWED_MIME_TYPES.split(',')
-      : ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain'],
+      : [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'application/pdf',
+          'text/plain',
+        ],
   },
 }));

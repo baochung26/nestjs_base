@@ -265,6 +265,7 @@ npm run seed
 ```
 
 Seeder sẽ tạo các users mẫu:
+
 - **admin@example.com** / **admin123** (Admin role)
 - **user@example.com** / **user123** (User role)
 - **jane@example.com** / **user123** (User role)
@@ -286,6 +287,7 @@ curl -X GET http://localhost:3000/api/auth/profile \
 ### 1. Queue Module
 
 Queue module sử dụng Bull và Redis để xử lý background jobs. Có 3 queues mặc định:
+
 - `default` - Queue mặc định
 - `email` - Queue cho email jobs
 - `notification` - Queue cho notification jobs
@@ -389,10 +391,10 @@ export class YourQueueProcessor {
   @Process('your-job-name')
   async handleYourJob(job: Job<YourJobData>) {
     this.logger.log(`Processing job ${job.id}`);
-    
+
     // Xử lý job của bạn
     // ...
-    
+
     return { success: true };
   }
 }
@@ -427,12 +429,13 @@ POST /api/auth/login
 **Bước 1:** User truy cập endpoint để bắt đầu OAuth flow:
 
 ```typescript
-GET /api/auth/google
+GET / api / auth / google;
 ```
 
 User sẽ được redirect đến Google để đăng nhập. Sau khi đăng nhập thành công, Google sẽ redirect về callback URL và backend sẽ tự động tạo/find user, sau đó redirect về frontend với JWT token.
 
 **Setup Google OAuth:**
+
 1. Tạo OAuth credentials tại [Google Cloud Console](https://console.cloud.google.com/)
 2. Cập nhật `.env` với:
    ```env
@@ -565,49 +568,49 @@ PUT /api/admin/settings
 
 ### Authentication
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|---------------|-------------|
-| POST | `/api/auth/register` | No | Đăng ký user mới |
-| POST | `/api/auth/login` | No | Đăng nhập (Email/Password) |
-| GET | `/api/auth/google` | No | Bắt đầu Google OAuth flow |
-| GET | `/api/auth/google/callback` | No | Callback từ Google OAuth |
-| GET | `/api/auth/profile` | Yes | Lấy profile |
+| Method | Endpoint                    | Auth Required | Description                |
+| ------ | --------------------------- | ------------- | -------------------------- |
+| POST   | `/api/auth/register`        | No            | Đăng ký user mới           |
+| POST   | `/api/auth/login`           | No            | Đăng nhập (Email/Password) |
+| GET    | `/api/auth/google`          | No            | Bắt đầu Google OAuth flow  |
+| GET    | `/api/auth/google/callback` | No            | Callback từ Google OAuth   |
+| GET    | `/api/auth/profile`         | Yes           | Lấy profile                |
 
 ### Users
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|---------------|-------------|
-| GET | `/api/users` | Yes | Lấy danh sách users |
-| GET | `/api/users/profile` | Yes | Profile của user hiện tại |
-| GET | `/api/users/:id` | Yes | Lấy user theo ID |
-| POST | `/api/users` | Yes | Tạo user mới |
-| PATCH | `/api/users/:id` | Yes | Cập nhật user |
-| DELETE | `/api/users/:id` | Yes | Xóa user |
+| Method | Endpoint             | Auth Required | Description               |
+| ------ | -------------------- | ------------- | ------------------------- |
+| GET    | `/api/users`         | Yes           | Lấy danh sách users       |
+| GET    | `/api/users/profile` | Yes           | Profile của user hiện tại |
+| GET    | `/api/users/:id`     | Yes           | Lấy user theo ID          |
+| POST   | `/api/users`         | Yes           | Tạo user mới              |
+| PATCH  | `/api/users/:id`     | Yes           | Cập nhật user             |
+| DELETE | `/api/users/:id`     | Yes           | Xóa user                  |
 
 ### Admin
 
-| Method | Endpoint | Auth Required | Role Required | Description |
-|--------|----------|---------------|---------------|-------------|
-| GET | `/api/admin/dashboard` | Yes | Admin | Dashboard thống kê |
-| GET | `/api/admin/users` | Yes | Admin | Quản lý users |
-| GET | `/api/admin/users/:id` | Yes | Admin | Chi tiết user |
-| POST | `/api/admin/users` | Yes | Admin | Tạo user |
-| PATCH | `/api/admin/users/:id` | Yes | Admin | Cập nhật user |
-| DELETE | `/api/admin/users/:id` | Yes | Admin | Xóa user |
-| PATCH | `/api/admin/users/:id/activate` | Yes | Admin | Kích hoạt user |
-| PATCH | `/api/admin/users/:id/deactivate` | Yes | Admin | Vô hiệu hóa user |
-| GET | `/api/admin/settings` | Yes | Admin | Lấy settings |
-| PUT | `/api/admin/settings` | Yes | Admin | Cập nhật settings |
+| Method | Endpoint                          | Auth Required | Role Required | Description        |
+| ------ | --------------------------------- | ------------- | ------------- | ------------------ |
+| GET    | `/api/admin/dashboard`            | Yes           | Admin         | Dashboard thống kê |
+| GET    | `/api/admin/users`                | Yes           | Admin         | Quản lý users      |
+| GET    | `/api/admin/users/:id`            | Yes           | Admin         | Chi tiết user      |
+| POST   | `/api/admin/users`                | Yes           | Admin         | Tạo user           |
+| PATCH  | `/api/admin/users/:id`            | Yes           | Admin         | Cập nhật user      |
+| DELETE | `/api/admin/users/:id`            | Yes           | Admin         | Xóa user           |
+| PATCH  | `/api/admin/users/:id/activate`   | Yes           | Admin         | Kích hoạt user     |
+| PATCH  | `/api/admin/users/:id/deactivate` | Yes           | Admin         | Vô hiệu hóa user   |
+| GET    | `/api/admin/settings`             | Yes           | Admin         | Lấy settings       |
+| PUT    | `/api/admin/settings`             | Yes           | Admin         | Cập nhật settings  |
 
 ### Queue
 
-| Method | Endpoint | Auth Required | Role Required | Description |
-|--------|----------|---------------|---------------|-------------|
-| GET | `/api/queue/stats` | Yes | Admin | Thống kê tất cả queues |
-| GET | `/api/queue/stats/:queueName` | Yes | Admin | Thống kê queue cụ thể |
-| POST | `/api/queue/email` | Yes | Admin | Thêm email job |
-| POST | `/api/queue/notification` | Yes | Admin | Thêm notification job |
-| DELETE | `/api/queue/clean/:queueName` | Yes | Admin | Dọn dẹp queue |
+| Method | Endpoint                      | Auth Required | Role Required | Description            |
+| ------ | ----------------------------- | ------------- | ------------- | ---------------------- |
+| GET    | `/api/queue/stats`            | Yes           | Admin         | Thống kê tất cả queues |
+| GET    | `/api/queue/stats/:queueName` | Yes           | Admin         | Thống kê queue cụ thể  |
+| POST   | `/api/queue/email`            | Yes           | Admin         | Thêm email job         |
+| POST   | `/api/queue/notification`     | Yes           | Admin         | Thêm notification job  |
+| DELETE | `/api/queue/clean/:queueName` | Yes           | Admin         | Dọn dẹp queue          |
 
 ## 🐳 Docker Commands
 

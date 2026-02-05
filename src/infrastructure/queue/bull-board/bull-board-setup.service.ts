@@ -28,10 +28,13 @@ export class BullBoardSetupService {
       return false;
     }
 
-    const path = this.configService.get('bullBoard.path') ?? BULL_BOARD_DEFAULT_PATH;
+    const path =
+      this.configService.get('bullBoard.path') ?? BULL_BOARD_DEFAULT_PATH;
     const expressApp = app.getHttpAdapter().getInstance();
 
-    const authMiddleware = createBullBoardAuthMiddlewareFromConfig(this.configService);
+    const authMiddleware = createBullBoardAuthMiddlewareFromConfig(
+      this.configService,
+    );
     expressApp.use(path, authMiddleware);
     expressApp.use(path, this.bullBoardService.getRouter());
 

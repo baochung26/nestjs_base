@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const isDevelopment = configService.get('NODE_ENV') !== 'production';
-        
+
         return {
           pinoHttp: {
             level: isDevelopment ? 'debug' : 'info',
@@ -51,10 +51,13 @@ import { v4 as uuidv4 } from 'uuid';
             }),
             genReqId: (req, res) => {
               // Use existing correlation ID if present, otherwise generate new one
-              const existingId = req.headers['x-correlation-id'] || req.id || uuidv4();
+              const existingId =
+                req.headers['x-correlation-id'] || req.id || uuidv4();
               req.id = existingId;
               const headerId =
-                typeof existingId === 'string' ? existingId : String(existingId);
+                typeof existingId === 'string'
+                  ? existingId
+                  : String(existingId);
               res.setHeader('x-correlation-id', headerId);
               return headerId;
             },

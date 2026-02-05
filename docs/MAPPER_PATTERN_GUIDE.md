@@ -28,13 +28,13 @@ Base Mapper cung cấp các methods chung:
 export abstract class BaseMapper<TEntity, TDto> {
   // Convert entity to DTO
   abstract toDto(entity: TEntity): TDto;
-  
+
   // Convert DTO to entity (partial)
   abstract toEntity(dto: Partial<TDto>): Partial<TEntity>;
-  
+
   // Convert array of entities to array of DTOs
   toDtoArray(entities: TEntity[]): TDto[];
-  
+
   // Convert array of DTOs to array of entities
   toEntityArray(dtos: Partial<TDto>[]): Partial<TEntity>[];
 }
@@ -61,7 +61,7 @@ export class UserMapper extends BaseMapper<User, UserDto> {
     // Exclude password
     return dto;
   }
-  
+
   toEntity(dto: Partial<CreateUserDto>): Partial<User> {
     const entity: Partial<User> = {};
     if (dto.email) entity.email = dto.email;

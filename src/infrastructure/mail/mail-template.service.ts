@@ -6,7 +6,11 @@ export interface TemplateContext {
   [key: string]: any;
 }
 
-export type TemplateName = 'welcome' | 'password-reset' | 'verification' | 'notification';
+export type TemplateName =
+  | 'welcome'
+  | 'password-reset'
+  | 'verification'
+  | 'notification';
 
 @Injectable()
 export class MailTemplateService {
@@ -27,7 +31,10 @@ export class MailTemplateService {
       this.cache.set(name, content);
       return content;
     } catch (error: any) {
-      this.logger.error({ error: error.message, name }, 'Failed to load template');
+      this.logger.error(
+        { error: error.message, name },
+        'Failed to load template',
+      );
       throw error;
     }
   }
@@ -96,7 +103,11 @@ export class MailTemplateService {
   /**
    * Notification email: title, message, link (optional)
    */
-  renderNotification(context: { title: string; message: string; link?: string }): string {
+  renderNotification(context: {
+    title: string;
+    message: string;
+    link?: string;
+  }): string {
     const linkBlock = context.link
       ? `<p><a href="${context.link}">View Details</a></p>`
       : '';

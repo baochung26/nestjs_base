@@ -32,6 +32,7 @@ npm install
 ```
 
 Packages:
+
 - `@bull-board/api` - Core API
 - `@bull-board/express` - Express adapter
 
@@ -83,6 +84,7 @@ curl "http://localhost:3000/admin/queues" \
 3. Click tab **"Failed"**
 
 Thông tin hiển thị:
+
 - Job ID
 - Job name
 - Failed reason / error message
@@ -94,10 +96,12 @@ Thông tin hiển thị:
 #### Retry Failed Jobs
 
 **Retry từng job:**
+
 1. Click vào failed job
 2. Click button **"Retry"**
 
 **Retry tất cả failed jobs:**
+
 1. Ở tab "Failed"
 2. Click button **"Retry all"**
 
@@ -111,6 +115,7 @@ Hoặc dùng **"Clean"** để xóa hàng loạt.
 ### Job Details
 
 Click vào bất kỳ job nào để xem:
+
 - **Data**: Payload của job
 - **Options**: attempts, delay, priority, backoff
 - **Progress**: Tiến trình xử lý (nếu có)
@@ -123,6 +128,7 @@ Click vào bất kỳ job nào để xem:
 #### Pause Queue
 
 Tạm dừng xử lý jobs:
+
 1. Click vào queue
 2. Click button **"Pause"**
 
@@ -135,11 +141,13 @@ Jobs mới vẫn được thêm vào nhưng không được xử lý cho đến 
 #### Empty Queue
 
 Xóa tất cả jobs (cẩn thận!):
+
 1. Click button **"Empty"**
 
 #### Clean Queue
 
 Dọn dẹp completed hoặc failed jobs:
+
 1. Click button **"Clean"**
 2. Chọn loại: Completed, Failed, Delayed
 3. Chọn grace period (jobs cũ hơn bao lâu)
@@ -148,11 +156,11 @@ Dọn dẹp completed hoặc failed jobs:
 
 Cấu hình qua `configuration.ts` và env:
 
-| Env | Mô tả | Default |
-|-----|-------|---------|
-| `BULL_BOARD_PATH` | URL path cho Bull Board UI | `/admin/queues` |
-| `BULL_BOARD_ENABLED` | Bật/tắt (set `false` để tắt) | `true` |
-| `BULL_BOARD_SECRET_KEY` | Key bảo vệ truy cập. Để trống = không bảo vệ | `` |
+| Env                     | Mô tả                                        | Default         |
+| ----------------------- | -------------------------------------------- | --------------- |
+| `BULL_BOARD_PATH`       | URL path cho Bull Board UI                   | `/admin/queues` |
+| `BULL_BOARD_ENABLED`    | Bật/tắt (set `false` để tắt)                 | `true`          |
+| `BULL_BOARD_SECRET_KEY` | Key bảo vệ truy cập. Để trống = không bảo vệ | ``              |
 
 ### Thay đổi Base Path
 
@@ -170,11 +178,13 @@ BULL_BOARD_PATH=/admin/queues
 ### Thêm Queues mới vào Bull Board
 
 1. Đăng ký queue trong `queue.module.ts`:
+
 ```typescript
 BullModule.registerQueue({ name: 'your-new-queue' }),
 ```
 
 2. Cập nhật `bull-board.service.ts`:
+
 ```typescript
 constructor(
   @InjectQueue('default') private readonly defaultQueue: Queue,
@@ -201,16 +211,16 @@ constructor(
 
 ## 📊 So sánh với Laravel
 
-| Laravel Horizon | Bull Board |
-|-----------------|------------|
-| Dashboard với stats | ✅ Dashboard với real-time stats |
-| Failed jobs table | ✅ Failed jobs tab với details |
-| Retry failed jobs | ✅ Retry button cho từng job |
-| Job details | ✅ Chi tiết job với data, logs, stack trace |
-| Pause/continue | ✅ Pause/resume queues |
-| Metrics & graphs | ⚠️ Chỉ có stats cơ bản (không có graphs) |
-| Tags | ❌ Không có |
-| Job batches | ❌ Không có (Bull không hỗ trợ) |
+| Laravel Horizon     | Bull Board                                  |
+| ------------------- | ------------------------------------------- |
+| Dashboard với stats | ✅ Dashboard với real-time stats            |
+| Failed jobs table   | ✅ Failed jobs tab với details              |
+| Retry failed jobs   | ✅ Retry button cho từng job                |
+| Job details         | ✅ Chi tiết job với data, logs, stack trace |
+| Pause/continue      | ✅ Pause/resume queues                      |
+| Metrics & graphs    | ⚠️ Chỉ có stats cơ bản (không có graphs)    |
+| Tags                | ❌ Không có                                 |
+| Job batches         | ❌ Không có (Bull không hỗ trợ)             |
 
 ## 🔒 Security Notes
 
@@ -233,12 +243,14 @@ http://localhost:3000/admin/queues?key=your-secret-key
 ### 2. Auto-refresh
 
 Bull Board tự động refresh mỗi 5 giây. Để thay đổi:
+
 - Click vào settings icon
 - Chọn refresh interval
 
 ### 3. Filter Jobs
 
 Dùng search box để filter jobs theo:
+
 - Job ID
 - Job name
 - Status
@@ -254,6 +266,7 @@ Click vào job → Copy job data để export JSON.
 **Nguyên nhân:** Key sai hoặc chưa truyền.
 
 **Giải pháp:**
+
 1. Kiểm tra `BULL_BOARD_SECRET_KEY` trong `.env` khớp với key dùng trong URL/header
 2. Dùng `?key=YOUR_KEY` trong URL hoặc header `X-Bull-Board-Key: YOUR_KEY`
 
@@ -262,6 +275,7 @@ Click vào job → Copy job data để export JSON.
 **Nguyên nhân:** App chưa chạy hoặc Bull Board chưa được mount.
 
 **Giải pháp:**
+
 1. Chạy `npm run start:dev`
 2. Kiểm tra logs có dòng: `Bull Board (Queue Monitor): http://localhost:3000/admin/queues`
 
@@ -270,5 +284,6 @@ Click vào job → Copy job data để export JSON.
 **Nguyên nhân:** Jobs đã bị clean hoặc `removeOnFail: true`.
 
 **Giải pháp:**
+
 - Đảm bảo `removeOnFail: false` trong queue config (đã set mặc định)
 - Kiểm tra Redis: `docker compose exec redis redis-cli` → `LLEN bull:email:failed`

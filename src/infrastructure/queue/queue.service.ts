@@ -51,11 +51,10 @@ export class QueueService {
   /**
    * Add email job
    */
-  async addEmailJob(
-    data: EmailJobData,
-    options?: Partial<QueueJobOptions>,
-  ) {
-    this.logger.debug(`Adding email job: to=${data.to}, subject=${data.subject}`);
+  async addEmailJob(data: EmailJobData, options?: Partial<QueueJobOptions>) {
+    this.logger.debug(
+      `Adding email job: to=${data.to}, subject=${data.subject}`,
+    );
 
     const jobOptions: QueueJobOptions = {
       ...DEFAULT_JOB_OPTIONS,
@@ -141,7 +140,10 @@ export class QueueService {
   /**
    * Clean failed jobs
    */
-  async cleanFailedJobs(queueName: QueueName = 'default', grace: number = 1000) {
+  async cleanFailedJobs(
+    queueName: QueueName = 'default',
+    grace: number = 1000,
+  ) {
     this.logger.log(`Cleaning failed jobs from queue: ${queueName}`);
     const queue = this.getQueueByName(queueName);
     return queue.clean(grace, 'failed');

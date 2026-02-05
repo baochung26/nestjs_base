@@ -27,19 +27,19 @@ Base Repository cung cấp các methods chung cho tất cả repositories:
 // src/common/repositories/base.repository.ts
 export abstract class BaseRepository<T> extends Repository<T> {
   // Find by ID, throw exception if not found
-  async findById(id: string): Promise<T>
-  
+  async findById(id: string): Promise<T>;
+
   // Find by ID, return null if not found
-  async findByIdOrNull(id: string): Promise<T | null>
-  
+  async findByIdOrNull(id: string): Promise<T | null>;
+
   // Check if entity exists
-  async exists(id: string): Promise<boolean>
-  
+  async exists(id: string): Promise<boolean>;
+
   // Find active entities
-  async findActive(): Promise<T[]>
-  
+  async findActive(): Promise<T[]>;
+
   // Find inactive entities
-  async findInactive(): Promise<T[]>
+  async findInactive(): Promise<T[]>;
 }
 ```
 
@@ -99,7 +99,11 @@ export class UsersRepository extends BaseRepository<User> {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {
-    super(userRepository.target, userRepository.manager, userRepository.queryRunner);
+    super(
+      userRepository.target,
+      userRepository.manager,
+      userRepository.queryRunner,
+    );
   }
 
   // Custom methods
@@ -149,9 +153,7 @@ export class UsersService {
 // ✅ Good - Service inject custom repository
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly usersRepository: UsersRepository,
-  ) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async findByEmail(email: string) {
     return this.usersRepository.findByEmail(email);
@@ -238,7 +240,11 @@ export class UsersRepository extends BaseRepository<User> {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {
-    super(userRepository.target, userRepository.manager, userRepository.queryRunner);
+    super(
+      userRepository.target,
+      userRepository.manager,
+      userRepository.queryRunner,
+    );
   }
 
   // Custom: Find by email
@@ -273,9 +279,7 @@ export class UsersRepository extends BaseRepository<User> {
 // src/modules/users/services/users.service.ts
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly usersRepository: UsersRepository,
-  ) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async create(dto: CreateUserDto): Promise<User> {
     // Sử dụng repository method

@@ -92,9 +92,12 @@ export const ERROR_MESSAGES = {
 export const VALIDATION_MESSAGES = {
   REQUIRED: (field: string) => `${field} is required`,
   INVALID_EMAIL: 'Invalid email format',
-  MIN_LENGTH: (field: string, min: number) => `${field} must be at least ${min} characters`,
-  MAX_LENGTH: (field: string, max: number) => `${field} must not exceed ${max} characters`,
+  MIN_LENGTH: (field: string, min: number) =>
+    `${field} must be at least ${min} characters`,
+  MAX_LENGTH: (field: string, max: number) =>
+    `${field} must not exceed ${max} characters`,
   INVALID_TYPE: (field: string, type: string) => `${field} must be a ${type}`,
-  INVALID_ENUM: (field: string, values: string[]) => `${field} must be one of: ${values.join(', ')}`,
+  INVALID_ENUM: (field: string, values: string[]) =>
+    `${field} must be one of: ${values.join(', ')}`,
   INVALID_FORMAT: (field: string) => `Invalid ${field} format`,
 } as const;

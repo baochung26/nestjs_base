@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { databaseConfig } from '../../config/configuration';
-import { User } from '../../modules/users/entities/user.entity';
 import { join } from 'path';
 
 @Module({
@@ -24,7 +23,7 @@ import { join } from 'path';
           entities: [join(__dirname, '../../**/*.entity{.ts,.js}')],
           migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
           synchronize: !isProduction && (dbConfig?.synchronize ?? true),
-          logging: dbConfig?.logging ?? (!isProduction),
+          logging: dbConfig?.logging ?? !isProduction,
           migrationsRun: false,
           migrationsTableName: 'migrations',
           // Connection pooling
@@ -35,11 +34,12 @@ import { join } from 'path';
             connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
           },
           // SSL configuration (for production)
-          ...(isProduction && process.env.DB_SSL === 'true' && {
-            ssl: {
-              rejectUnauthorized: false,
-            },
-          }),
+          ...(isProduction &&
+            process.env.DB_SSL === 'true' && {
+              ssl: {
+                rejectUnauthorized: false,
+              },
+            }),
         };
       },
       inject: [ConfigService],

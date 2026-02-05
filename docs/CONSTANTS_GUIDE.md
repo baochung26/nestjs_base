@@ -48,15 +48,15 @@ return new ApiResponseDto(true, HTTP_STATUS.OK, 'Success', data);
 ### Available Constants
 
 ```typescript
-HTTP_STATUS.OK                    // 200
-HTTP_STATUS.CREATED               // 201
-HTTP_STATUS.BAD_REQUEST           // 400
-HTTP_STATUS.UNAUTHORIZED          // 401
-HTTP_STATUS.FORBIDDEN             // 403
-HTTP_STATUS.NOT_FOUND             // 404
-HTTP_STATUS.CONFLICT              // 409
-HTTP_STATUS.UNPROCESSABLE_ENTITY  // 422
-HTTP_STATUS.INTERNAL_SERVER_ERROR // 500
+HTTP_STATUS.OK; // 200
+HTTP_STATUS.CREATED; // 201
+HTTP_STATUS.BAD_REQUEST; // 400
+HTTP_STATUS.UNAUTHORIZED; // 401
+HTTP_STATUS.FORBIDDEN; // 403
+HTTP_STATUS.NOT_FOUND; // 404
+HTTP_STATUS.CONFLICT; // 409
+HTTP_STATUS.UNPROCESSABLE_ENTITY; // 422
+HTTP_STATUS.INTERNAL_SERVER_ERROR; // 500
 // ... và nhiều hơn
 ```
 
@@ -82,8 +82,8 @@ if (role === USER_ROLES.ADMIN) { ... }
 ```typescript
 import { USER_STATUS } from '../common/constants';
 
-isActive: USER_STATUS.ACTIVE   // true
-isActive: USER_STATUS.INACTIVE // false
+isActive: USER_STATUS.ACTIVE; // true
+isActive: USER_STATUS.INACTIVE; // false
 ```
 
 ### User Defaults
@@ -109,30 +109,30 @@ isActive: USER_DEFAULTS.IS_ACTIVE // true
 import { SUCCESS_MESSAGES } from '../common/constants';
 
 // General
-SUCCESS_MESSAGES.SUCCESS
-SUCCESS_MESSAGES.CREATED
-SUCCESS_MESSAGES.UPDATED
-SUCCESS_MESSAGES.DELETED
-SUCCESS_MESSAGES.RETRIEVED
+SUCCESS_MESSAGES.SUCCESS;
+SUCCESS_MESSAGES.CREATED;
+SUCCESS_MESSAGES.UPDATED;
+SUCCESS_MESSAGES.DELETED;
+SUCCESS_MESSAGES.RETRIEVED;
 
 // Auth
-SUCCESS_MESSAGES.LOGIN_SUCCESS
-SUCCESS_MESSAGES.REGISTER_SUCCESS
-SUCCESS_MESSAGES.LOGOUT_SUCCESS
-SUCCESS_MESSAGES.PASSWORD_RESET_SENT
-SUCCESS_MESSAGES.EMAIL_VERIFIED
+SUCCESS_MESSAGES.LOGIN_SUCCESS;
+SUCCESS_MESSAGES.REGISTER_SUCCESS;
+SUCCESS_MESSAGES.LOGOUT_SUCCESS;
+SUCCESS_MESSAGES.PASSWORD_RESET_SENT;
+SUCCESS_MESSAGES.EMAIL_VERIFIED;
 
 // User
-SUCCESS_MESSAGES.USER_CREATED
-SUCCESS_MESSAGES.USER_UPDATED
-SUCCESS_MESSAGES.USER_DELETED
-SUCCESS_MESSAGES.USER_ACTIVATED
-SUCCESS_MESSAGES.USER_DEACTIVATED
+SUCCESS_MESSAGES.USER_CREATED;
+SUCCESS_MESSAGES.USER_UPDATED;
+SUCCESS_MESSAGES.USER_DELETED;
+SUCCESS_MESSAGES.USER_ACTIVATED;
+SUCCESS_MESSAGES.USER_DEACTIVATED;
 
 // File, Queue, Cache
-SUCCESS_MESSAGES.FILE_UPLOADED
-SUCCESS_MESSAGES.JOB_ADDED
-SUCCESS_MESSAGES.CACHE_CLEARED
+SUCCESS_MESSAGES.FILE_UPLOADED;
+SUCCESS_MESSAGES.JOB_ADDED;
+SUCCESS_MESSAGES.CACHE_CLEARED;
 ```
 
 ### Error Messages
@@ -141,33 +141,33 @@ SUCCESS_MESSAGES.CACHE_CLEARED
 import { ERROR_MESSAGES } from '../common/constants';
 
 // General
-ERROR_MESSAGES.BAD_REQUEST
-ERROR_MESSAGES.UNAUTHORIZED
-ERROR_MESSAGES.FORBIDDEN
-ERROR_MESSAGES.NOT_FOUND
-ERROR_MESSAGES.CONFLICT
-ERROR_MESSAGES.VALIDATION_ERROR
-ERROR_MESSAGES.TOO_MANY_REQUESTS
-ERROR_MESSAGES.INTERNAL_SERVER_ERROR
+ERROR_MESSAGES.BAD_REQUEST;
+ERROR_MESSAGES.UNAUTHORIZED;
+ERROR_MESSAGES.FORBIDDEN;
+ERROR_MESSAGES.NOT_FOUND;
+ERROR_MESSAGES.CONFLICT;
+ERROR_MESSAGES.VALIDATION_ERROR;
+ERROR_MESSAGES.TOO_MANY_REQUESTS;
+ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
 
 // Auth
-ERROR_MESSAGES.INVALID_CREDENTIALS
-ERROR_MESSAGES.EMAIL_ALREADY_EXISTS
-ERROR_MESSAGES.INVALID_TOKEN
-ERROR_MESSAGES.INVALID_REFRESH_TOKEN
-ERROR_MESSAGES.TOKEN_EXPIRED
-ERROR_MESSAGES.ACCOUNT_INACTIVE
+ERROR_MESSAGES.INVALID_CREDENTIALS;
+ERROR_MESSAGES.EMAIL_ALREADY_EXISTS;
+ERROR_MESSAGES.INVALID_TOKEN;
+ERROR_MESSAGES.INVALID_REFRESH_TOKEN;
+ERROR_MESSAGES.TOKEN_EXPIRED;
+ERROR_MESSAGES.ACCOUNT_INACTIVE;
 
 // User
-ERROR_MESSAGES.USER_NOT_FOUND
-ERROR_MESSAGES.USER_ALREADY_EXISTS
-ERROR_MESSAGES.CANNOT_DELETE_SELF
-ERROR_MESSAGES.CANNOT_DEACTIVATE_SELF
+ERROR_MESSAGES.USER_NOT_FOUND;
+ERROR_MESSAGES.USER_ALREADY_EXISTS;
+ERROR_MESSAGES.CANNOT_DELETE_SELF;
+ERROR_MESSAGES.CANNOT_DEACTIVATE_SELF;
 
 // File, Database, Queue, Cache
-ERROR_MESSAGES.FILE_NOT_FOUND
-ERROR_MESSAGES.DATABASE_ERROR
-ERROR_MESSAGES.CACHE_ERROR
+ERROR_MESSAGES.FILE_NOT_FOUND;
+ERROR_MESSAGES.DATABASE_ERROR;
+ERROR_MESSAGES.CACHE_ERROR;
 ```
 
 ### Validation Messages
@@ -176,15 +176,15 @@ ERROR_MESSAGES.CACHE_ERROR
 import { VALIDATION_MESSAGES } from '../common/constants';
 
 // Dynamic messages (hàm nhận tham số)
-VALIDATION_MESSAGES.REQUIRED('email')              // "email is required"
-VALIDATION_MESSAGES.MIN_LENGTH('password', 6)      // "password must be at least 6 characters"
-VALIDATION_MESSAGES.MAX_LENGTH('name', 50)         // "name must not exceed 50 characters"
-VALIDATION_MESSAGES.INVALID_TYPE('age', 'number')  // "age must be a number"
-VALIDATION_MESSAGES.INVALID_ENUM('role', ['user', 'admin'])  // "role must be one of: user, admin"
-VALIDATION_MESSAGES.INVALID_FORMAT('email')        // "Invalid email format"
+VALIDATION_MESSAGES.REQUIRED('email'); // "email is required"
+VALIDATION_MESSAGES.MIN_LENGTH('password', 6); // "password must be at least 6 characters"
+VALIDATION_MESSAGES.MAX_LENGTH('name', 50); // "name must not exceed 50 characters"
+VALIDATION_MESSAGES.INVALID_TYPE('age', 'number'); // "age must be a number"
+VALIDATION_MESSAGES.INVALID_ENUM('role', ['user', 'admin']); // "role must be one of: user, admin"
+VALIDATION_MESSAGES.INVALID_FORMAT('email'); // "Invalid email format"
 
 // Static message
-VALIDATION_MESSAGES.INVALID_EMAIL  // "Invalid email format"
+VALIDATION_MESSAGES.INVALID_EMAIL; // "Invalid email format"
 ```
 
 ## 📄 Pagination Constants
@@ -207,11 +207,11 @@ limit: PAGINATION.DEFAULT_LIMIT  // 10
 ### Available Constants
 
 ```typescript
-PAGINATION.DEFAULT_PAGE   // 1
-PAGINATION.DEFAULT_LIMIT  // 10
-PAGINATION.MIN_PAGE       // 1
-PAGINATION.MIN_LIMIT      // 1
-PAGINATION.MAX_LIMIT      // 100
+PAGINATION.DEFAULT_PAGE; // 1
+PAGINATION.DEFAULT_LIMIT; // 10
+PAGINATION.MIN_PAGE; // 1
+PAGINATION.MIN_LIMIT; // 1
+PAGINATION.MAX_LIMIT; // 100
 ```
 
 ### Pagination Messages
@@ -219,8 +219,8 @@ PAGINATION.MAX_LIMIT      // 100
 ```typescript
 import { PAGINATION_MESSAGES } from '../common/constants';
 
-PAGINATION_MESSAGES.INVALID_PAGE   // "Page must be at least 1"
-PAGINATION_MESSAGES.INVALID_LIMIT  // "Limit must be between 1 and 100"
+PAGINATION_MESSAGES.INVALID_PAGE; // "Page must be at least 1"
+PAGINATION_MESSAGES.INVALID_LIMIT; // "Limit must be between 1 and 100"
 ```
 
 ## 💻 Sử dụng trong Code
@@ -230,7 +230,10 @@ PAGINATION_MESSAGES.INVALID_LIMIT  // "Limit must be between 1 and 100"
 Project có sẵn custom exceptions trong `src/shared/errors/custom-exceptions.ts`:
 
 ```typescript
-import { NotFoundException, ConflictException } from '../shared/errors/custom-exceptions';
+import {
+  NotFoundException,
+  ConflictException,
+} from '../shared/errors/custom-exceptions';
 import { ERROR_MESSAGES } from '../common/constants';
 
 // Sử dụng với message mặc định
@@ -335,8 +338,8 @@ import { HTTP_STATUS, ERROR_MESSAGES } from '../common/constants';
 ```typescript
 // ✅ Good - Dùng UserRole enum từ entity
 import { UserRole } from '../users/entities/user.entity';
-const role: UserRole = UserRole.USER;  // ✅
-const role: UserRole = 'invalid';      // ❌ Type error
+const role: UserRole = UserRole.USER; // ✅
+const role: UserRole = 'invalid'; // ❌ Type error
 ```
 
 ### 4. Không hardcode values
@@ -355,8 +358,8 @@ if (page < PAGINATION.MIN_PAGE) throw new Error(PAGINATION_MESSAGES.INVALID_PAGE
 
 ```typescript
 // ✅ Good - Dynamic validation messages
-VALIDATION_MESSAGES.REQUIRED('email')
-VALIDATION_MESSAGES.MIN_LENGTH('password', 6)
+VALIDATION_MESSAGES.REQUIRED('email');
+VALIDATION_MESSAGES.MIN_LENGTH('password', 6);
 ```
 
 ## 📖 Ví dụ Hoàn chỉnh
@@ -366,7 +369,10 @@ VALIDATION_MESSAGES.MIN_LENGTH('password', 6)
 ```typescript
 import { Injectable } from '@nestjs/common';
 import { ERROR_MESSAGES } from '../common/constants';
-import { NotFoundException, ConflictException } from '../shared/errors/custom-exceptions';
+import {
+  NotFoundException,
+  ConflictException,
+} from '../shared/errors/custom-exceptions';
 
 @Injectable()
 export class UsersService {
@@ -404,18 +410,19 @@ export class UsersController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findOne(id);
-    return user;  // TransformInterceptor wrap response
+    return user; // TransformInterceptor wrap response
   }
 
   @Post()
   async create(@Body() dto: CreateUserDto) {
     const user = await this.usersService.create(dto);
-    return user;  // TransformInterceptor wrap với status 201
+    return user; // TransformInterceptor wrap với status 201
   }
 }
 ```
 
 Khi cần response tùy chỉnh (message, statusCode), có thể dùng ResponseHelper:
+
 ```typescript
 return ResponseHelper.created(user, SUCCESS_MESSAGES.USER_CREATED);
 ```

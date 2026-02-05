@@ -28,7 +28,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = exceptionResponse;
       } else {
         const responseObj = exceptionResponse as any;
-        message = responseObj.message || exception.message || 'An error occurred';
+        message =
+          responseObj.message || exception.message || 'An error occurred';
         error = responseObj.error || responseObj.errors || undefined;
       }
     } else if (exception instanceof Error) {

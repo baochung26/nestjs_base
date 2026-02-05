@@ -30,7 +30,8 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmailWithPassword(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password: _, ...result } = user;
+      const result = { ...user };
+      delete result.password;
       return result;
     }
     return null;
@@ -40,7 +41,7 @@ export class AuthService {
     this.logger.debug(`Registering new user: ${registerDto.email}`);
 
     const userDto = await this.usersService.create(registerDto);
-    
+
     // Get full user entity for token generation
     const user = await this.usersService.findByEmail(userDto.email);
     if (!user) {
@@ -49,7 +50,9 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user);
 
-    this.logger.log(`User registered successfully: ${userDto.email} (ID: ${userDto.id})`);
+    this.logger.log(
+      `User registered successfully: ${userDto.email} (ID: ${userDto.id})`,
+    );
     return {
       ...userDto,
       ...tokens,
@@ -61,7 +64,9 @@ export class AuthService {
 
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
-      this.logger.warn(`Login failed: invalid credentials for ${loginDto.email}`);
+      this.logger.warn(
+        `Login failed: invalid credentials for ${loginDto.email}`,
+      );
       throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
@@ -73,7 +78,9 @@ export class AuthService {
 
     const tokens = await this.generateTokens(fullUser);
 
-    this.logger.log(`User logged in successfully: ${user.email} (ID: ${user.id})`);
+    this.logger.log(
+      `User logged in successfully: ${user.email} (ID: ${user.id})`,
+    );
     return {
       ...user,
       ...tokens,
@@ -87,7 +94,8 @@ export class AuthService {
     picture?: string;
   }) {
     const user = await this.usersService.findOrCreateGoogleUser(googleUser);
-    const { password, ...result } = user;
+    const result = { ...user };
+    delete result.password;
 
     const tokens = await this.generateTokens(user);
 
@@ -101,8 +109,9 @@ export class AuthService {
    * Refresh access token using refresh token
    */
   async refreshAccessToken(refreshToken: string): Promise<TokenResponse> {
-    const payload = await this.refreshTokenService.validateRefreshToken(refreshToken);
-    
+    const payload =
+      await this.refreshTokenService.validateRefreshToken(refreshToken);
+
     if (!payload) {
       this.logger.warn('Invalid refresh token');
       throw new UnauthorizedException(ERROR_MESSAGES.INVALID_REFRESH_TOKEN);
@@ -111,7 +120,10 @@ export class AuthService {
     // Get user to ensure they still exist and are active
     const user = await this.usersService.findOne(payload.userId);
     if (!user || !user.isActive) {
-      this.logger.warn({ userId: payload.userId }, 'User not found or inactive');
+      this.logger.warn(
+        { userId: payload.userId },
+        'User not found or inactive',
+      );
       throw new UnauthorizedException(ERROR_MESSAGES.INVALID_REFRESH_TOKEN);
     }
 

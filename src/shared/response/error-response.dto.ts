@@ -57,7 +57,9 @@ export class ForbiddenErrorResponseDto extends ApiErrorResponseDto {
   @ApiProperty({ example: 403 })
   statusCode: number;
 
-  @ApiProperty({ example: 'You do not have permission to access this resource' })
+  @ApiProperty({
+    example: 'You do not have permission to access this resource',
+  })
   message: string;
 
   @ApiProperty({ example: 'Forbidden', required: false })
@@ -126,9 +128,12 @@ export class ValidationErrorResponseDto extends ApiErrorResponseDto {
   @ApiProperty({ example: 422 })
   statusCode: number;
 
-  @ApiProperty({ 
-    example: ['email must be an email', 'password must be longer than or equal to 6 characters'],
-    type: [String]
+  @ApiProperty({
+    example: [
+      'email must be an email',
+      'password must be longer than or equal to 6 characters',
+    ],
+    type: [String],
   })
   message: string[];
 
