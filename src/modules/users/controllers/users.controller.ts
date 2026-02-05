@@ -9,7 +9,15 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiExtraModels, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiExtraModels,
+  ApiParam,
+} from '@nestjs/swagger';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
@@ -18,8 +26,15 @@ import { UserResponseDto } from '../dtos/user-response.dto';
 import { UsersListResponseDto } from '../dtos/users-list-response.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { ApiProtectedCommonResponses, ApiBadRequestResponse, ApiNotFoundResponse } from '../../../common/decorators/api-common-responses.decorator';
-import { ApiStandardResponse, ApiPaginatedResponse } from '../../../common/decorators/api-response.decorator';
+import {
+  ApiProtectedCommonResponses,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+} from '../../../common/decorators/api-common-responses.decorator';
+import {
+  ApiStandardResponse,
+  ApiPaginatedResponse,
+} from '../../../common/decorators/api-response.decorator';
 import { User } from '../entities/user.entity';
 import { CacheInterceptor } from '../../../common/interceptors/cache.interceptor';
 import { Cache } from '../../../common/decorators/cache.decorator';
@@ -36,7 +51,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new user', description: 'Tạo user mới. Yêu cầu JWT token.' })
+  @ApiOperation({
+    summary: 'Create a new user',
+    description: 'Tạo user mới. Yêu cầu JWT token.',
+  })
   @ApiBody({ type: CreateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User created successfully', 201)
   @ApiBadRequestResponse('Bad request — validation failed')
@@ -47,9 +65,15 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all users', description: 'Lấy danh sách tất cả users. Yêu cầu JWT token.' })
+  @ApiOperation({
+    summary: 'Get all users',
+    description: 'Lấy danh sách tất cả users. Yêu cầu JWT token.',
+  })
   @ApiPaginatedResponse(UserResponseDto, 'List of users retrieved successfully')
-  @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of users retrieved successfully',
+  })
   @ApiProtectedCommonResponses()
   @Cache(300, 'users:list') // cache danh sách 5 phút
   findAll() {
@@ -60,9 +84,14 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Get current user profile',
-    description: 'Lấy thông tin profile của user hiện tại từ JWT token. **Yêu cầu Bearer token trong header Authorization.**',
+    description:
+      'Lấy thông tin profile của user hiện tại từ JWT token. **Yêu cầu Bearer token trong header Authorization.**',
   })
-  @ApiStandardResponse(UserResponseDto, 'User profile retrieved successfully', 200)
+  @ApiStandardResponse(
+    UserResponseDto,
+    'User profile retrieved successfully',
+    200,
+  )
   @ApiProtectedCommonResponses()
   getProfile(@CurrentUser() user: User) {
     return this.usersService.findOne(user.id);
@@ -72,19 +101,30 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Update current user profile',
-    description: 'Cập nhật thông tin profile của user hiện tại. Chỉ được sửa firstName, lastName, password. **Yêu cầu Bearer token trong header Authorization.**',
+    description:
+      'Cập nhật thông tin profile của user hiện tại. Chỉ được sửa firstName, lastName, password. **Yêu cầu Bearer token trong header Authorization.**',
   })
   @ApiBody({ type: UpdateProfileDto })
   @ApiStandardResponse(UserResponseDto, 'Profile updated successfully', 200)
   @ApiBadRequestResponse('Bad request — validation failed')
   @ApiProtectedCommonResponses()
-  updateProfile(@CurrentUser() user: User, @Body() updateProfileDto: UpdateProfileDto) {
+  updateProfile(
+    @CurrentUser() user: User,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
     return this.usersService.updateProfile(user.id, updateProfileDto);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get user by ID', description: 'Lấy thông tin user theo ID. Yêu cầu JWT token.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description: 'Lấy thông tin user theo ID. Yêu cầu JWT token.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiStandardResponse(UserResponseDto, 'User retrieved successfully', 200)
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
@@ -94,8 +134,15 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update user by ID', description: 'Cập nhật thông tin user theo ID. Yêu cầu JWT token.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiOperation({
+    summary: 'Update user by ID',
+    description: 'Cập nhật thông tin user theo ID. Yêu cầu JWT token.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiBody({ type: UpdateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User updated successfully', 200)
   @ApiBadRequestResponse('Bad request — validation failed')
@@ -108,27 +155,34 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete user by ID', description: 'Xóa user theo ID. Yêu cầu JWT token.' })
-  @ApiParam({ name: 'id', description: 'User ID (UUID)', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiOperation({
+    summary: 'Delete user by ID',
+    description: 'Xóa user theo ID. Yêu cầu JWT token.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
     description: 'User deleted successfully',
     schema: {
       allOf: [
         { $ref: '#/components/schemas/ApiResponseDto' },
         {
           properties: {
-            data: { type: 'object', nullable: true, example: null }
-          }
-        }
-      ]
-    }
+            data: { type: 'object', nullable: true, example: null },
+          },
+        },
+      ],
+    },
   })
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
   @CacheEvict(['users:list']) // xóa cache danh sách sau khi delete
   @CacheEvict() // xóa cache GET /users/:id (key tự sinh) sau khi delete
   remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+    return this.usersService.removeById(id);
   }
 }

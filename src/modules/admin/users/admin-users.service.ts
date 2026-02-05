@@ -59,7 +59,7 @@ export class AdminUsersService {
   }
 
   async deleteUser(id: string) {
-    return this.usersService.remove(id);
+    return this.usersService.removeById(id);
   }
 
   async activateUser(id: string) {

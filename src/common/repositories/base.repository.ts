@@ -1,6 +1,6 @@
 import {
   Repository,
-  FindOptionsWhere,
+  FindOneOptions,
   FindManyOptions,
   DeepPartial,
 } from 'typeorm';
@@ -16,7 +16,7 @@ export abstract class BaseRepository<T> {
   /**
    * Find entity by ID, throw NotFoundException if not found
    */
-  async findById(id: string, options?: FindManyOptions<T>): Promise<T> {
+  async findById(id: string, options?: FindOneOptions<T>): Promise<T> {
     const entity = await this.repository.findOne({
       where: { id } as any,
       ...options,
@@ -32,7 +32,10 @@ export abstract class BaseRepository<T> {
   /**
    * Find entity by ID, return null if not found (no exception)
    */
-  async findByIdOrNull(id: string, options?: FindManyOptions<T>): Promise<T | null> {
+  async findByIdOrNull(
+    id: string,
+    options?: FindOneOptions<T>,
+  ): Promise<T | null> {
     return this.repository.findOne({
       where: { id } as any,
       ...options,

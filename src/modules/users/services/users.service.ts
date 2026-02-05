@@ -103,68 +103,25 @@ export class UsersService extends BaseService<User> {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
     const user = await this.usersRepository.findByIdWithoutPassword(id);
-
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
-    }
+    const hashedPassword = updateUserDto.password
+      ? await bcrypt.hash(updateUserDto.password, 10)
+      : undefined;
 
     // Use mapper to convert DTO to entity
     const userData = this.userMapper.toEntityFromUpdate(updateUserDto);
-    if (updateUserDto.password) {
-      (userData as any).password = updateUserDto.password;
+    const updates: Partial<User> = {
+      ...userData,
+      ...(hashedPassword ? { password: hashedPassword } : {}),
+    };
+
+    if (Object.keys(updates).length === 0) {
+      return this.userMapper.toDto(user);
     }
 
-    Object.assign(user, userData);
+    Object.assign(user, updates);
     const updatedUser = await this.usersRepository.save(user);
     // Convert entity to DTO for response
     return this.userMapper.toDto(updatedUser);
-  }
-
-  async remove(id: string): Promise<void> {
-    await super.remove(id);
-  }
-
-  /**
-   * Demo: Sử dụng base method findAllEntities() để lấy tất cả users (bao gồm cả inactive).
-   * Method này trả về Entity[] (không phải DTO), phù hợp cho internal operations.
-   *
-   * Ví dụ use case: Cần lấy tất cả users để batch processing, reporting, hoặc internal admin tasks.
-   */
-  async getAllUsersEntities(options?: {
-    includeInactive?: boolean;
-  }): Promise<User[]> {
-    if (options?.includeInactive) {
-      // Sử dụng base method để lấy tất cả (bao gồm inactive)
-      return super.findAllEntities();
-    }
-    // Hoặc dùng repository method có sẵn cho active users
-    return this.usersRepository.findActiveUsers();
-  }
-
-  /**
-   * Demo: Sử dụng base method findOneEntity() để lấy user entity theo ID.
-   * Method này trả về Entity (không phải DTO), phù hợp khi cần full entity với tất cả fields.
-   * Ví dụ use case: Internal operations cần access password field, hoặc cần modify entity trực tiếp.
-   */
-  async getUserEntityById(id: string): Promise<User> {
-    // Sử dụng base method - trả về full User entity (bao gồm password nếu có trong select)
-    return super.findOneEntity(id);
-  }
-
-  /**
-   * Demo: Sử dụng base method exists() để kiểm tra user có tồn tại không.
-   * Method này không throw exception, chỉ trả về boolean.
-   */
-  async checkUserExists(id: string): Promise<boolean> {
-    return super.exists(id);
-  }
-
-  /**
-   * Demo: Sử dụng base method findOneOrNull() để lấy user hoặc null (không throw).
-   * Hữu ích khi không muốn throw NotFoundException.
-   */
-  async getUserEntityOrNull(id: string): Promise<User | null> {
-    return super.findOneOrNull(id);
   }
 
   async findOrCreateGoogleUser(googleProfile: {

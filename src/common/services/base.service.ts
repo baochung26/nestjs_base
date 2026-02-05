@@ -1,4 +1,4 @@
-import { FindManyOptions } from 'typeorm';
+import { FindManyOptions, FindOneOptions } from 'typeorm';
 import { BaseRepository } from '../repositories/base.repository';
 
 /**
@@ -21,16 +21,16 @@ export abstract class BaseService<T> {
    * Lấy một entity theo ID, throw NotFoundException nếu không tồn tại.
    * Note: Nếu service cần trả về DTO, có thể override method này với tên khác hoặc implement riêng.
    */
-  async findOneEntity(id: string, options?: FindManyOptions<T>): Promise<T> {
+  async findEntityById(id: string, options?: FindOneOptions<T>): Promise<T> {
     return this.repository.findById(id, options);
   }
 
   /**
    * Lấy entity theo ID hoặc null (không throw).
    */
-  async findOneOrNull(
+  async findEntityByIdOrNull(
     id: string,
-    options?: FindManyOptions<T>,
+    options?: FindOneOptions<T>,
   ): Promise<T | null> {
     return this.repository.findByIdOrNull(id, options);
   }
@@ -38,14 +38,14 @@ export abstract class BaseService<T> {
   /**
    * Kiểm tra entity có tồn tại theo ID không.
    */
-  async exists(id: string): Promise<boolean> {
+  async existsById(id: string): Promise<boolean> {
     return this.repository.exists(id);
   }
 
   /**
    * Xóa entity theo ID (throw NotFoundException nếu không tồn tại).
    */
-  async remove(id: string): Promise<void> {
+  async removeById(id: string): Promise<void> {
     const entity = await this.repository.findById(id);
     await this.repository.remove(entity);
   }
