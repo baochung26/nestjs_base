@@ -7,23 +7,31 @@ import { UpdateProfileDto } from '../dtos/update-profile.dto';
 import { UserDto } from '../dtos/user.dto';
 import { UsersRepository } from '../repositories/users.repository';
 import { UserMapper } from '../mappers/user.mapper';
+import { BaseService } from '../../../common/services/base.service';
 import { ConflictException } from '../../../shared/errors/custom-exceptions';
 import { ERROR_MESSAGES } from '../../../common/constants';
 
 @Injectable()
-export class UsersService {
+export class UsersService extends BaseService<User> {
   private readonly logger = new Logger(UsersService.name);
   private readonly userMapper = new UserMapper();
 
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(protected readonly usersRepository: UsersRepository) {
+    super(usersRepository);
+  }
 
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
     this.logger.debug({ email: createUserDto.email }, 'Creating new user');
 
-    const emailExists = await this.usersRepository.emailExists(createUserDto.email);
+    const emailExists = await this.usersRepository.emailExists(
+      createUserDto.email,
+    );
 
     if (emailExists) {
-      this.logger.warn({ email: createUserDto.email }, 'User creation failed: email already exists');
+      this.logger.warn(
+        { email: createUserDto.email },
+        'User creation failed: email already exists',
+      );
       throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
@@ -37,8 +45,10 @@ export class UsersService {
     });
 
     const savedUser = await this.usersRepository.save(user);
-    this.logger.log(`User created successfully: ${savedUser.email} (ID: ${savedUser.id})`);
-    
+    this.logger.log(
+      `User created successfully: ${savedUser.email} (ID: ${savedUser.id})`,
+    );
+
     // Convert entity to DTO for response
     return this.userMapper.toDto(savedUser);
   }
@@ -66,12 +76,17 @@ export class UsersService {
    * User tự cập nhật profile: chỉ firstName, lastName, password.
    * Không cho phép sửa email, role, isActive.
    */
-  async updateProfile(id: string, updateProfileDto: UpdateProfileDto): Promise<UserDto> {
+  async updateProfile(
+    id: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<UserDto> {
     const user = await this.usersRepository.findByIdWithoutPassword(id);
 
     const updates: Partial<User> = {};
-    if (updateProfileDto.firstName !== undefined) updates.firstName = updateProfileDto.firstName;
-    if (updateProfileDto.lastName !== undefined) updates.lastName = updateProfileDto.lastName;
+    if (updateProfileDto.firstName !== undefined)
+      updates.firstName = updateProfileDto.firstName;
+    if (updateProfileDto.lastName !== undefined)
+      updates.lastName = updateProfileDto.lastName;
     if (updateProfileDto.password) {
       updates.password = await bcrypt.hash(updateProfileDto.password, 10);
     }
@@ -101,14 +116,55 @@ export class UsersService {
 
     Object.assign(user, userData);
     const updatedUser = await this.usersRepository.save(user);
-    
     // Convert entity to DTO for response
     return this.userMapper.toDto(updatedUser);
   }
 
   async remove(id: string): Promise<void> {
-    const user = await this.usersRepository.findByIdWithoutPassword(id);
-    await this.usersRepository.remove(user);
+    await super.remove(id);
+  }
+
+  /**
+   * Demo: Sử dụng base method findAllEntities() để lấy tất cả users (bao gồm cả inactive).
+   * Method này trả về Entity[] (không phải DTO), phù hợp cho internal operations.
+   *
+   * Ví dụ use case: Cần lấy tất cả users để batch processing, reporting, hoặc internal admin tasks.
+   */
+  async getAllUsersEntities(options?: {
+    includeInactive?: boolean;
+  }): Promise<User[]> {
+    if (options?.includeInactive) {
+      // Sử dụng base method để lấy tất cả (bao gồm inactive)
+      return super.findAllEntities();
+    }
+    // Hoặc dùng repository method có sẵn cho active users
+    return this.usersRepository.findActiveUsers();
+  }
+
+  /**
+   * Demo: Sử dụng base method findOneEntity() để lấy user entity theo ID.
+   * Method này trả về Entity (không phải DTO), phù hợp khi cần full entity với tất cả fields.
+   * Ví dụ use case: Internal operations cần access password field, hoặc cần modify entity trực tiếp.
+   */
+  async getUserEntityById(id: string): Promise<User> {
+    // Sử dụng base method - trả về full User entity (bao gồm password nếu có trong select)
+    return super.findOneEntity(id);
+  }
+
+  /**
+   * Demo: Sử dụng base method exists() để kiểm tra user có tồn tại không.
+   * Method này không throw exception, chỉ trả về boolean.
+   */
+  async checkUserExists(id: string): Promise<boolean> {
+    return super.exists(id);
+  }
+
+  /**
+   * Demo: Sử dụng base method findOneOrNull() để lấy user hoặc null (không throw).
+   * Hữu ích khi không muốn throw NotFoundException.
+   */
+  async getUserEntityOrNull(id: string): Promise<User | null> {
+    return super.findOneOrNull(id);
   }
 
   async findOrCreateGoogleUser(googleProfile: {

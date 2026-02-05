@@ -339,33 +339,49 @@ app.enableVersioning({
 // GET /api/v1/auth/login
 ```
 
-### 9. 🔐 **Base Service với Common CRUD**
+### 9. ✅ **COMPLETED: Base Service với Common CRUD**
 
 **Vấn đề:** Services có code lặp lại cho CRUD operations.
 
-**Giải pháp:** Tạo base service với common CRUD methods.
+**Giải pháp:** ✅ Đã tạo base service với common CRUD methods, tích hợp với BaseRepository.
 
 **Priority:** 🟡 MEDIUM
 
+**Status:** ✅ **COMPLETED**
+
+**Files:**
+- `src/common/services/base.service.ts` — Base service với `findAll`, `findOne`, `findOneOrNull`, `exists`, `remove`. Các service khác extend và gọi `this.repository` (BaseRepository). create/update không nằm trong base vì DTO và logic khác nhau theo từng entity.
+
+**Implementation (Summary):**
 ```typescript
 // src/common/services/base.service.ts
 export abstract class BaseService<T> {
-  constructor(protected repository: Repository<T>) {}
-  
-  async findAll(): Promise<T[]> {
-    return this.repository.find();
+  constructor(protected readonly repository: BaseRepository<T>) {}
+
+  async findAll(options?: FindManyOptions<T>): Promise<T[]> {
+    return this.repository.findAll(options);
   }
-  
-  async findOne(id: string): Promise<T> {
-    const entity = await this.repository.findOne({ where: { id } });
-    if (!entity) {
-      throw new NotFoundException();
-    }
-    return entity;
+
+  async findOne(id: string, options?: FindManyOptions<T>): Promise<T> {
+    return this.repository.findById(id, options);
   }
-  // ... more common methods
+
+  async findOneOrNull(id: string, options?: FindManyOptions<T>): Promise<T | null> {
+    return this.repository.findByIdOrNull(id, options);
+  }
+
+  async exists(id: string): Promise<boolean> {
+    return this.repository.exists(id);
+  }
+
+  async remove(id: string): Promise<void> {
+    const entity = await this.repository.findById(id);
+    await this.repository.remove(entity);
+  }
 }
 ```
+
+**Cách dùng:** Service cụ thể extend `BaseService<Entity>` và truyền repository vào `super(repository)`. Có thể override các method hoặc thêm method riêng (create, update, findByEmail, …).
 
 ### 10. ✅ **COMPLETED: Base Repository**
 
