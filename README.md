@@ -746,6 +746,7 @@ getProfile(@CurrentUser() user: User) {
 - [Base Entity Guide](./docs/BASE_ENTITY_GUIDE.md) - Hướng dẫn Base Entity
 - [Custom Pipes Guide](./docs/CUSTOM_PIPES_GUIDE.md) - Hướng dẫn Custom Pipes
 - [Testing Guide](./docs/TESTING_GUIDE.md) - Hướng dẫn Testing với Jest
+- [Prettier Guide](./docs/PRETTIER_GUIDE.md) - Hướng dẫn format và kiểm tra code style với Prettier
 - [Architecture Improvements](./docs/ARCHITECTURE_IMPROVEMENTS.md) - Đề xuất cải thiện cấu trúc dự án
 - [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
 
