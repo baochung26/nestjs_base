@@ -242,6 +242,31 @@ async create(dto: CreateUserDto) {
 }
 ```
 
+### Custom Exceptions và Exception Filters (không conflict)
+
+**Custom exceptions** (`src/shared/errors/custom-exceptions.ts`) đều kế thừa `HttpException` và truyền object `{ statusCode, message, error }` vào `super()`. Khi filter gọi `exception.getResponse()` sẽ nhận đúng object này.
+
+| Thành phần | Vai trò |
+|------------|--------|
+| **HttpExceptionFilter** (`src/common/filters/http-exception.filter.ts`) | `@Catch(HttpException)` — bắt mọi exception kế thừa `HttpException` (gồm tất cả custom exceptions). Đọc `getStatus()`, `getResponse()` rồi tạo `ApiErrorResponseDto` và trả về JSON. |
+| **AllExceptionsFilter** (`src/common/filters/all-exceptions.filter.ts`) | `@Catch()` — bắt mọi exception còn lại (lỗi không phải HttpException). Với `HttpException` thì xử lý giống (status, message, error); với `Error` khác dùng message và 500. |
+
+**Kết luận:** Custom exceptions **không conflict** với hai filter. Trong `main.ts` đăng ký:
+
+```typescript
+app.useGlobalFilters(new AllExceptionsFilter());
+app.useGlobalFilters(new HttpExceptionFilter());
+```
+
+NestJS áp dụng filter **đăng ký sau** trước. Vì vậy `HttpException` (và mọi custom exception) do **HttpExceptionFilter** xử lý; exception không phải `HttpException` do **AllExceptionsFilter** xử lý. Cả hai đều format response theo `ApiErrorResponseDto` (success, statusCode, message, error, timestamp, path), nên client luôn nhận format lỗi thống nhất.
+
+**File tham chiếu:**
+
+- Custom exceptions: `src/shared/errors/custom-exceptions.ts`
+- HttpExceptionFilter: `src/common/filters/http-exception.filter.ts`
+- AllExceptionsFilter: `src/common/filters/all-exceptions.filter.ts`
+- Đăng ký global filters: `src/main.ts`
+
 ## Frontend Integration
 
 ### Handling Success Response

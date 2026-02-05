@@ -6,8 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class CorrelationIdMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     // Get correlation ID from header or generate new one
-    const correlationId =
-      req.headers['x-correlation-id'] || uuidv4();
+    const correlationId = req.headers['x-correlation-id'] || uuidv4();
 
     // Set correlation ID in request
     req.id = correlationId as string;
