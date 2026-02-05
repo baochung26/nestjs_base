@@ -14,7 +14,11 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'password123', description: 'Mật khẩu', minLength: USER_DEFAULTS.MIN_PASSWORD_LENGTH })
+  @ApiProperty({
+    example: 'password123',
+    description: 'Mật khẩu',
+    minLength: USER_DEFAULTS.MIN_PASSWORD_LENGTH,
+  })
   @IsString()
   @MinLength(USER_DEFAULTS.MIN_PASSWORD_LENGTH)
   password: string;
@@ -27,7 +31,11 @@ export class CreateUserDto {
   @IsString()
   lastName: string;
 
-  @ApiProperty({ enum: UserRole, required: false, description: 'Vai trò user (mặc định: user)' })
+  @ApiProperty({
+    enum: UserRole,
+    required: false,
+    description: 'Vai trò user (mặc định: user)',
+  })
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;

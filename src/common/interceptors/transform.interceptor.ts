@@ -7,12 +7,13 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponseDto } from '../../shared/response/api-response.dto';
-import { SUCCESS_MESSAGES, HTTP_STATUS } from '../constants';
+import { SUCCESS_MESSAGES } from '../constants';
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ApiResponseDto<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponseDto<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -32,7 +33,9 @@ export class TransformInterceptor<T>
         const message = data?.message || SUCCESS_MESSAGES.SUCCESS;
 
         // Nếu data có message, loại bỏ nó khỏi data
-        const cleanData = data?.message ? { ...data, message: undefined } : data;
+        const cleanData = data?.message
+          ? { ...data, message: undefined }
+          : data;
 
         return new ApiResponseDto<T>(
           true,

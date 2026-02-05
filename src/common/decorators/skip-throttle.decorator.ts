@@ -5,7 +5,8 @@ import { Throttle } from '@nestjs/throttler';
  * Decorator để skip rate limiting cho endpoint
  * Sử dụng khi muốn endpoint không bị rate limit
  */
-export const SkipThrottle = (skipAll = true) => SetMetadata('skipThrottle', skipAll);
+export const SkipThrottle = (skipAll = true) =>
+  SetMetadata('skipThrottle', skipAll);
 
 /**
  * Decorator để áp dụng custom rate limit cho endpoint
@@ -22,7 +23,9 @@ export const ThrottleCustom = (limit: number, ttl: number) =>
  * Decorator để sử dụng rate limit preset
  * @param preset - Tên preset ('short', 'long', 'default')
  */
-export const ThrottlePreset = (preset: 'short' | 'long' | 'default' = 'default') => {
+export const ThrottlePreset = (
+  preset: 'short' | 'long' | 'default' = 'default',
+) => {
   const presets = {
     short: { limit: 10, ttl: 10000 }, // 10 requests per 10 seconds
     long: { limit: 1000, ttl: 600000 }, // 1000 requests per 10 minutes

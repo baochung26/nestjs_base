@@ -9,7 +9,6 @@ import { tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
 import {
   CACHE_EVICT_KEY,
-  CacheEvict,
   type CacheEvictValue,
 } from '../decorators/cache-evict.decorator';
 import { CacheService } from '../../infrastructure/cache/cache.service';
@@ -40,12 +39,13 @@ export class CacheEvictInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    return next.handle().pipe(
-      tap(async () => this.evict(evictValue, request)),
-    );
+    return next.handle().pipe(tap(async () => this.evict(evictValue, request)));
   }
 
-  private async evict(evictValue: CacheEvictValue, request: Request): Promise<void> {
+  private async evict(
+    evictValue: CacheEvictValue,
+    request: Request,
+  ): Promise<void> {
     if (Array.isArray(evictValue)) {
       await this.cacheService.delMultiple(evictValue);
       return;

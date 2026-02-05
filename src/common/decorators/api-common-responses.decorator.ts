@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiResponse, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
-import { 
+import {
   BadRequestErrorResponseDto,
   UnauthorizedErrorResponseDto,
   ForbiddenErrorResponseDto,
@@ -15,91 +15,107 @@ import {
  * Common API responses decorators để tránh lặp lại code
  */
 
-export const ApiBadRequestResponse = (description: string = 'Bad request — body không hợp lệ') => {
+export const ApiBadRequestResponse = (
+  description: string = 'Bad request — body không hợp lệ',
+) => {
   return applyDecorators(
     ApiExtraModels(BadRequestErrorResponseDto),
-    ApiResponse({ 
-      status: 400, 
+    ApiResponse({
+      status: 400,
       description,
-      schema: { $ref: getSchemaPath(BadRequestErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(BadRequestErrorResponseDto) },
+    }),
   );
 };
 
-export const ApiUnauthorizedResponse = (description: string = 'Unauthorized — invalid or expired token') => {
+export const ApiUnauthorizedResponse = (
+  description: string = 'Unauthorized — invalid or expired token',
+) => {
   return applyDecorators(
     ApiExtraModels(UnauthorizedErrorResponseDto),
-    ApiResponse({ 
-      status: 401, 
+    ApiResponse({
+      status: 401,
       description,
-      schema: { $ref: getSchemaPath(UnauthorizedErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(UnauthorizedErrorResponseDto) },
+    }),
   );
 };
 
-export const ApiForbiddenResponse = (description: string = 'Forbidden — insufficient permissions') => {
+export const ApiForbiddenResponse = (
+  description: string = 'Forbidden — insufficient permissions',
+) => {
   return applyDecorators(
     ApiExtraModels(ForbiddenErrorResponseDto),
-    ApiResponse({ 
-      status: 403, 
+    ApiResponse({
+      status: 403,
       description,
-      schema: { $ref: getSchemaPath(ForbiddenErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(ForbiddenErrorResponseDto) },
+    }),
   );
 };
 
-export const ApiNotFoundResponse = (description: string = 'Not Found — resource not found') => {
+export const ApiNotFoundResponse = (
+  description: string = 'Not Found — resource not found',
+) => {
   return applyDecorators(
     ApiExtraModels(NotFoundErrorResponseDto),
-    ApiResponse({ 
-      status: 404, 
+    ApiResponse({
+      status: 404,
       description,
-      schema: { $ref: getSchemaPath(NotFoundErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(NotFoundErrorResponseDto) },
+    }),
   );
 };
 
-export const ApiConflictResponse = (description: string = 'Conflict — resource already exists') => {
+export const ApiConflictResponse = (
+  description: string = 'Conflict — resource already exists',
+) => {
   return applyDecorators(
     ApiExtraModels(ConflictErrorResponseDto),
-    ApiResponse({ 
-      status: 409, 
+    ApiResponse({
+      status: 409,
       description,
-      schema: { $ref: getSchemaPath(ConflictErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(ConflictErrorResponseDto) },
+    }),
   );
 };
 
-export const ApiValidationErrorResponse = (description: string = 'Validation Error — request validation failed') => {
+export const ApiValidationErrorResponse = (
+  description: string = 'Validation Error — request validation failed',
+) => {
   return applyDecorators(
     ApiExtraModels(ValidationErrorResponseDto),
-    ApiResponse({ 
-      status: 422, 
+    ApiResponse({
+      status: 422,
       description,
-      schema: { $ref: getSchemaPath(ValidationErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(ValidationErrorResponseDto) },
+    }),
   );
 };
 
-export const ApiTooManyRequestsResponse = (description: string = 'Too many requests — vượt giới hạn throttle') => {
+export const ApiTooManyRequestsResponse = (
+  description: string = 'Too many requests — vượt giới hạn throttle',
+) => {
   return applyDecorators(
     ApiExtraModels(TooManyRequestsErrorResponseDto),
-    ApiResponse({ 
-      status: 429, 
+    ApiResponse({
+      status: 429,
       description,
-      schema: { $ref: getSchemaPath(TooManyRequestsErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(TooManyRequestsErrorResponseDto) },
+    }),
   );
 };
 
-export const ApiInternalServerErrorResponse = (description: string = 'Internal Server Error') => {
+export const ApiInternalServerErrorResponse = (
+  description: string = 'Internal Server Error',
+) => {
   return applyDecorators(
     ApiExtraModels(InternalServerErrorResponseDto),
-    ApiResponse({ 
-      status: 500, 
+    ApiResponse({
+      status: 500,
       description,
-      schema: { $ref: getSchemaPath(InternalServerErrorResponseDto) }
-    })
+      schema: { $ref: getSchemaPath(InternalServerErrorResponseDto) },
+    }),
   );
 };
 
@@ -108,9 +124,13 @@ export const ApiInternalServerErrorResponse = (description: string = 'Internal S
  */
 export const ApiAuthCommonResponses = () => {
   return applyDecorators(
-    ApiBadRequestResponse('Bad request — body không hợp lệ (ví dụ email sai định dạng, thiếu trường)'),
+    ApiBadRequestResponse(
+      'Bad request — body không hợp lệ (ví dụ email sai định dạng, thiếu trường)',
+    ),
     ApiUnauthorizedResponse('Invalid credentials — email hoặc mật khẩu sai'),
-    ApiTooManyRequestsResponse('Too many requests — vượt giới hạn throttle (10 requests / 10 giây)'),
+    ApiTooManyRequestsResponse(
+      'Too many requests — vượt giới hạn throttle (10 requests / 10 giây)',
+    ),
   );
 };
 

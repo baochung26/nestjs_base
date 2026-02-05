@@ -18,7 +18,11 @@ export class UpdateProfileDto {
   @IsString()
   lastName?: string;
 
-  @ApiProperty({ example: 'newpassword123', required: false, minLength: USER_DEFAULTS.MIN_PASSWORD_LENGTH })
+  @ApiProperty({
+    example: 'newpassword123',
+    required: false,
+    minLength: USER_DEFAULTS.MIN_PASSWORD_LENGTH,
+  })
   @IsOptional()
   @IsString()
   @MinLength(USER_DEFAULTS.MIN_PASSWORD_LENGTH, {

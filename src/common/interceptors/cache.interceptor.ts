@@ -7,7 +7,11 @@ import {
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
-import { CACHE_TTL_KEY, CACHE_KEY_KEY, CACHE_SKIP_KEY } from '../decorators/cache.decorator';
+import {
+  CACHE_TTL_KEY,
+  CACHE_KEY_KEY,
+  CACHE_SKIP_KEY,
+} from '../decorators/cache.decorator';
 import { CacheService } from '../../infrastructure/cache/cache.service';
 import { Request } from 'express';
 
@@ -47,10 +51,10 @@ export class CacheInterceptor implements NestInterceptor {
     }
 
     // Generate cache key
-    const customKey = this.reflector.getAllAndOverride<string>(
-      CACHE_KEY_KEY,
-      [handler, controller],
-    );
+    const customKey = this.reflector.getAllAndOverride<string>(CACHE_KEY_KEY, [
+      handler,
+      controller,
+    ]);
 
     const cacheKey = customKey || this.generateCacheKey(request);
 
