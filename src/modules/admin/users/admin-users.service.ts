@@ -7,6 +7,8 @@ import { CreateUserDto } from '../../users/dtos/create-user.dto';
 import { PaginatedResponseDto } from '../../../shared/pagination/pagination.dto';
 import { UserDto } from '../../users/dtos/user.dto';
 import { PAGINATION } from '../../../common/constants';
+import { ForbiddenException } from '../../../shared/errors/custom-exceptions';
+import { ERROR_MESSAGES } from '../../../common/constants';
 
 @Injectable()
 export class AdminUsersService {
@@ -54,7 +56,15 @@ export class AdminUsersService {
     return this.usersService.create(createUserDto);
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+  async updateUser(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    currentUserId: string,
+  ) {
+    if (id === currentUserId && updateUserDto.isActive === false) {
+      throw new ForbiddenException(ERROR_MESSAGES.CANNOT_DEACTIVATE_SELF);
+    }
+
     return this.usersService.update(id, updateUserDto);
   }
 
@@ -66,7 +76,11 @@ export class AdminUsersService {
     return this.usersService.update(id, { isActive: true });
   }
 
-  async deactivateUser(id: string) {
+  async deactivateUser(id: string, currentUserId: string) {
+    if (id === currentUserId) {
+      throw new ForbiddenException(ERROR_MESSAGES.CANNOT_DEACTIVATE_SELF);
+    }
+
     return this.usersService.update(id, { isActive: false });
   }
 

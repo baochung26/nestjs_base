@@ -29,6 +29,11 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmailWithPassword(email);
+    if (user && !user.isActive) {
+      this.logger.warn(`Login failed: account inactive for ${email}`);
+      throw new UnauthorizedException(ERROR_MESSAGES.ACCOUNT_INACTIVE);
+    }
+
     if (user && (await bcrypt.compare(password, user.password))) {
       const result = { ...user };
       delete result.password;
@@ -94,6 +99,11 @@ export class AuthService {
     picture?: string;
   }) {
     const user = await this.usersService.findOrCreateGoogleUser(googleUser);
+
+    if (!user.isActive) {
+      throw new UnauthorizedException(ERROR_MESSAGES.ACCOUNT_INACTIVE);
+    }
+
     const result = { ...user };
     delete result.password;
 

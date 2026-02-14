@@ -43,6 +43,8 @@ import { Cache } from '../../../common/decorators/cache.decorator';
 import { CacheEvictInterceptor } from '../../../common/interceptors/cache-evict.interceptor';
 import { CacheEvict } from '../../../common/decorators/cache-evict.decorator';
 import { UserRole } from '../entities/user.entity';
+import { ForbiddenException } from '../../../shared/errors/custom-exceptions';
+import { ERROR_MESSAGES } from '../../../common/constants';
 
 @ApiTags('users')
 @ApiExtraModels(UserResponseDto, UsersListResponseDto)
@@ -157,7 +159,15 @@ export class UsersController {
   @ApiProtectedCommonResponses()
   @CacheEvict(['users:list']) // xóa cache danh sách sau khi update
   @CacheEvict() // xóa cache GET /users/:id (key tự sinh) sau khi update
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    if (id === currentUser.id && updateUserDto.isActive === false) {
+      throw new ForbiddenException(ERROR_MESSAGES.CANNOT_DEACTIVATE_SELF);
+    }
+
     return this.usersService.update(id, updateUserDto);
   }
 

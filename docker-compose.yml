@@ -89,6 +89,11 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       # Base URL để build absolute URL (ví dụ: storage file URL)
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3001}
+      # File watch ổn định trên Docker Desktop/WSL/Linux (fallback polling)
+      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-true}
+      CHOKIDAR_INTERVAL: ${CHOKIDAR_INTERVAL:-1000}
+      WATCHPACK_POLLING: ${WATCHPACK_POLLING:-true}
+      TSC_WATCHFILE: ${TSC_WATCHFILE:-UseFsEventsWithFallbackDynamicPolling}
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

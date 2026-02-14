@@ -7,6 +7,7 @@ import {
   Req,
   Res,
   BadRequestException,
+  HttpException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -42,6 +43,22 @@ import { User } from '../../users/entities/user.entity';
 import { UserResponseDto } from '../../users/dtos/user-response.dto';
 import { Request, Response } from 'express';
 import { SUCCESS_MESSAGES } from '../../../common/constants';
+
+type GoogleAuthUser = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  picture?: string;
+};
+
+type GoogleLoginResult = {
+  access_token: string;
+  refresh_token: string;
+  [key: string]: unknown;
+};
+
+const DEFAULT_FRONTEND_URL = 'http://localhost:3000';
+const FRONTEND_AUTH_CALLBACK_PATH = '/auth/callback';
 
 @ApiTags('auth')
 @ApiExtraModels(
@@ -116,17 +133,13 @@ export class AuthController {
   })
   @ApiResponse({ status: 302, description: 'Redirect to frontend with tokens' })
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as any;
-    const result = await this.authService.googleLogin(user);
-
-    const google = this.configService.get('google');
-    const frontendUrl =
-      google?.frontendURL ||
-      process.env.FRONTEND_URL ||
-      'http://localhost:3001';
-    res.redirect(
-      `${frontendUrl}/auth/callback?access_token=${result.access_token}&refresh_token=${result.refresh_token}&user=${encodeURIComponent(JSON.stringify(result))}`,
-    );
+    try {
+      const user = req.user as GoogleAuthUser;
+      const result = await this.authService.googleLogin(user);
+      return res.redirect(this.buildGoogleSuccessRedirectUrl(result));
+    } catch (error) {
+      return res.redirect(this.buildGoogleErrorRedirectUrl(error));
+    }
   }
 
   @Post('google/login')
@@ -198,5 +211,63 @@ export class AuthController {
   @ApiProtectedCommonResponses()
   getProfile(@CurrentUser() user: User) {
     return user;
+  }
+
+  private getFrontendUrl(): string {
+    const google = this.configService.get('google');
+    return (
+      google?.frontendURL || process.env.FRONTEND_URL || DEFAULT_FRONTEND_URL
+    );
+  }
+
+  private buildGoogleSuccessRedirectUrl(result: GoogleLoginResult): string {
+    const params = new URLSearchParams({
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      user: JSON.stringify(result),
+    });
+
+    return `${this.getFrontendUrl()}${FRONTEND_AUTH_CALLBACK_PATH}?${params.toString()}`;
+  }
+
+  private buildGoogleErrorRedirectUrl(error: unknown): string {
+    const statusCode = error instanceof HttpException ? error.getStatus() : 401;
+    const message = this.extractGoogleErrorMessage(error);
+    const params = new URLSearchParams({
+      error: message,
+      statusCode: String(statusCode),
+    });
+
+    return `${this.getFrontendUrl()}${FRONTEND_AUTH_CALLBACK_PATH}?${params.toString()}`;
+  }
+
+  private extractGoogleErrorMessage(error: unknown): string {
+    if (error instanceof HttpException) {
+      const response = error.getResponse();
+
+      if (typeof response === 'string') {
+        return response;
+      }
+
+      if (
+        typeof response === 'object' &&
+        response !== null &&
+        'message' in response
+      ) {
+        const message = (response as { message?: string | string[] }).message;
+        if (Array.isArray(message)) {
+          return message.join(', ');
+        }
+        if (typeof message === 'string') {
+          return message;
+        }
+      }
+    }
+
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
+    return 'Google login failed';
   }
 }

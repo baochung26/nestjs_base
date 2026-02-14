@@ -27,6 +27,7 @@ import { UsersListResponseDto } from '../../users/dtos/users-list-response.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import {
   ApiProtectedCommonResponses,
   ApiBadRequestResponse,
@@ -38,6 +39,7 @@ import {
   ApiPaginatedResponse,
 } from '../../../common/decorators/api-response.decorator';
 import { UserRole } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import {
   PaginationQueryDto,
   SortOrder,
@@ -199,8 +201,12 @@ export class AdminUsersController {
   @ApiBadRequestResponse('Bad request — validation failed')
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
-  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.adminUsersService.updateUser(id, updateUserDto);
+  updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.adminUsersService.updateUser(id, updateUserDto, currentUser.id);
   }
 
   @Delete(':id')
@@ -263,7 +269,7 @@ export class AdminUsersController {
   @ApiStandardResponse(UserResponseDto, 'User deactivated successfully', 200)
   @ApiNotFoundResponse('User not found')
   @ApiProtectedCommonResponses()
-  deactivateUser(@Param('id') id: string) {
-    return this.adminUsersService.deactivateUser(id);
+  deactivateUser(@Param('id') id: string, @CurrentUser() currentUser: User) {
+    return this.adminUsersService.deactivateUser(id, currentUser.id);
   }
 }
