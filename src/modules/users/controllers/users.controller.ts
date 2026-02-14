@@ -25,7 +25,9 @@ import { UpdateProfileDto } from '../dtos/update-profile.dto';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { UsersListResponseDto } from '../dtos/users-list-response.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { Roles } from '../../../common/decorators/roles.decorator';
 import {
   ApiProtectedCommonResponses,
   ApiBadRequestResponse,
@@ -40,20 +42,22 @@ import { CacheInterceptor } from '../../../common/interceptors/cache.interceptor
 import { Cache } from '../../../common/decorators/cache.decorator';
 import { CacheEvictInterceptor } from '../../../common/interceptors/cache-evict.interceptor';
 import { CacheEvict } from '../../../common/decorators/cache-evict.decorator';
+import { UserRole } from '../entities/user.entity';
 
 @ApiTags('users')
 @ApiExtraModels(UserResponseDto, UsersListResponseDto)
 @ApiBearerAuth('JWT-auth')
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(CacheInterceptor, CacheEvictInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Create a new user',
-    description: 'Tạo user mới. Yêu cầu JWT token.',
+    description: 'Tạo user mới. Chỉ admin mới có quyền.',
   })
   @ApiBody({ type: CreateUserDto })
   @ApiStandardResponse(UserResponseDto, 'User created successfully', 201)
@@ -65,9 +69,10 @@ export class UsersController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Get all users',
-    description: 'Lấy danh sách tất cả users. Yêu cầu JWT token.',
+    description: 'Lấy danh sách tất cả users. Chỉ admin mới có quyền.',
   })
   @ApiPaginatedResponse(UserResponseDto, 'List of users retrieved successfully')
   @ApiResponse({
@@ -116,9 +121,10 @@ export class UsersController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Get user by ID',
-    description: 'Lấy thông tin user theo ID. Yêu cầu JWT token.',
+    description: 'Lấy thông tin user theo ID. Chỉ admin mới có quyền.',
   })
   @ApiParam({
     name: 'id',
@@ -134,9 +140,10 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Update user by ID',
-    description: 'Cập nhật thông tin user theo ID. Yêu cầu JWT token.',
+    description: 'Cập nhật thông tin user theo ID. Chỉ admin mới có quyền.',
   })
   @ApiParam({
     name: 'id',
@@ -155,9 +162,10 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Delete user by ID',
-    description: 'Xóa user theo ID. Yêu cầu JWT token.',
+    description: 'Xóa user theo ID. Chỉ admin mới có quyền.',
   })
   @ApiParam({
     name: 'id',

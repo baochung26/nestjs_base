@@ -1,20 +1,25 @@
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('app', () => ({
+export default registerAs('app', () => {
   // Port configuration (đơn giản hóa):
   // - Trong Docker: PORT=3000 (hardcode, container port luôn là 3000)
   // - Local dev: APP_PORT từ .env hoặc default 3000
   // - Cloud platforms: PORT được set tự động (Heroku, Railway, etc.)
   // Default: 3000 (đơn giản nhất, không cần config)
-  port: parseInt(
+  const port = parseInt(
     process.env.PORT || // Cloud platforms hoặc Docker (ưu tiên)
       process.env.APP_PORT || // Local development
       '3000', // Default: 3000 (đơn giản)
     10,
-  ),
-  env: process.env.NODE_ENV || 'development',
-  prefix: 'api',
-}));
+  );
+
+  return {
+    port,
+    env: process.env.NODE_ENV || 'development',
+    prefix: 'api',
+    baseUrl: process.env.APP_BASE_URL || `http://localhost:${port}`,
+  };
+});
 
 export const databaseConfig = registerAs('database', () => ({
   host: process.env.DB_HOST || 'localhost',
@@ -49,7 +54,7 @@ export const googleOAuthConfig = registerAs('google', () => ({
   clientId: process.env.GOOGLE_CLIENT_ID || '',
   clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
   callbackURL: process.env.GOOGLE_CALLBACK_URL || '',
-  frontendURL: process.env.FRONTEND_URL || 'http://localhost:3001',
+  frontendURL: process.env.FRONTEND_URL || 'http://localhost:3000',
 }));
 
 export const mailConfig = registerAs('mail', () => ({

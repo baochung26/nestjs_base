@@ -108,11 +108,11 @@ Hệ thống sử dụng **Pino** (thông qua `nestjs-pino`) làm logger chính 
 
 Tự động log mỗi request:
 
-- **Incoming:** method, url, body (đã sanitize password/token), query, params, correlationId
+- **Incoming:** method, url, body (đã sanitize password/token/secret/authorization/cookie), query, params, correlationId
 - **Outgoing (success):** method, url, statusCode, correlationId, duration (ms)
 - **Outgoing (error):** method, url, statusCode, duration, error.message, error.stack
 
-**Sanitize:** Các field `password`, `token`, `access_token` được thay bằng `***`
+**Sanitize:** Các field match pattern `password`, `token`, `secret`, `authorization`, `cookie` sẽ được thay bằng `***`
 
 ### 3. AllExceptionsFilter
 
@@ -374,7 +374,7 @@ this.logger.log('User logged in');
 
 ### 2. Không log dữ liệu nhạy cảm
 
-- Đã có: LoggingInterceptor sanitize `password`, `token`, `access_token`
+- Đã có: LoggingInterceptor sanitize theo pattern `password`, `token`, `secret`, `authorization`, `cookie`
 - Tự log: **Không** log password, token, credit card, etc.
 
 ### 3. Dùng đúng log level

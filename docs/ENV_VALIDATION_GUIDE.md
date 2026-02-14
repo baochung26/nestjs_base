@@ -71,6 +71,7 @@ Các environment variables có **default values**:
 ```env
 NODE_ENV=development          # Default: development
 APP_PORT=3000                 # Default: 3000
+APP_BASE_URL=http://localhost:3001  # Optional: base URL để build absolute URL (storage, etc.)
 ```
 
 ### Database
@@ -101,7 +102,7 @@ JWT_EXPIRES_IN=7d             # Default: 7d
 GOOGLE_CLIENT_ID=            # Default: '' (empty)
 GOOGLE_CLIENT_SECRET=         # Default: '' (empty)
 GOOGLE_CALLBACK_URL=          # Default: '' (empty)
-FRONTEND_URL=http://localhost:3001  # Default: http://localhost:3001
+FRONTEND_URL=http://localhost:3000  # Default: http://localhost:3000
 ```
 
 ### Mail (Optional)
@@ -315,7 +316,7 @@ JWT_EXPIRES_IN=7d
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_CALLBACK_URL=
-FRONTEND_URL=http://localhost:3001
+FRONTEND_URL=http://localhost:3000
 
 # Mail (Optional)
 MAIL_HOST=smtp.gmail.com

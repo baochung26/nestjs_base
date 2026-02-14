@@ -495,7 +495,7 @@ sleep 5
 docker compose exec app npm run seed
 
 # 4. Kiểm tra ứng dụng
-curl http://localhost:3000/api
+curl http://localhost:3001/api/v1
 ```
 
 ### Reset Database

@@ -6,9 +6,9 @@
 
 **URL:** `POST /api/v1/auth/login`
 
-**Base URL:** `http://localhost:3000` (hoặc domain của bạn)
+**Base URL:** `http://localhost:3001` (hoặc domain của bạn)
 
-**Full URL:** `http://localhost:3000/api/v1/auth/login`
+**Full URL:** `http://localhost:3001/api/v1/auth/login`
 
 ## 📤 Request Format
 
@@ -95,7 +95,7 @@ Response sẽ được wrap bởi `TransformInterceptor` theo format chuẩn:
 Tạo file `lib/api-client.ts`:
 
 ```typescript
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -516,13 +516,13 @@ const response = await apiClient.get('/api/v1/users/profile');
 Thêm vào `.env.local` của Next.js:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
 ## 🧪 Test với cURL
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/login \
+curl -X POST http://localhost:3001/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",

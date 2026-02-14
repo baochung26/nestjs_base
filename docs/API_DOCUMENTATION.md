@@ -29,7 +29,8 @@ API này sử dụng:
 ## 🌐 Base URL
 
 ```
-Development: http://localhost:3000/api/v1
+Local: http://localhost:3000/api/v1 (APP_PORT)
+Docker: http://localhost:3001/api/v1 (APP_HOST_PORT)
 Production: https://yourdomain.com/api/v1
 ```
 
@@ -482,7 +483,7 @@ localStorage.removeItem('refresh_token');
 
 Lấy thông tin profile của user hiện tại.
 
-**Authentication:** Required (JWT)
+**Authentication:** Required (JWT + Admin Role)
 
 **Response (200):**
 
@@ -507,7 +508,9 @@ Lấy thông tin profile của user hiện tại.
 
 ## Users
 
-Tất cả endpoints trong section này yêu cầu **JWT Authentication**.
+Tất cả endpoints trong section này yêu cầu **JWT Authentication**.  
+Các endpoint quản trị (`/api/v1/users`, `/api/v1/users/:id`) yêu cầu **Admin Role**.  
+User thường chỉ dùng các endpoint profile.
 
 ### Get All Users
 
@@ -515,7 +518,7 @@ Tất cả endpoints trong section này yêu cầu **JWT Authentication**.
 
 Lấy danh sách tất cả users.
 
-**Authentication:** Required (JWT)
+**Authentication:** Required (JWT + Admin Role)
 
 **Query Parameters:** Không có
 
@@ -634,7 +637,7 @@ User tự cập nhật thông tin của chính mình. Chỉ cho phép sửa: `fi
 
 Lấy thông tin user theo ID.
 
-**Authentication:** Required (JWT)
+**Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
 
@@ -672,7 +675,7 @@ Lấy thông tin user theo ID.
 
 Tạo user mới.
 
-**Authentication:** Required (JWT)
+**Authentication:** Required (JWT + Admin Role)
 
 **Request Body:**
 
@@ -727,7 +730,7 @@ Tạo user mới.
 
 Cập nhật thông tin user.
 
-**Authentication:** Required (JWT)
+**Authentication:** Required (JWT + Admin Role)
 
 **Path Parameters:**
 

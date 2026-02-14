@@ -17,7 +17,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
     // Your data here
   },
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/users/123"
+  "path": "/api/v1/users/123"
 }
 ```
 
@@ -32,7 +32,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
     // Created resource
   },
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/users"
+  "path": "/api/v1/users"
 }
 ```
 
@@ -53,7 +53,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
     "totalPages": 10
   },
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/users"
+  "path": "/api/v1/users"
 }
 ```
 
@@ -68,7 +68,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
   "message": "Bad Request",
   "error": "Validation failed",
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/users"
+  "path": "/api/v1/users"
 }
 ```
 
@@ -84,7 +84,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
   ],
   "error": "Validation Error",
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/auth/register"
+  "path": "/api/v1/auth/register"
 }
 ```
 
@@ -97,7 +97,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
   "message": "User with ID 123 not found",
   "error": "Not Found",
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/users/123"
+  "path": "/api/v1/users/123"
 }
 ```
 
@@ -110,7 +110,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
   "message": "Invalid credentials",
   "error": "Unauthorized",
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/auth/login"
+  "path": "/api/v1/auth/login"
 }
 ```
 
@@ -123,7 +123,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
   "message": "You do not have permission to access this resource",
   "error": "Forbidden",
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/admin/users"
+  "path": "/api/v1/admin/users"
 }
 ```
 
@@ -136,7 +136,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
   "message": "Email already exists",
   "error": "Conflict",
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/auth/register"
+  "path": "/api/v1/auth/register"
 }
 ```
 
@@ -149,7 +149,7 @@ Tất cả API responses trong dự án đều tuân theo format chuẩn để �
   "message": "Internal server error",
   "error": "Internal Server Error",
   "timestamp": "2024-01-19T10:30:00.000Z",
-  "path": "/api/users"
+  "path": "/api/v1/users"
 }
 ```
 
@@ -283,7 +283,7 @@ interface ApiResponse<T> {
 }
 
 async function getUser(id: string): Promise<User> {
-  const response = await fetch(`/api/users/${id}`);
+  const response = await fetch(`/api/v1/users/${id}`);
   const result: ApiResponse<User> = await response.json();
 
   if (result.success) {

@@ -31,6 +31,7 @@ export class CacheService {
 
   /**
    * Set value in cache
+   * @param ttl Time to live in seconds
    */
   async set(key: string, value: any, ttl?: number): Promise<void> {
     try {

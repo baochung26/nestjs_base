@@ -47,7 +47,7 @@ src/infrastructure/health/
 
 ### 1. Overall Health Check
 
-**GET** `/api/health`
+**GET** `/api/v1/health`
 
 Kiểm tra tất cả health checks (database, Redis, memory, disk).
 
@@ -105,7 +105,7 @@ Kiểm tra tất cả health checks (database, Redis, memory, disk).
 
 ### 2. Database Health Check
 
-**GET** `/api/health/db`
+**GET** `/api/v1/health/db`
 
 Chỉ kiểm tra database connection.
 
@@ -130,7 +130,7 @@ Chỉ kiểm tra database connection.
 
 ### 3. Redis Health Check
 
-**GET** `/api/health/redis`
+**GET** `/api/v1/health/redis`
 
 Chỉ kiểm tra Redis connection.
 
@@ -159,7 +159,7 @@ Chỉ kiểm tra Redis connection.
 
 ### 4. Memory Health Check
 
-**GET** `/api/health/memory`
+**GET** `/api/v1/health/memory`
 
 Kiểm tra memory usage (heap và RSS).
 
@@ -190,7 +190,7 @@ Kiểm tra memory usage (heap và RSS).
 
 ### 5. Disk Health Check
 
-**GET** `/api/health/disk`
+**GET** `/api/v1/health/disk`
 
 Kiểm tra disk storage usage.
 
@@ -369,13 +369,13 @@ spec:
     - name: app
       livenessProbe:
         httpGet:
-          path: /api/health
+          path: /api/v1/health
           port: 3000
         initialDelaySeconds: 30
         periodSeconds: 10
       readinessProbe:
         httpGet:
-          path: /api/health
+          path: /api/v1/health
           port: 3000
         initialDelaySeconds: 5
         periodSeconds: 5
@@ -385,7 +385,7 @@ spec:
 
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
+  CMD curl -f http://localhost:3001/api/v1/health || exit 1
 ```
 
 ### Monitoring Tools
@@ -398,9 +398,9 @@ Có thể tích hợp với Prometheus để scrape metrics:
 # prometheus.yml
 scrape_configs:
   - job_name: 'nestjs-app'
-    metrics_path: '/api/health'
+    metrics_path: '/api/v1/health'
     static_configs:
-      - targets: ['localhost:3000']
+      - targets: ['localhost:3001']
 ```
 
 #### Custom Monitoring Script
@@ -409,7 +409,7 @@ scrape_configs:
 #!/bin/bash
 # health-check.sh
 
-HEALTH_URL="http://localhost:3000/api/health"
+HEALTH_URL="http://localhost:3001/api/v1/health"
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
 
 if [ $RESPONSE -eq 200 ]; then
@@ -498,19 +498,19 @@ fi
 
 ```bash
 # Overall health check
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/v1/health
 
 # Database health check
-curl http://localhost:3000/api/health/db
+curl http://localhost:3001/api/v1/health/db
 
 # Redis health check
-curl http://localhost:3000/api/health/redis
+curl http://localhost:3001/api/v1/health/redis
 
 # Memory health check
-curl http://localhost:3000/api/health/memory
+curl http://localhost:3001/api/v1/health/memory
 
 # Disk health check
-curl http://localhost:3000/api/health/disk
+curl http://localhost:3001/api/v1/health/disk
 ```
 
 ### JavaScript/TypeScript
@@ -521,7 +521,7 @@ import axios from 'axios';
 // Overall health check
 const healthCheck = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/health');
+    const response = await axios.get('http://localhost:3001/api/v1/health');
     console.log('Health Status:', response.data.status);
     console.log('Details:', response.data.details);
   } catch (error) {
@@ -537,7 +537,7 @@ services:
   app:
     build: .
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/api/v1/health']
       interval: 30s
       timeout: 10s
       retries: 3

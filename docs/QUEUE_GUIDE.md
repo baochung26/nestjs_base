@@ -654,7 +654,7 @@ Tất cả endpoints yêu cầu **Admin role**.
 ### 1. Lấy thống kê tất cả queues
 
 ```http
-GET /api/queue/stats
+GET /api/v1/queue/stats
 Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
@@ -699,14 +699,14 @@ Authorization: Bearer YOUR_ADMIN_TOKEN
 ### 2. Lấy thống kê queue cụ thể
 
 ```http
-GET /api/queue/stats/email
+GET /api/v1/queue/stats/email
 Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
 ### 3. Thêm Email Job qua API
 
 ```http
-POST /api/queue/email
+POST /api/v1/queue/email
 Authorization: Bearer YOUR_ADMIN_TOKEN
 Content-Type: application/json
 
@@ -736,7 +736,7 @@ Content-Type: application/json
 ### 4. Thêm Notification Job qua API
 
 ```http
-POST /api/queue/notification
+POST /api/v1/queue/notification
 Authorization: Bearer YOUR_ADMIN_TOKEN
 Content-Type: application/json
 
@@ -753,7 +753,7 @@ Content-Type: application/json
 ### 5. Dọn dẹp Queue
 
 ```http
-DELETE /api/queue/clean/email
+DELETE /api/v1/queue/clean/email
 Authorization: Bearer YOUR_ADMIN_TOKEN
 Content-Type: application/json
 
@@ -772,7 +772,7 @@ Content-Type: application/json
 #### Truy cập Bull Board
 
 ```
-http://localhost:3000/admin/queues
+http://localhost:3001/admin/queues
 ```
 
 **Bảo vệ bằng secret key:**
@@ -784,10 +784,10 @@ http://localhost:3000/admin/queues
 
 ```bash
 # Cách 1: Qua query string (dễ nhất cho browser)
-http://localhost:3000/admin/queues?key=YOUR_SECRET_KEY
+http://localhost:3001/admin/queues?key=YOUR_SECRET_KEY
 
 # Cách 2: Qua header (dùng curl/Postman)
-curl "http://localhost:3000/admin/queues" \
+curl "http://localhost:3001/admin/queues" \
   -H "X-Bull-Board-Key: YOUR_SECRET_KEY"
 ```
 
@@ -845,7 +845,7 @@ const stats = await this.queueService.getQueueStats('email');
 console.log('Email queue stats:', stats);
 
 // Hoặc qua API
-curl -X GET http://localhost:3000/api/v1/queue/stats \
+curl -X GET http://localhost:3001/api/v1/queue/stats \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -1103,7 +1103,7 @@ async checkQueueHealth() {
    ```
 
 2. **Xem failed jobs qua Bull Board UI:**
-   - Truy cập `http://localhost:3000/admin/queues?key=YOUR_SECRET_KEY`
+   - Truy cập `http://localhost:3001/admin/queues?key=YOUR_SECRET_KEY`
    - Click vào queue → tab "Failed"
    - Xem error details, stack trace, retry jobs
 

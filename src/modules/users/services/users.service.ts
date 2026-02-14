@@ -103,6 +103,16 @@ export class UsersService extends BaseService<User> {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
     const user = await this.usersRepository.findByIdWithoutPassword(id);
+
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUser = await this.usersRepository.findByEmail(
+        updateUserDto.email,
+      );
+      if (existingUser && existingUser.id !== id) {
+        throw new ConflictException(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
+      }
+    }
+
     const hashedPassword = updateUserDto.password
       ? await bcrypt.hash(updateUserDto.password, 10)
       : undefined;

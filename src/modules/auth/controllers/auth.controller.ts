@@ -6,6 +6,7 @@ import {
   Get,
   Req,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -139,7 +140,7 @@ export class AuthController {
     description: 'Use GET /auth/google for OAuth flow',
   })
   async googleLogin() {
-    throw new Error('Use GET /auth/google for OAuth flow');
+    throw new BadRequestException('Use GET /auth/google for OAuth flow');
   }
 
   @Post('refresh')

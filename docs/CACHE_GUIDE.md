@@ -76,7 +76,7 @@ if (value) {
 // Set với default TTL (1 hour)
 await this.cacheService.set('user:123', userData);
 
-// Set với custom TTL (30 minutes)
+// Set với custom TTL (30 minutes) — TTL tính theo giây
 await this.cacheService.set('user:123', userData, 1800);
 ```
 

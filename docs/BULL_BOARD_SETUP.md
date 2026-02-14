@@ -41,7 +41,7 @@ Packages:
 ### URL
 
 ```
-http://localhost:3000/admin/queues
+http://localhost:3001/admin/queues
 ```
 
 ### Authentication (Secret Key)
@@ -57,13 +57,13 @@ BULL_BOARD_SECRET_KEY=your-secret-key-here
 #### Cách 1: Query String (Dễ nhất cho browser)
 
 ```
-http://localhost:3000/admin/queues?key=your-secret-key-here
+http://localhost:3001/admin/queues?key=your-secret-key-here
 ```
 
 #### Cách 2: Header (Curl/Postman)
 
 ```bash
-curl "http://localhost:3000/admin/queues" \
+curl "http://localhost:3001/admin/queues" \
   -H "X-Bull-Board-Key: your-secret-key-here"
 ```
 
@@ -237,7 +237,7 @@ constructor(
 Bookmark URL kèm key để truy cập nhanh:
 
 ```
-http://localhost:3000/admin/queues?key=your-secret-key
+http://localhost:3001/admin/queues?key=your-secret-key
 ```
 
 ### 2. Auto-refresh
@@ -277,7 +277,7 @@ Click vào job → Copy job data để export JSON.
 **Giải pháp:**
 
 1. Chạy `npm run start:dev`
-2. Kiểm tra logs có dòng: `Bull Board (Queue Monitor): http://localhost:3000/admin/queues`
+2. Kiểm tra logs có dòng: `Bull Board (Queue Monitor): http://localhost:3001/admin/queues`
 
 ### Failed jobs không hiện trong UI
 

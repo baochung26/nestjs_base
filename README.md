@@ -119,11 +119,12 @@ JWT_EXPIRES_IN=7d
 # Google OAuth Configuration
 GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
-FRONTEND_URL=http://localhost:3001
+GOOGLE_CALLBACK_URL=http://localhost:3001/api/v1/auth/google/callback
+FRONTEND_URL=http://localhost:3000
 
 # Application Configuration
 APP_PORT=3000
+APP_BASE_URL=http://localhost:3001
 NODE_ENV=development
 
 # pgAdmin Configuration
@@ -149,7 +150,8 @@ docker-compose logs -f
 
 #### Bước 4: Kiểm tra ứng dụng
 
-Ứng dụng sẽ chạy tại: `http://localhost:3000/api`
+Ứng dụng sẽ chạy tại: `http://localhost:3001/api/v1` (Docker default).  
+Chạy local không dùng Docker: `http://localhost:3000/api/v1`.
 
 #### Bước 5: Truy cập pgAdmin (Quản lý Database)
 
@@ -230,8 +232,8 @@ npm run start:prod
 Sau khi ứng dụng chạy, bạn có thể tạo user đầu tiên qua API:
 
 ```bash
-# Đăng ký user mới
-curl -X POST http://localhost:3000/api/auth/register \
+# Đăng ký user mới (Docker default: 3001, local: 3000)
+curl -X POST http://localhost:3001/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com",
@@ -246,7 +248,7 @@ Sau đó, bạn cần cập nhật role của user này thành `admin` trực ti
 ### 2. Đăng nhập và lấy JWT Token
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:3001/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com",
@@ -278,7 +280,7 @@ Xem chi tiết tại [docs/SEEDER_GUIDE.md](docs/SEEDER_GUIDE.md)
 Thêm token vào header của các request:
 
 ```bash
-curl -X GET http://localhost:3000/api/auth/profile \
+curl -X GET http://localhost:3001/api/v1/auth/profile \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
@@ -340,15 +342,15 @@ export class YourService {
 
 ```bash
 # Lấy thống kê tất cả queues
-GET /api/queue/stats
+GET /api/v1/queue/stats
 Authorization: Bearer YOUR_TOKEN
 
 # Lấy thống kê queue cụ thể
-GET /api/queue/stats/email
+GET /api/v1/queue/stats/email
 Authorization: Bearer YOUR_TOKEN
 
 # Thêm email job
-POST /api/queue/email
+POST /api/v1/queue/email
 Authorization: Bearer YOUR_TOKEN
 Content-Type: application/json
 {
@@ -359,7 +361,7 @@ Content-Type: application/json
 }
 
 # Thêm notification job
-POST /api/queue/notification
+POST /api/v1/queue/notification
 Authorization: Bearer YOUR_TOKEN
 Content-Type: application/json
 {
@@ -370,7 +372,7 @@ Content-Type: application/json
 }
 
 # Dọn dẹp completed jobs
-DELETE /api/queue/clean/default
+DELETE /api/v1/queue/clean/default
 Authorization: Bearer YOUR_TOKEN
 Content-Type: application/json
 {
@@ -405,7 +407,7 @@ export class YourQueueProcessor {
 #### Đăng ký user mới
 
 ```typescript
-POST /api/auth/register
+POST /api/v1/auth/register
 {
   "email": "user@example.com",
   "password": "password123",
@@ -417,7 +419,7 @@ POST /api/auth/register
 #### Đăng nhập (Email/Password)
 
 ```typescript
-POST /api/auth/login
+POST /api/v1/auth/login
 {
   "email": "user@example.com",
   "password": "password123"
@@ -441,8 +443,8 @@ User sẽ được redirect đến Google để đăng nhập. Sau khi đăng nh
    ```env
    GOOGLE_CLIENT_ID=your-google-client-id
    GOOGLE_CLIENT_SECRET=your-google-client-secret
-   GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
-   FRONTEND_URL=http://localhost:3001
+   GOOGLE_CALLBACK_URL=http://localhost:3001/api/v1/auth/google/callback
+   FRONTEND_URL=http://localhost:3000
    ```
 3. Xem chi tiết tại [docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md)
 
@@ -450,7 +452,7 @@ User sẽ được redirect đến Google để đăng nhập. Sau khi đăng nh
 
 ```typescript
 // Redirect user to Google OAuth
-window.location.href = 'http://localhost:3000/api/auth/google';
+window.location.href = 'http://localhost:3001/api/v1/auth/google';
 
 // Handle callback (trong callback page)
 const urlParams = new URLSearchParams(window.location.search);
@@ -464,26 +466,26 @@ if (token) {
 #### Lấy profile (cần authentication)
 
 ```typescript
-GET /api/auth/profile
+GET /api/v1/auth/profile
 Authorization: Bearer YOUR_TOKEN
 ```
 
 ### 3. User Module
 
-Tất cả endpoints cần JWT authentication:
+Tất cả endpoints cần JWT. Riêng các endpoint quản trị (`/api/v1/users`, `/api/v1/users/:id`) yêu cầu role `admin`. User thường chỉ dùng các endpoint profile.
 
 ```typescript
-// Lấy danh sách users
-GET /api/users
+// Lấy danh sách users (Admin)
+GET /api/v1/users
 
 // Lấy profile của user hiện tại
-GET /api/users/profile
+GET /api/v1/users/profile
 
-// Lấy thông tin user theo ID
-GET /api/users/:id
+// Lấy thông tin user theo ID (Admin)
+GET /api/v1/users/:id
 
-// Tạo user mới
-POST /api/users
+// Tạo user mới (Admin)
+POST /api/v1/users
 {
   "email": "newuser@example.com",
   "password": "password123",
@@ -492,15 +494,15 @@ POST /api/users
   "role": "user" // optional: "user" | "admin"
 }
 
-// Cập nhật user
-PATCH /api/users/:id
+// Cập nhật user (Admin)
+PATCH /api/v1/users/:id
 {
   "firstName": "Updated Name",
   "isActive": true
 }
 
-// Xóa user
-DELETE /api/users/:id
+// Xóa user (Admin)
+DELETE /api/v1/users/:id
 ```
 
 ### 4. Admin Module
@@ -510,7 +512,7 @@ Tất cả endpoints yêu cầu role `admin`:
 #### Dashboard
 
 ```typescript
-GET /api/admin/dashboard
+GET /api/v1/admin/dashboard
 Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
@@ -518,13 +520,13 @@ Authorization: Bearer YOUR_ADMIN_TOKEN
 
 ```typescript
 // Lấy tất cả users
-GET /api/admin/users
+GET /api/v1/admin/users
 
 // Lấy user theo ID
-GET /api/admin/users/:id
+GET /api/v1/admin/users/:id
 
 // Tạo user
-POST /api/admin/users
+POST /api/v1/admin/users
 {
   "email": "user@example.com",
   "password": "password123",
@@ -534,30 +536,30 @@ POST /api/admin/users
 }
 
 // Cập nhật user
-PATCH /api/admin/users/:id
+PATCH /api/v1/admin/users/:id
 {
   "firstName": "Updated",
   "isActive": true
 }
 
 // Xóa user
-DELETE /api/admin/users/:id
+DELETE /api/v1/admin/users/:id
 
 // Kích hoạt user
-PATCH /api/admin/users/:id/activate
+PATCH /api/v1/admin/users/:id/activate
 
 // Vô hiệu hóa user
-PATCH /api/admin/users/:id/deactivate
+PATCH /api/v1/admin/users/:id/deactivate
 ```
 
 #### Settings
 
 ```typescript
 // Lấy settings
-GET /api/admin/settings
+GET /api/v1/admin/settings
 
 // Cập nhật settings
-PUT /api/admin/settings
+PUT /api/v1/admin/settings
 {
   "appName": "My App",
   "version": "1.0.0"
@@ -570,47 +572,47 @@ PUT /api/admin/settings
 
 | Method | Endpoint                    | Auth Required | Description                |
 | ------ | --------------------------- | ------------- | -------------------------- |
-| POST   | `/api/auth/register`        | No            | Đăng ký user mới           |
-| POST   | `/api/auth/login`           | No            | Đăng nhập (Email/Password) |
-| GET    | `/api/auth/google`          | No            | Bắt đầu Google OAuth flow  |
-| GET    | `/api/auth/google/callback` | No            | Callback từ Google OAuth   |
-| GET    | `/api/auth/profile`         | Yes           | Lấy profile                |
+| POST   | `/api/v1/auth/register`        | No            | Đăng ký user mới           |
+| POST   | `/api/v1/auth/login`           | No            | Đăng nhập (Email/Password) |
+| GET    | `/api/v1/auth/google`          | No            | Bắt đầu Google OAuth flow  |
+| GET    | `/api/v1/auth/google/callback` | No            | Callback từ Google OAuth   |
+| GET    | `/api/v1/auth/profile`         | Yes           | Lấy profile                |
 
 ### Users
 
-| Method | Endpoint             | Auth Required | Description               |
-| ------ | -------------------- | ------------- | ------------------------- |
-| GET    | `/api/users`         | Yes           | Lấy danh sách users       |
-| GET    | `/api/users/profile` | Yes           | Profile của user hiện tại |
-| GET    | `/api/users/:id`     | Yes           | Lấy user theo ID          |
-| POST   | `/api/users`         | Yes           | Tạo user mới              |
-| PATCH  | `/api/users/:id`     | Yes           | Cập nhật user             |
-| DELETE | `/api/users/:id`     | Yes           | Xóa user                  |
+| Method | Endpoint             | Auth Required | Role Required | Description               |
+| ------ | -------------------- | ------------- | ------------- | ------------------------- |
+| GET    | `/api/v1/users`         | Yes           | Admin         | Lấy danh sách users       |
+| GET    | `/api/v1/users/profile` | Yes           | Any           | Profile của user hiện tại |
+| GET    | `/api/v1/users/:id`     | Yes           | Admin         | Lấy user theo ID          |
+| POST   | `/api/v1/users`         | Yes           | Admin         | Tạo user mới              |
+| PATCH  | `/api/v1/users/:id`     | Yes           | Admin         | Cập nhật user             |
+| DELETE | `/api/v1/users/:id`     | Yes           | Admin         | Xóa user                  |
 
 ### Admin
 
 | Method | Endpoint                          | Auth Required | Role Required | Description        |
 | ------ | --------------------------------- | ------------- | ------------- | ------------------ |
-| GET    | `/api/admin/dashboard`            | Yes           | Admin         | Dashboard thống kê |
-| GET    | `/api/admin/users`                | Yes           | Admin         | Quản lý users      |
-| GET    | `/api/admin/users/:id`            | Yes           | Admin         | Chi tiết user      |
-| POST   | `/api/admin/users`                | Yes           | Admin         | Tạo user           |
-| PATCH  | `/api/admin/users/:id`            | Yes           | Admin         | Cập nhật user      |
-| DELETE | `/api/admin/users/:id`            | Yes           | Admin         | Xóa user           |
-| PATCH  | `/api/admin/users/:id/activate`   | Yes           | Admin         | Kích hoạt user     |
-| PATCH  | `/api/admin/users/:id/deactivate` | Yes           | Admin         | Vô hiệu hóa user   |
-| GET    | `/api/admin/settings`             | Yes           | Admin         | Lấy settings       |
-| PUT    | `/api/admin/settings`             | Yes           | Admin         | Cập nhật settings  |
+| GET    | `/api/v1/admin/dashboard`            | Yes           | Admin         | Dashboard thống kê |
+| GET    | `/api/v1/admin/users`                | Yes           | Admin         | Quản lý users      |
+| GET    | `/api/v1/admin/users/:id`            | Yes           | Admin         | Chi tiết user      |
+| POST   | `/api/v1/admin/users`                | Yes           | Admin         | Tạo user           |
+| PATCH  | `/api/v1/admin/users/:id`            | Yes           | Admin         | Cập nhật user      |
+| DELETE | `/api/v1/admin/users/:id`            | Yes           | Admin         | Xóa user           |
+| PATCH  | `/api/v1/admin/users/:id/activate`   | Yes           | Admin         | Kích hoạt user     |
+| PATCH  | `/api/v1/admin/users/:id/deactivate` | Yes           | Admin         | Vô hiệu hóa user   |
+| GET    | `/api/v1/admin/settings`             | Yes           | Admin         | Lấy settings       |
+| PUT    | `/api/v1/admin/settings`             | Yes           | Admin         | Cập nhật settings  |
 
 ### Queue
 
 | Method | Endpoint                      | Auth Required | Role Required | Description            |
 | ------ | ----------------------------- | ------------- | ------------- | ---------------------- |
-| GET    | `/api/queue/stats`            | Yes           | Admin         | Thống kê tất cả queues |
-| GET    | `/api/queue/stats/:queueName` | Yes           | Admin         | Thống kê queue cụ thể  |
-| POST   | `/api/queue/email`            | Yes           | Admin         | Thêm email job         |
-| POST   | `/api/queue/notification`     | Yes           | Admin         | Thêm notification job  |
-| DELETE | `/api/queue/clean/:queueName` | Yes           | Admin         | Dọn dẹp queue          |
+| GET    | `/api/v1/queue/stats`            | Yes           | Admin         | Thống kê tất cả queues |
+| GET    | `/api/v1/queue/stats/:queueName` | Yes           | Admin         | Thống kê queue cụ thể  |
+| POST   | `/api/v1/queue/email`            | Yes           | Admin         | Thêm email job         |
+| POST   | `/api/v1/queue/notification`     | Yes           | Admin         | Thêm notification job  |
+| DELETE | `/api/v1/queue/clean/:queueName` | Yes           | Admin         | Dọn dẹp queue          |
 
 ## 🐳 Docker Commands
 

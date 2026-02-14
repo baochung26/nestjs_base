@@ -212,7 +212,7 @@ Interceptor sinh key từ request:
 - **params:** `req.params` (JSON)
 - **userId:** `req.user?.id` hoặc `'anonymous'`
 
-Ví dụ: `cache:GET:/api/users:{}:{"id":"123"}:user-uuid-456` → mỗi user, mỗi URL/query/params khác nhau có cache riêng.
+Ví dụ: `cache:GET:/api/v1/users:{}:{"id":"123"}:user-uuid-456` → mỗi user, mỗi URL/query/params khác nhau có cache riêng.
 
 **Khi nào dùng key tùy chỉnh:**
 

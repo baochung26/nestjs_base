@@ -272,7 +272,7 @@ Config đã có `credentials: true` mặc định. Nếu vẫn lỗi, kiểm tra
 1. **Frontend fetch:**
 
    ```typescript
-   fetch('http://localhost:3000/api/v1/auth/login', {
+   fetch('http://localhost:3001/api/v1/auth/login', {
      method: 'POST',
      credentials: 'include', // ✅ Đúng
      headers: {
@@ -326,7 +326,7 @@ CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com,https://admin.you
 
 ```typescript
 // lib/api-client.ts
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export const apiClient = {
   async post(endpoint: string, data: any) {
@@ -347,7 +347,7 @@ export const apiClient = {
 
 ```bash
 # Test CORS với origin
-curl -X POST http://localhost:3000/api/v1/auth/login \
+curl -X POST http://localhost:3001/api/v1/auth/login \
   -H "Origin: http://localhost:3002" \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"user123"}' \

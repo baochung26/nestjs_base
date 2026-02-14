@@ -30,6 +30,9 @@ Storage Module sử dụng **local file system** để lưu trữ files với c�
 Thêm vào file `.env`:
 
 ```env
+# Application Base URL (dùng để build file URL)
+APP_BASE_URL=http://localhost:3001
+
 # Storage Configuration
 STORAGE_TYPE=local
 STORAGE_LOCAL_DESTINATION=./uploads
@@ -146,7 +149,7 @@ const stats = await this.storageService.getStorageStats('documents');
 ### 1. Upload Single File
 
 ```http
-POST /api/storage/upload
+POST /api/v1/storage/upload
 Authorization: Bearer YOUR_TOKEN
 Content-Type: multipart/form-data
 
@@ -168,17 +171,20 @@ subfolder: documents (optional query param)
       "mimetype": "application/pdf",
       "size": 1048576,
       "path": "./uploads/documents/document-1234567890-abc123.pdf",
-      "url": "http://localhost:3000/api/storage/files/documents/document-1234567890-abc123.pdf",
+      "url": "http://localhost:3001/api/v1/storage/files/documents/document-1234567890-abc123.pdf",
       "uploadedAt": "2024-01-19T10:30:00.000Z"
     }
   }
 }
 ```
 
+**Lưu ý:** Giá trị `url` được build từ `APP_BASE_URL`.  
+Docker mặc định: `http://localhost:<APP_HOST_PORT>` (ví dụ `3001`). Local: `http://localhost:<APP_PORT>` (mặc định `3000`).
+
 ### 2. Upload Multiple Files
 
 ```http
-POST /api/storage/upload/multiple
+POST /api/v1/storage/upload/multiple
 Authorization: Bearer YOUR_TOKEN
 Content-Type: multipart/form-data
 
@@ -201,7 +207,7 @@ subfolder: images (optional query param)
         "mimetype": "image/jpeg",
         "size": 524288,
         "path": "./uploads/images/image1-1234567890-abc123.jpg",
-        "url": "http://localhost:3000/api/storage/files/images/image1-1234567890-abc123.jpg",
+        "url": "http://localhost:3001/api/v1/storage/files/images/image1-1234567890-abc123.jpg",
         "uploadedAt": "2024-01-19T10:30:00.000Z"
       }
     ]
@@ -212,7 +218,7 @@ subfolder: images (optional query param)
 ### 3. Get File
 
 ```http
-GET /api/storage/files/documents/filename.pdf
+GET /api/v1/storage/files/documents/filename.pdf
 ```
 
 Returns file content with appropriate Content-Type header.
@@ -220,7 +226,7 @@ Returns file content with appropriate Content-Type header.
 ### 4. Get File Info
 
 ```http
-GET /api/storage/info/documents/filename.pdf
+GET /api/v1/storage/info/documents/filename.pdf
 Authorization: Bearer YOUR_TOKEN
 ```
 
@@ -236,7 +242,7 @@ Authorization: Bearer YOUR_TOKEN
     "mimetype": "application/pdf",
     "size": 1048576,
     "path": "./uploads/documents/filename.pdf",
-    "url": "http://localhost:3000/api/storage/files/documents/filename.pdf",
+    "url": "http://localhost:3001/api/v1/storage/files/documents/filename.pdf",
     "uploadedAt": "2024-01-19T10:30:00.000Z"
   }
 }
@@ -245,7 +251,7 @@ Authorization: Bearer YOUR_TOKEN
 ### 5. List Files
 
 ```http
-GET /api/storage/list?subfolder=documents
+GET /api/v1/storage/list?subfolder=documents
 Authorization: Bearer YOUR_TOKEN
 ```
 
@@ -263,7 +269,7 @@ Authorization: Bearer YOUR_TOKEN
         "mimetype": "application/pdf",
         "size": 1048576,
         "path": "./uploads/documents/file1.pdf",
-        "url": "http://localhost:3000/api/storage/files/documents/file1.pdf",
+        "url": "http://localhost:3001/api/v1/storage/files/documents/file1.pdf",
         "uploadedAt": "2024-01-19T10:30:00.000Z"
       }
     ],
@@ -275,7 +281,7 @@ Authorization: Bearer YOUR_TOKEN
 ### 6. Delete File
 
 ```http
-DELETE /api/storage/files/documents/filename.pdf
+DELETE /api/v1/storage/files/documents/filename.pdf
 Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
@@ -294,7 +300,7 @@ Authorization: Bearer YOUR_ADMIN_TOKEN
 ### 7. Get Storage Statistics
 
 ```http
-GET /api/storage/stats?subfolder=documents
+GET /api/v1/storage/stats?subfolder=documents
 Authorization: Bearer YOUR_ADMIN_TOKEN
 ```
 
@@ -460,6 +466,11 @@ async cleanupOldFiles() {
   }
 }
 ```
+
+### 6. Multer Memory Storage & Limits
+
+- Project dùng `memoryStorage` để đảm bảo `file.buffer` luôn có sẵn cho `StorageService`.
+- Giới hạn kích thước upload được lấy từ `STORAGE_MAX_FILE_SIZE`.
 
 ### 6. File Size Limits
 

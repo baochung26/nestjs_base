@@ -68,6 +68,7 @@ REDIS_PORT=6380        # port kết nối Redis (local = REDIS_HOST_PORT)
 
 - `APP_HOST_PORT`, `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, `PGADMIN_HOST_PORT`: optional (dùng bởi docker-compose).
 - `APP_PORT`, `DB_PORT`, `REDIS_PORT`: dùng bởi app (listen / connection port).
+- `APP_BASE_URL`: base URL để build absolute URL (storage, v.v.). Docker dùng `http://localhost:${APP_HOST_PORT}`, local dùng `http://localhost:${APP_PORT}`.
 
 ---
 

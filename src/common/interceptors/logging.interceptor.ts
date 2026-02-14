@@ -59,19 +59,39 @@ export class LoggingInterceptor implements NestInterceptor {
   }
 
   private sanitizeBody(body: any): any {
-    if (!body) return body;
+    return this.sanitizeValue(body);
+  }
 
-    const sanitized = { ...body };
-    // Remove sensitive fields
-    if (sanitized.password) {
-      sanitized.password = '***';
+  private sanitizeValue(value: any, key?: string): any {
+    if (value === null || value === undefined) return value;
+
+    if (key && this.isSensitiveKey(key)) {
+      return '***';
     }
-    if (sanitized.token) {
-      sanitized.token = '***';
+
+    if (Array.isArray(value)) {
+      return value.map((item) => this.sanitizeValue(item));
     }
-    if (sanitized.access_token) {
-      sanitized.access_token = '***';
+
+    if (typeof value === 'object') {
+      const result: Record<string, any> = {};
+      for (const [childKey, childValue] of Object.entries(value)) {
+        result[childKey] = this.sanitizeValue(childValue, childKey);
+      }
+      return result;
     }
-    return sanitized;
+
+    return value;
+  }
+
+  private isSensitiveKey(key: string): boolean {
+    const normalized = key.toLowerCase();
+    return (
+      normalized.includes('password') ||
+      normalized.includes('token') ||
+      normalized.includes('secret') ||
+      normalized.includes('authorization') ||
+      normalized.includes('cookie')
+    );
   }
 }

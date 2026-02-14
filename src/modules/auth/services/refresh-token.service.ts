@@ -39,7 +39,7 @@ export class RefreshTokenService {
     };
 
     const cacheKey = this.getCacheKey(refreshToken);
-    await this.cacheService.set(cacheKey, payload, ttlSeconds * 1000); // CacheService expects milliseconds
+    await this.cacheService.set(cacheKey, payload, ttlSeconds); // TTL in seconds
 
     this.logger.debug({ userId, tokenId }, 'Refresh token generated');
 

@@ -14,6 +14,8 @@ const stat = promisify(fs.stat);
 const unlink = promisify(fs.unlink);
 const mkdir = promisify(fs.mkdir);
 const access = promisify(fs.access);
+const writeFile = promisify(fs.writeFile);
+const readFile = promisify(fs.readFile);
 
 export interface FileInfo {
   filename: string;
@@ -143,8 +145,8 @@ export class StorageService {
     );
     const filePath = path.join(storagePath, filename);
 
-    // Save file
-    fs.writeFileSync(filePath, file.buffer);
+    // Save file (async)
+    await writeFile(filePath, file.buffer);
 
     const fileInfo: FileInfo = {
       filename,
@@ -187,7 +189,7 @@ export class StorageService {
 
     try {
       await access(filePath);
-      return fs.readFileSync(filePath);
+      return await readFile(filePath);
     } catch {
       throw new NotFoundException(`File ${filename} not found`);
     }
@@ -273,8 +275,12 @@ export class StorageService {
    */
   getFileUrl(subfolder?: string, filename?: string): string {
     const app = this.configService.get('app');
-    const baseUrl = app?.frontendUrl || 'http://localhost:3000';
-    const apiPrefix = app?.prefix || 'api';
+    const rawBaseUrl =
+      app?.baseUrl ||
+      process.env.APP_BASE_URL ||
+      `http://localhost:${app?.port || process.env.PORT || process.env.APP_PORT || 3000}`;
+    const baseUrl = rawBaseUrl.replace(/\/+$/, '');
+    const apiPrefix = (app?.prefix || 'api').replace(/^\/+/, '');
     const path = subfolder ? `${subfolder}/${filename}` : filename;
     return `${baseUrl}/${apiPrefix}/storage/files/${path}`;
   }

@@ -41,6 +41,12 @@ export const validationSchema = Joi.object({
     .default(3000)
     .description('App listen port (local dev)'),
 
+  // APP_BASE_URL: Base URL để build absolute URL (ví dụ: storage file URL)
+  APP_BASE_URL: Joi.string()
+    .uri()
+    .optional()
+    .description('App base URL (e.g., http://localhost:3000)'),
+
   // Database Configuration (port app dùng để kết nối DB)
   DB_HOST: Joi.string().required().description('Database host'),
   DB_PORT: Joi.number()
