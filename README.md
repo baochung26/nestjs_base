@@ -1,67 +1,77 @@
-# NestJS Backend Base (Portfolio Project)
+# NestJS Backend Base
 
-A production-minded NestJS backend starter focused on clean architecture, security, and real-world backend features.
+Backend NestJS theo hướng production-ready, tập trung vào kiến trúc rõ ràng, bảo mật, khả năng vận hành, và dễ mở rộng.
 
-## Why This Project
+## Mục tiêu dự án
 
-This repository is designed as a public showcase of backend engineering practices:
+Dự án được xây dựng để làm nền tảng backend thực tế với các thành phần thường gặp:
 
-- Modular NestJS architecture with clear separation of concerns
-- JWT auth with refresh-token flow and Google OAuth integration
-- Role-based authorization (`USER`, `ADMIN`)
-- PostgreSQL + TypeORM + Redis + Bull queues
-- Caching, scheduling, health checks, structured logging, and Swagger
-- Docker-first local setup
+- Authentication với JWT (access + refresh token)
+- Google OAuth login flow
+- Phân quyền theo vai trò `USER` / `ADMIN`
+- Quản lý người dùng, admin APIs, health checks
+- PostgreSQL + TypeORM + Redis + Bull Queue
+- Swagger, logging có correlation ID, scheduler, cache, mail, storage
+- Chuẩn hóa response/error qua interceptor + filter
 
-## Tech Stack
+## Công nghệ chính
 
-- NestJS 10 + TypeScript
+- NestJS 10, TypeScript
 - PostgreSQL + TypeORM
-- Redis + Bull
+- Redis + Bull + Bull Board
 - Passport (Local, JWT, Google OAuth)
 - Swagger / OpenAPI
-- Pino logging + correlation ID
-- Jest for testing
+- `nestjs-pino` (structured logging)
+- Jest (unit/e2e)
 
-## Project Structure
+## Cấu trúc mã nguồn
 
 ```text
 src/
-  common/             # shared decorators, guards, interceptors, middleware
-  config/             # environment config + validation
-  infrastructure/     # DB, cache, queue, scheduler, health, mail, storage
-  modules/            # auth, users, admin domain modules
-  shared/             # shared DTOs/entities/helpers
+  common/           # decorators, guards, interceptors, filters, pipes, middleware
+  config/           # config + Joi validation cho env
+  infrastructure/   # database, cache, queue, scheduler, mail, storage, health, logger
+  modules/          # auth, users, admin
+  shared/           # base entity, response dto/helper, pagination
 ```
 
-## Quick Start
+## Bắt đầu nhanh
 
-### 1. Clone & install
+### 1) Cài đặt
 
 ```bash
 npm install
 cp .env.example .env
 ```
 
-### 2. Run with Docker (recommended)
+### 2) Chạy bằng Docker (khuyến nghị)
 
 ```bash
 docker compose up -d
 ```
 
-API base URL (default): `http://localhost:3001/api/v1`
+Mặc định:
 
-Swagger (non-production): `http://localhost:3001/api/docs`
+- API: `http://localhost:3001/api/v1`
+- Swagger: `http://localhost:3001/api/docs`
+- pgAdmin: `http://localhost:5050`
 
-### 3. Run locally (without Docker)
+### 3) Chạy local không Docker
 
-Make sure PostgreSQL + Redis are available, update `.env`, then:
+Yêu cầu: PostgreSQL + Redis đã chạy sẵn.
+
+Cập nhật `.env` cho phù hợp môi trường local, sau đó:
 
 ```bash
 npm run start:dev
 ```
 
-## Useful Scripts
+Mặc định local:
+
+- API: `http://localhost:3000/api/v1`
+- Swagger: `http://localhost:3000/api/docs`
+
+## Scripts hữu ích
 
 ```bash
 npm run start:dev
@@ -69,32 +79,57 @@ npm run build
 npm run lint
 npm test
 npm run test:cov
+
 npm run seed
+npm run seed:clear
+npm run seed:refresh
+
+npm run migration:generate -- src/infrastructure/database/migrations/<name>
 npm run migration:run
+npm run migration:revert
+npm run migration:show
 ```
 
-## Documentation
+## API chính
 
-See the documentation index:
+- `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`
+- `GET /auth/google`, `GET /auth/google/callback`
+- `GET /users/profile`, `PATCH /users/profile`
+- `GET /admin/*` (yêu cầu role `ADMIN`)
+- `GET /health`, `GET /health/db`, `GET /health/redis`, `GET /health/memory`, `GET /health/disk`
 
-- [docs/README.md](./docs/README.md)
+Ngoài Swagger, project có các endpoint nội bộ cho Queue và Storage (xem tài liệu API chi tiết).
 
-## API Summary
+## Tài liệu
 
-- Auth: `/auth/*`
-- Users: `/users/*`
-- Admin: `/admin/*`
-- Health: `/health/*`
+Tài liệu chi tiết nằm trong thư mục `docs`:
 
-Full API reference:
+- [Documentation Index](./docs/README.md)
+- [API Documentation](./docs/API_DOCUMENTATION.md)
+- [Architecture Overview](./docs/ARCHITECTURE_OVERVIEW.md)
+- [Development Setup](./docs/DEVELOPMENT_SETUP.md)
+- [Google OAuth Setup](./docs/GOOGLE_OAUTH_SETUP.md)
+- [Google Login Flow](./docs/GOOGLE_LOGIN_FLOW.md)
 
-- [docs/API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)
+## Biến môi trường quan trọng
 
-## Security Notes
+Tối thiểu cần cấu hình:
 
-- Do not commit real credentials to the repository
-- Keep `.env` local only (already ignored)
-- Use strong JWT and OAuth secrets in production
+- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
+- `JWT_SECRET` (khuyến nghị >= 32 ký tự)
+
+Nếu dùng Google login:
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_CALLBACK_URL`
+- `FRONTEND_URL`
+
+## Bảo mật
+
+- Không commit credentials thật vào repository
+- Dùng secret mạnh cho JWT/OAuth ở môi trường thật
+- Tách credentials riêng cho dev/staging/production
 
 ## License
 
