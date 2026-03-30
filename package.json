@@ -1,9 +1,9 @@
 {
   "name": "nestjs-demo2",
   "version": "1.0.0",
-  "description": "NestJS project with Docker, Auth, User, and Admin modules",
+  "description": "Production-minded NestJS backend starter for portfolio and learning",
   "author": "",
-  "private": true,
+  "private": false,
   "license": "MIT",
   "scripts": {
     "build": "nest build",
@@ -55,7 +55,6 @@
     "@nestjs/terminus": "^10.1.1",
     "@nestjs/throttler": "^5.0.1",
     "@nestjs/axios": "^3.0.1",
-    "@nestjs/platform-express": "^10.3.0",
     "helmet": "^7.1.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.8",
@@ -108,7 +107,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -116,7 +115,7 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "coverage",
     "testEnvironment": "node"
   }
 }
