@@ -1,5 +1,6 @@
-version: '3.8'
-
+# Quy ước port mapping (đọc từ .env):
+#   *_HOST_PORT = port trên máy host (bên trái HOST:CONTAINER), dùng khi truy cập từ browser/redis-cli/pgAdmin
+#   Bên phải (5432, 6379, 3000, 80) = port trong container (cố định, không đổi)
 services:
   postgres:
     image: postgres:15-alpine
@@ -10,23 +11,39 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-nestjs_db}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - '${POSTGRES_HOST_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - nestjs_network
+      nestjs_network:
+        aliases:
+          - postgres
+          - nestjs_postgres
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-postgres}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: nestjs_redis
     restart: always
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - '${REDIS_HOST_PORT:-6380}:6379'
     volumes:
       - redis_data:/data
     networks:
-      - nestjs_network
+      nestjs_network:
+        aliases:
+          - redis
+          - nestjs_redis
     command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -38,7 +55,8 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      # Host:Container — pgAdmin lắng nghe 80 trong container
+      - '${PGADMIN_HOST_PORT:-5050}:80'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
@@ -54,24 +72,36 @@ services:
     container_name: nestjs_app
     restart: always
     ports:
-      - "${APP_PORT:-3000}:3000"
+      # Host:Container — App luôn lắng nghe 3000 trong container
+      - '${APP_HOST_PORT:-3001}:3000'
     environment:
       NODE_ENV: development
-      DB_HOST: postgres
+      # Ghi đè giá trị từ .env. Dùng tên container để tránh ENOTFOUND (một số môi trường DNS resolve container name ổn hơn).
+      PORT: 3000
+      DB_HOST: nestjs_postgres
       DB_PORT: 5432
+      REDIS_HOST: nestjs_redis
+      REDIS_PORT: 6379
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-nestjs_db}
       JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      # Base URL để build absolute URL (ví dụ: storage file URL)
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3001}
+      # File watch ổn định trên Docker Desktop/WSL/Linux (fallback polling)
+      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-true}
+      CHOKIDAR_INTERVAL: ${CHOKIDAR_INTERVAL:-1000}
+      WATCHPACK_POLLING: ${WATCHPACK_POLLING:-true}
+      TSC_WATCHFILE: ${TSC_WATCHFILE:-UseFsEventsWithFallbackDynamicPolling}
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - nestjs_network
     command: npm run start:dev

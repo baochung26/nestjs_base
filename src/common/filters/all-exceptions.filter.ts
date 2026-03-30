@@ -3,10 +3,10 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ApiErrorResponseDto } from '../dto/api-response.dto';
+import { ApiErrorResponseDto } from '../../shared/response/api-response.dto';
+import { HTTP_STATUS, ERROR_MESSAGES } from '../constants';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -15,8 +15,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    // Dùng kiểu number/string để linh hoạt với mọi HttpStatus và message
+    let status: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    let message: string = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
     let error: string | string[] | object | undefined;
 
     if (exception instanceof HttpException) {
@@ -27,11 +28,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = exceptionResponse;
       } else {
         const responseObj = exceptionResponse as any;
-        message = responseObj.message || exception.message || 'An error occurred';
+        message =
+          responseObj.message || exception.message || 'An error occurred';
         error = responseObj.error || responseObj.errors || undefined;
       }
     } else if (exception instanceof Error) {
-      message = exception.message || 'Internal server error';
+      message = exception.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
     }
 
     // Log error for debugging (in production, use proper logging service)

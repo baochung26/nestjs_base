@@ -1,6 +1,7 @@
 import { applyDecorators, Type } from '@nestjs/common';
 import { ApiResponse, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
-import { ApiResponseDto, PaginatedResponseDto } from '../dto/api-response.dto';
+import { ApiResponseDto } from '../../shared/response/api-response.dto';
+import { PaginatedResponseDto } from '../../shared/pagination/pagination.dto';
 
 /**
  * Decorator để document API response trong Swagger
@@ -9,10 +10,12 @@ import { ApiResponseDto, PaginatedResponseDto } from '../dto/api-response.dto';
 export const ApiStandardResponse = <TModel extends Type<any>>(
   model: TModel,
   description: string = 'Success',
+  status: number = 200,
 ) => {
   return applyDecorators(
     ApiExtraModels(ApiResponseDto, model),
     ApiResponse({
+      status,
       description,
       schema: {
         allOf: [
