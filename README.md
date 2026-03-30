@@ -1,765 +1,101 @@
-# NestJS Demo Project
+# NestJS Backend Base (Portfolio Project)
 
-Dự án NestJS đầy đủ với Docker, bao gồm các module: Auth, User, Admin, và Queue System với Redis.
+A production-minded NestJS backend starter focused on clean architecture, security, and real-world backend features.
 
-## 📋 Mục lục
+## Why This Project
 
-- [Tính năng](#tính-năng)
-- [Cấu trúc dự án](#cấu-trúc-dự-án)
-- [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
-- [Cài đặt và Setup](#cài-đặt-và-setup)
-- [Khởi tạo dự án](#khởi-tạo-dự-án)
-- [Sử dụng các Module](#sử-dụng-các-module)
-- [API Endpoints](#api-endpoints)
-- [Docker Commands](#docker-commands)
-- [Development](#development)
+This repository is designed as a public showcase of backend engineering practices:
 
-## ✨ Tính năng
+- Modular NestJS architecture with clear separation of concerns
+- JWT auth with refresh-token flow and Google OAuth integration
+- Role-based authorization (`USER`, `ADMIN`)
+- PostgreSQL + TypeORM + Redis + Bull queues
+- Caching, scheduling, health checks, structured logging, and Swagger
+- Docker-first local setup
 
-- ✅ **Authentication & Authorization** - JWT-based authentication với role-based access control
-- ✅ **User Management** - CRUD operations cho users
-- ✅ **Admin Panel** - Dashboard, User management, Settings
-- ✅ **Queue System** - Background job processing với Bull và Redis
-- ✅ **Database** - PostgreSQL với TypeORM
-- ✅ **Cache System** - Redis-based caching với decorators và interceptors
-- ✅ **Scheduler System** - Cron jobs cho cleanup, retries, sync tasks
-- ✅ **Mail System** - Email sending với Nodemailer và templates
-- ✅ **Storage System** - Local file storage với upload/download/delete
-- ✅ **Health Checks** - Health monitoring với @nestjs/terminus (database, Redis, memory, disk)
-- ✅ **Security** - CORS, Helmet security headers, Rate limiting với @nestjs/throttler
-- ✅ **Docker Support** - Full Docker setup với docker-compose
-- ✅ **Validation** - Request validation với class-validator
-- ✅ **Error Handling** - Global exception filters
-- ✅ **Response Transformation** - Global interceptors
-- ✅ **Logging** - Structured logging với Pino và correlation ID tracing
+## Tech Stack
 
-## 📁 Cấu trúc dự án
+- NestJS 10 + TypeScript
+- PostgreSQL + TypeORM
+- Redis + Bull
+- Passport (Local, JWT, Google OAuth)
+- Swagger / OpenAPI
+- Pino logging + correlation ID
+- Jest for testing
 
-```
+## Project Structure
+
+```text
 src/
-├── common/                    # Common utilities
-│   ├── decorators/            # Custom decorators (@CurrentUser, @Roles)
-│   ├── filters/               # Exception filters
-│   ├── guards/                # Auth guards (JWT, Roles)
-│   ├── interceptors/         # Response interceptors & logging
-│   ├── middleware/           # Middleware (correlation ID)
-│   └── utils/                # Utility functions
-├── config/                    # Configuration files
-│   ├── configuration.ts      # Config loader
-│   └── validation.ts         # Environment validation
-├── infrastructure/            # Infrastructure modules
-│   ├── database/              # Database configuration
-│   │   ├── database.module.ts
-│   │   └── seed/             # Data seeder
-│   ├── queue/                 # Queue module (Bull + Redis)
-│   └── logger/                # Logger module (Pino)
-├── modules/                    # Business modules
-│   ├── auth/                  # Authentication module
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── strategies/        # Passport strategies
-│   │   └── guards/
-│   ├── users/                 # User module
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── entities/
-│   │   └── dtos/
-│   └── admin/                 # Admin module
-│       ├── users/             # Admin user management
-│       ├── settings/          # Admin settings
-│       └── dashboard/         # Admin dashboard
-├── shared/                     # Shared utilities
-│   ├── response/              # API response DTOs
-│   ├── pagination/            # Pagination DTOs
-│   └── errors/                # Custom exceptions
-├── app.module.ts              # Root module
-└── main.ts                    # Application entry point
+  common/             # shared decorators, guards, interceptors, middleware
+  config/             # environment config + validation
+  infrastructure/     # DB, cache, queue, scheduler, health, mail, storage
+  modules/            # auth, users, admin domain modules
+  shared/             # shared DTOs/entities/helpers
 ```
 
-## 🔧 Yêu cầu hệ thống
+## Quick Start
 
-- **Node.js** >= 18.x
-- **npm** >= 9.x hoặc **yarn**
-- **Docker** và **Docker Compose** (khuyến nghị)
-- **PostgreSQL** (nếu chạy local không dùng Docker)
-- **Redis** (nếu chạy local không dùng Docker)
-
-## 🚀 Cài đặt và Setup
-
-### Phương pháp 1: Sử dụng Docker (Khuyến nghị)
-
-#### Bước 1: Clone và vào thư mục dự án
-
-```bash
-cd nestjs_demo2
-```
-
-#### Bước 2: Tạo file .env
-
-File `.env` đã được tạo sẵn với các giá trị mặc định. Bạn có thể chỉnh sửa nếu cần:
-
-```env
-# Database Configuration
-DB_HOST=postgres
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_NAME=nestjs_db
-
-# Redis Configuration
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_PASSWORD=
-REDIS_DB=0
-
-# JWT Configuration
-JWT_SECRET=your-secret-key-change-in-production-please-use-strong-secret
-JWT_EXPIRES_IN=7d
-
-# Google OAuth Configuration
-GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:3001/api/v1/auth/google/callback
-FRONTEND_URL=http://localhost:3000
-
-# Application Configuration
-APP_PORT=3000
-APP_BASE_URL=http://localhost:3001
-NODE_ENV=development
-
-# pgAdmin Configuration
-PGADMIN_EMAIL=admin@admin.com
-PGADMIN_PASSWORD=admin
-PGADMIN_PORT=5050
-```
-
-**⚠️ Lưu ý:** Trước khi deploy production, hãy thay đổi `JWT_SECRET`, `DB_PASSWORD` và `PGADMIN_PASSWORD` thành các giá trị mạnh và bảo mật.
-
-#### Bước 3: Build và chạy containers
-
-```bash
-# Build và chạy tất cả services (PostgreSQL, Redis, App)
-docker-compose up -d
-
-# Xem logs của app
-docker-compose logs -f app
-
-# Xem logs của tất cả services
-docker-compose logs -f
-```
-
-#### Bước 4: Kiểm tra ứng dụng
-
-Ứng dụng sẽ chạy tại: `http://localhost:3001/api/v1` (Docker default).  
-Chạy local không dùng Docker: `http://localhost:3000/api/v1`.
-
-#### Bước 5: Truy cập pgAdmin (Quản lý Database)
-
-pgAdmin đã được tích hợp để quản lý PostgreSQL database:
-
-1. **Truy cập pgAdmin:** Mở trình duyệt và vào `http://localhost:5050` (hoặc port bạn đã cấu hình)
-
-2. **Đăng nhập:**
-   - Email: `admin@admin.com` (hoặc giá trị trong `PGADMIN_EMAIL`)
-   - Password: `admin` (hoặc giá trị trong `PGADMIN_PASSWORD`)
-
-3. **Kết nối với PostgreSQL Server:**
-   - Click chuột phải vào **Servers** → **Register** → **Server**
-   - Tab **General:**
-     - Name: `NestJS PostgreSQL` (tên tùy chọn)
-   - Tab **Connection:**
-     - Host name/address: `postgres` (tên service trong docker-compose)
-     - Port: `5432`
-     - Maintenance database: `nestjs_db` (hoặc giá trị trong `DB_NAME`)
-     - Username: `postgres` (hoặc giá trị trong `DB_USER`)
-     - Password: `postgres` (hoặc giá trị trong `DB_PASSWORD`)
-     - ✅ Check **Save password** để lưu mật khẩu
-   - Click **Save**
-
-4. **Sử dụng pgAdmin:**
-   - Xem và quản lý databases, tables, data
-   - Chạy SQL queries
-   - Xem và chỉnh sửa schema
-   - Export/Import data
-
-**Lưu ý:** Trong môi trường Docker, hostname của PostgreSQL là `postgres` (tên service), không phải `localhost`.
-
-Xem hướng dẫn chi tiết tại [docs/PGADMIN_GUIDE.md](docs/PGADMIN_GUIDE.md)
-
-### Phương pháp 2: Chạy Local (không dùng Docker)
-
-#### Bước 1: Cài đặt dependencies
+### 1. Clone & install
 
 ```bash
 npm install
+cp .env.example .env
 ```
 
-#### Bước 2: Setup Database và Redis
-
-- **PostgreSQL:** Đảm bảo PostgreSQL đang chạy và tạo database `nestjs_db`
-- **Redis:** Đảm bảo Redis server đang chạy trên port 6379
-
-#### Bước 3: Cập nhật .env
-
-Cập nhật file `.env` với thông tin database và Redis local:
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_NAME=nestjs_db
-
-REDIS_HOST=localhost
-REDIS_PORT=6379
-```
-
-#### Bước 4: Chạy ứng dụng
+### 2. Run with Docker (recommended)
 
 ```bash
-# Development mode
+docker compose up -d
+```
+
+API base URL (default): `http://localhost:3001/api/v1`
+
+Swagger (non-production): `http://localhost:3001/api/docs`
+
+### 3. Run locally (without Docker)
+
+Make sure PostgreSQL + Redis are available, update `.env`, then:
+
+```bash
 npm run start:dev
+```
 
-# Production mode
+## Useful Scripts
+
+```bash
+npm run start:dev
 npm run build
-npm run start:prod
-```
-
-## 🎯 Khởi tạo dự án
-
-### 1. Tạo User đầu tiên (Admin)
-
-Sau khi ứng dụng chạy, bạn có thể tạo user đầu tiên qua API:
-
-```bash
-# Đăng ký user mới (Docker default: 3001, local: 3000)
-curl -X POST http://localhost:3001/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@example.com",
-    "password": "password123",
-    "firstName": "Admin",
-    "lastName": "User"
-  }'
-```
-
-Sau đó, bạn cần cập nhật role của user này thành `admin` trực tiếp trong database hoặc thông qua API (nếu đã có admin khác).
-
-### 2. Đăng nhập và lấy JWT Token
-
-```bash
-curl -X POST http://localhost:3001/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@example.com",
-    "password": "password123"
-  }'
-```
-
-Response sẽ chứa `access_token` mà bạn cần sử dụng cho các request tiếp theo.
-
-### 3. Seed dữ liệu mẫu (Khuyến nghị)
-
-Chạy seeder để tạo users mẫu:
-
-```bash
+npm run lint
+npm test
+npm run test:cov
 npm run seed
+npm run migration:run
 ```
 
-Seeder sẽ tạo các users mẫu:
+## Documentation
 
-- **admin@example.com** / **admin123** (Admin role)
-- **user@example.com** / **user123** (User role)
-- **jane@example.com** / **user123** (User role)
-- **inactive@example.com** / **user123** (Inactive user)
+See the documentation index:
 
-Xem chi tiết tại [docs/SEEDER_GUIDE.md](docs/SEEDER_GUIDE.md)
+- [docs/README.md](./docs/README.md)
 
-### 4. Sử dụng Token
+## API Summary
 
-Thêm token vào header của các request:
+- Auth: `/auth/*`
+- Users: `/users/*`
+- Admin: `/admin/*`
+- Health: `/health/*`
 
-```bash
-curl -X GET http://localhost:3001/api/v1/auth/profile \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
-```
+Full API reference:
 
-## 📚 Sử dụng các Module
+- [docs/API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)
 
-### 1. Queue Module
+## Security Notes
 
-Queue module sử dụng Bull và Redis để xử lý background jobs. Có 3 queues mặc định:
+- Do not commit real credentials to the repository
+- Keep `.env` local only (already ignored)
+- Use strong JWT and OAuth secrets in production
 
-- `default` - Queue mặc định
-- `email` - Queue cho email jobs
-- `notification` - Queue cho notification jobs
+## License
 
-**📖 Xem hướng dẫn chi tiết tại:** [docs/QUEUE_GUIDE.md](docs/QUEUE_GUIDE.md)
-
-#### Sử dụng QueueService trong code
-
-```typescript
-import { Injectable } from '@nestjs/common';
-import { QueueService } from '../queue/queue.service';
-
-@Injectable()
-export class YourService {
-  constructor(private queueService: QueueService) {}
-
-  async sendWelcomeEmail(userEmail: string, userName: string) {
-    // Thêm email job vào queue
-    await this.queueService.addEmailJob({
-      to: userEmail,
-      subject: 'Welcome to our platform!',
-      template: 'welcome',
-      data: {
-        name: userName,
-      },
-    });
-  }
-
-  async sendNotification(userId: string, message: string) {
-    // Thêm notification job vào queue
-    await this.queueService.addNotificationJob({
-      userId: userId,
-      type: 'info',
-      message: message,
-      data: {},
-    });
-  }
-
-  async addCustomJob(data: any) {
-    // Thêm job vào default queue
-    await this.queueService.addJob(data, {
-      attempts: 3,
-      delay: 5000, // Delay 5 seconds
-    });
-  }
-}
-```
-
-#### Queue API Endpoints (Admin only)
-
-```bash
-# Lấy thống kê tất cả queues
-GET /api/v1/queue/stats
-Authorization: Bearer YOUR_TOKEN
-
-# Lấy thống kê queue cụ thể
-GET /api/v1/queue/stats/email
-Authorization: Bearer YOUR_TOKEN
-
-# Thêm email job
-POST /api/v1/queue/email
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-{
-  "to": "user@example.com",
-  "subject": "Test Email",
-  "template": "welcome",
-  "data": { "name": "John" }
-}
-
-# Thêm notification job
-POST /api/v1/queue/notification
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-{
-  "userId": "user-id",
-  "type": "info",
-  "message": "New notification",
-  "data": {}
-}
-
-# Dọn dẹp completed jobs
-DELETE /api/v1/queue/clean/default
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/json
-{
-  "type": "completed",
-  "grace": 1000
-}
-```
-
-#### Tùy chỉnh Processors
-
-Bạn có thể tạo processors mới trong `src/queue/queue.processor.ts`:
-
-```typescript
-@Processor('your-queue-name')
-export class YourQueueProcessor {
-  private readonly logger = new Logger(YourQueueProcessor.name);
-
-  @Process('your-job-name')
-  async handleYourJob(job: Job<YourJobData>) {
-    this.logger.log(`Processing job ${job.id}`);
-
-    // Xử lý job của bạn
-    // ...
-
-    return { success: true };
-  }
-}
-```
-
-### 2. Auth Module
-
-#### Đăng ký user mới
-
-```typescript
-POST /api/v1/auth/register
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "firstName": "John",
-  "lastName": "Doe"
-}
-```
-
-#### Đăng nhập (Email/Password)
-
-```typescript
-POST /api/v1/auth/login
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-#### Đăng nhập với Google OAuth
-
-**Bước 1:** User truy cập endpoint để bắt đầu OAuth flow:
-
-```typescript
-GET / api / auth / google;
-```
-
-User sẽ được redirect đến Google để đăng nhập. Sau khi đăng nhập thành công, Google sẽ redirect về callback URL và backend sẽ tự động tạo/find user, sau đó redirect về frontend với JWT token.
-
-**Setup Google OAuth:**
-
-1. Tạo OAuth credentials tại [Google Cloud Console](https://console.cloud.google.com/)
-2. Cập nhật `.env` với:
-   ```env
-   GOOGLE_CLIENT_ID=your-google-client-id
-   GOOGLE_CLIENT_SECRET=your-google-client-secret
-   GOOGLE_CALLBACK_URL=http://localhost:3001/api/v1/auth/google/callback
-   FRONTEND_URL=http://localhost:3000
-   ```
-3. Xem chi tiết tại [docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md)
-
-**Frontend Integration:**
-
-```typescript
-// Redirect user to Google OAuth
-window.location.href = 'http://localhost:3001/api/v1/auth/google';
-
-// Handle callback (trong callback page)
-const urlParams = new URLSearchParams(window.location.search);
-const token = urlParams.get('token');
-if (token) {
-  localStorage.setItem('access_token', token);
-  // Redirect to dashboard
-}
-```
-
-#### Lấy profile (cần authentication)
-
-```typescript
-GET /api/v1/auth/profile
-Authorization: Bearer YOUR_TOKEN
-```
-
-### 3. User Module
-
-Tất cả endpoints cần JWT. Riêng các endpoint quản trị (`/api/v1/users`, `/api/v1/users/:id`) yêu cầu role `admin`. User thường chỉ dùng các endpoint profile.
-
-```typescript
-// Lấy danh sách users (Admin)
-GET /api/v1/users
-
-// Lấy profile của user hiện tại
-GET /api/v1/users/profile
-
-// Lấy thông tin user theo ID (Admin)
-GET /api/v1/users/:id
-
-// Tạo user mới (Admin)
-POST /api/v1/users
-{
-  "email": "newuser@example.com",
-  "password": "password123",
-  "firstName": "Jane",
-  "lastName": "Doe",
-  "role": "user" // optional: "user" | "admin"
-}
-
-// Cập nhật user (Admin)
-PATCH /api/v1/users/:id
-{
-  "firstName": "Updated Name",
-  "isActive": true
-}
-
-// Xóa user (Admin)
-DELETE /api/v1/users/:id
-```
-
-### 4. Admin Module
-
-Tất cả endpoints yêu cầu role `admin`:
-
-#### Dashboard
-
-```typescript
-GET /api/v1/admin/dashboard
-Authorization: Bearer YOUR_ADMIN_TOKEN
-```
-
-#### User Management
-
-```typescript
-// Lấy tất cả users
-GET /api/v1/admin/users
-
-// Lấy user theo ID
-GET /api/v1/admin/users/:id
-
-// Tạo user
-POST /api/v1/admin/users
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "firstName": "John",
-  "lastName": "Doe",
-  "role": "user"
-}
-
-// Cập nhật user
-PATCH /api/v1/admin/users/:id
-{
-  "firstName": "Updated",
-  "isActive": true
-}
-
-// Xóa user
-DELETE /api/v1/admin/users/:id
-
-// Kích hoạt user
-PATCH /api/v1/admin/users/:id/activate
-
-// Vô hiệu hóa user
-PATCH /api/v1/admin/users/:id/deactivate
-```
-
-#### Settings
-
-```typescript
-// Lấy settings
-GET /api/v1/admin/settings
-
-// Cập nhật settings
-PUT /api/v1/admin/settings
-{
-  "appName": "My App",
-  "version": "1.0.0"
-}
-```
-
-## 🔌 API Endpoints
-
-### Authentication
-
-| Method | Endpoint                    | Auth Required | Description                |
-| ------ | --------------------------- | ------------- | -------------------------- |
-| POST   | `/api/v1/auth/register`        | No            | Đăng ký user mới           |
-| POST   | `/api/v1/auth/login`           | No            | Đăng nhập (Email/Password) |
-| GET    | `/api/v1/auth/google`          | No            | Bắt đầu Google OAuth flow  |
-| GET    | `/api/v1/auth/google/callback` | No            | Callback từ Google OAuth   |
-| GET    | `/api/v1/auth/profile`         | Yes           | Lấy profile                |
-
-### Users
-
-| Method | Endpoint             | Auth Required | Role Required | Description               |
-| ------ | -------------------- | ------------- | ------------- | ------------------------- |
-| GET    | `/api/v1/users`         | Yes           | Admin         | Lấy danh sách users       |
-| GET    | `/api/v1/users/profile` | Yes           | Any           | Profile của user hiện tại |
-| GET    | `/api/v1/users/:id`     | Yes           | Admin         | Lấy user theo ID          |
-| POST   | `/api/v1/users`         | Yes           | Admin         | Tạo user mới              |
-| PATCH  | `/api/v1/users/:id`     | Yes           | Admin         | Cập nhật user             |
-| DELETE | `/api/v1/users/:id`     | Yes           | Admin         | Xóa user                  |
-
-### Admin
-
-| Method | Endpoint                          | Auth Required | Role Required | Description        |
-| ------ | --------------------------------- | ------------- | ------------- | ------------------ |
-| GET    | `/api/v1/admin/dashboard`            | Yes           | Admin         | Dashboard thống kê |
-| GET    | `/api/v1/admin/users`                | Yes           | Admin         | Quản lý users      |
-| GET    | `/api/v1/admin/users/:id`            | Yes           | Admin         | Chi tiết user      |
-| POST   | `/api/v1/admin/users`                | Yes           | Admin         | Tạo user           |
-| PATCH  | `/api/v1/admin/users/:id`            | Yes           | Admin         | Cập nhật user      |
-| DELETE | `/api/v1/admin/users/:id`            | Yes           | Admin         | Xóa user           |
-| PATCH  | `/api/v1/admin/users/:id/activate`   | Yes           | Admin         | Kích hoạt user     |
-| PATCH  | `/api/v1/admin/users/:id/deactivate` | Yes           | Admin         | Vô hiệu hóa user   |
-| GET    | `/api/v1/admin/settings`             | Yes           | Admin         | Lấy settings       |
-| PUT    | `/api/v1/admin/settings`             | Yes           | Admin         | Cập nhật settings  |
-
-### Queue
-
-| Method | Endpoint                      | Auth Required | Role Required | Description            |
-| ------ | ----------------------------- | ------------- | ------------- | ---------------------- |
-| GET    | `/api/v1/queue/stats`            | Yes           | Admin         | Thống kê tất cả queues |
-| GET    | `/api/v1/queue/stats/:queueName` | Yes           | Admin         | Thống kê queue cụ thể  |
-| POST   | `/api/v1/queue/email`            | Yes           | Admin         | Thêm email job         |
-| POST   | `/api/v1/queue/notification`     | Yes           | Admin         | Thêm notification job  |
-| DELETE | `/api/v1/queue/clean/:queueName` | Yes           | Admin         | Dọn dẹp queue          |
-
-## 🐳 Docker Commands
-
-```bash
-# Build và chạy containers
-docker-compose up -d
-
-# Xem logs
-docker-compose logs -f app
-docker-compose logs -f postgres
-docker-compose logs -f redis
-docker-compose logs -f pgadmin
-
-# Dừng containers
-docker-compose down
-
-# Dừng và xóa volumes (xóa data)
-docker-compose down -v
-
-# Rebuild containers
-docker-compose up -d --build
-
-# Restart một service cụ thể
-docker-compose restart app
-
-# Xem status
-docker-compose ps
-
-# Vào container
-docker-compose exec app sh
-docker-compose exec postgres psql -U postgres -d nestjs_db
-docker-compose exec redis redis-cli
-
-# Truy cập pgAdmin
-# Mở trình duyệt: http://localhost:5050
-# Email: admin@admin.com (hoặc giá trị trong PGADMIN_EMAIL)
-# Password: admin (hoặc giá trị trong PGADMIN_PASSWORD)
-```
-
-## 💻 Development
-
-### Scripts có sẵn
-
-```bash
-# Development
-npm run start:dev          # Chạy với watch mode
-
-# Production
-npm run build              # Build project
-npm run start:prod         # Chạy production
-
-# Database Seeding
-npm run seed               # Seed dữ liệu mẫu
-npm run seed:clear         # Xóa dữ liệu đã seed
-npm run seed:refresh       # Clear và seed lại
-
-# Code quality
-npm run lint               # Lint code
-npm run format             # Format code với Prettier
-
-# Testing
-npm run test               # Chạy unit tests
-npm run test:watch         # Chạy tests với watch mode
-npm run test:cov           # Chạy tests với coverage
-npm run test:e2e           # Chạy E2E tests
-```
-
-### Cấu trúc Guards và Decorators
-
-#### Sử dụng Guards
-
-```typescript
-import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { RolesGuard } from './common/guards/roles.guard';
-import { Roles } from './common/decorators/roles.decorator';
-
-@Controller('example')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
-export class ExampleController {
-  // ...
-}
-```
-
-#### Sử dụng CurrentUser Decorator
-
-```typescript
-import { CurrentUser } from './common/decorators/current-user.decorator';
-import { User } from './user/entities/user.entity';
-
-@Get('profile')
-getProfile(@CurrentUser() user: User) {
-  return user;
-}
-```
-
-## 🔒 Security Notes
-
-1. **JWT Secret:** Luôn thay đổi `JWT_SECRET` trong production
-2. **Database Password:** Sử dụng password mạnh cho database
-3. **Environment Variables:** Không commit file `.env` lên git
-4. **HTTPS:** Sử dụng HTTPS trong production
-5. **Rate Limiting:** Cân nhắc thêm rate limiting cho API
-
-## 📝 Notes
-
-- Database sẽ tự động được tạo khi chạy lần đầu (với `synchronize: true` trong development)
-- Redis được sử dụng cho queue system và có thể dùng cho caching
-- Tất cả passwords được hash bằng bcrypt
-- JWT tokens có thời hạn mặc định là 7 ngày
-- Logger sử dụng Pino với correlation ID để trace requests
-- Tất cả requests được log tự động với correlation ID trong header `x-correlation-id`
-
-## 📚 Documentation
-
-- [API Response Format](./docs/API_RESPONSE_FORMAT.md) - Chuẩn hóa API response và error
-- [Google OAuth Setup](./docs/GOOGLE_OAUTH_SETUP.md) - Hướng dẫn setup Google OAuth
-- [Queue Guide](./docs/QUEUE_GUIDE.md) - Hướng dẫn sử dụng Queue System
-- [Seeder Guide](./docs/SEEDER_GUIDE.md) - Hướng dẫn sử dụng Data Seeder
-- [Logging and Debug Guide](./docs/LOGGING_AND_DEBUG_GUIDE.md) - Hệ thống logging và hướng dẫn debug khi có error
-- [TypeORM Guide](./docs/TYPEORM_GUIDE.md) - Hướng dẫn sử dụng TypeORM và Migrations
-- [Cache Guide](./docs/CACHE_GUIDE.md) - Hướng dẫn sử dụng Cache Module với Redis
-- [Scheduler Guide](./docs/SCHEDULER_GUIDE.md) - Hướng dẫn sử dụng Scheduler Module với Cron Jobs
-- [Mail Guide](./docs/MAIL_GUIDE.md) - Hướng dẫn sử dụng Mail Module với Nodemailer
-- [Storage Guide](./docs/STORAGE_GUIDE.md) - Hướng dẫn sử dụng Storage Module với Local Storage
-- [Health Guide](./docs/HEALTH_GUIDE.md) - Hướng dẫn sử dụng Health Module với Terminus
-- [Security Guide](./docs/SECURITY_GUIDE.md) - Hướng dẫn sử dụng Security Module (CORS, Helmet, Rate Limiting)
-- [Constants Guide](./docs/CONSTANTS_GUIDE.md) - Hướng dẫn sử dụng Constants
-- [Environment Validation Guide](./docs/ENV_VALIDATION_GUIDE.md) - Hướng dẫn Environment Variables Validation
-- [Repository Pattern Guide](./docs/REPOSITORY_PATTERN_GUIDE.md) - Hướng dẫn Repository Pattern
-- [Mapper Pattern Guide](./docs/MAPPER_PATTERN_GUIDE.md) - Hướng dẫn Mapper Pattern
-- [Base Entity Guide](./docs/BASE_ENTITY_GUIDE.md) - Hướng dẫn Base Entity
-- [Custom Pipes Guide](./docs/CUSTOM_PIPES_GUIDE.md) - Hướng dẫn Custom Pipes
-- [Testing Guide](./docs/TESTING_GUIDE.md) - Hướng dẫn Testing với Jest
-- [Prettier Guide](./docs/PRETTIER_GUIDE.md) - Hướng dẫn format và kiểm tra code style với Prettier
-- [Architecture Improvements](./docs/ARCHITECTURE_IMPROVEMENTS.md) - Đề xuất cải thiện cấu trúc dự án
-- [pgAdmin Guide](./docs/PGADMIN_GUIDE.md) - Hướng dẫn sử dụng pgAdmin
-
-## 🤝 Contributing
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
+MIT
